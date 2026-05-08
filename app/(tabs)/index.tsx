@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import React, { useEffect, useState } from "react";
-import { Platform, StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, TextInput, View } from "react-native";
 import { supabase } from "../../lib/supabase";
 
 import { HelloWave } from "@/components/hello-wave";
@@ -10,10 +10,49 @@ import { ThemedView } from "@/components/themed-view";
 import { Link } from "expo-router";
 
 export default function HomeScreen() {
-  // Supabase test: fetch items
+  // Auth state
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [user, setUser] = useState<any>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // Items state
   const [items, setItems] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Check for user on mount
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data, error }) => {
+      if (data?.user) setUser(data.user);
+    });
+  }, []);
+
+  // Fetch items if user is logged in
+  useEffect(() => {
+    if (!user) return;
+    setLoading(true);
+    supabase
+      .from("items")
+      .select("*")
+      .eq("user_id", user.id)
+      .then(({ data, error }) => {
+        if (error) setError(error.message);
+        else setItems(data || []);
+        setLoading(false);
+      });
+  }, [user]);
+
+  // Sign in handler
+  const handleSignIn = async () => {
+    setAuthError(null);
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) setAuthError(error.message);
+    else setUser(data.user);
+  };
 
   useEffect(() => {
     supabase
@@ -40,24 +79,56 @@ export default function HomeScreen() {
         <ThemedText type="title">Welcome!</ThemedText>
         <HelloWave />
       </ThemedView>
-
       {/* Supabase items test display */}
+      {/* Supabase Auth and Items Test Display */}
       <View style={{ padding: 16 }}>
         <Text style={{ fontWeight: "bold", marginBottom: 8 }}>
           Supabase Items Table Test
         </Text>
-        {loading && <Text>Loading...</Text>}
-        {error && <Text style={{ color: "red" }}>{error}</Text>}
-        {!loading && !error && items.length === 0 && (
-          <Text>No items found.</Text>
-        )}
-        {!loading && !error && items.length > 0 && (
+        {!user && (
           <View>
-            {items.map((item) => (
-              <Text key={item.id}>
-                {item.category} - {item.id}
-              </Text>
-            ))}
+            <Text>Email:</Text>
+            <TextInput
+              style={{ borderWidth: 1, marginBottom: 8, padding: 4 }}
+              autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
+              placeholder="email"
+            />
+            <Text>Password:</Text>
+            <TextInput
+              style={{ borderWidth: 1, marginBottom: 8, padding: 4 }}
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+              placeholder="password"
+            />
+            <Text
+              style={{ color: "blue", marginBottom: 8 }}
+              onPress={handleSignIn}
+            >
+              Sign In
+            </Text>
+            {authError && <Text style={{ color: "red" }}>{authError}</Text>}
+          </View>
+        )}
+        {user && (
+          <View>
+            <Text>User: {user.email}</Text>
+            {loading && <Text>Loading...</Text>}
+            {error && <Text style={{ color: "red" }}>{error}</Text>}
+            {!loading && !error && items.length === 0 && (
+              <Text>No items found.</Text>
+            )}
+            {!loading && !error && items.length > 0 && (
+              <View>
+                {items.map((item) => (
+                  <Text key={item.id}>
+                    {item.category} - {item.id}
+                  </Text>
+                ))}
+              </View>
+            )}
           </View>
         )}
       </View>
