@@ -1,13 +1,27 @@
-import { Image } from "expo-image";
-import React, { useEffect, useState } from "react";
-import { Platform, StyleSheet, Text, TextInput, View } from "react-native";
-import { supabase } from "../../lib/supabase";
+import { Image } from 'expo-image';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { HelloWave } from "@/components/hello-wave";
-import ParallaxScrollView from "@/components/parallax-scroll-view";
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { Link } from "expo-router";
+import {
+  FontFamilies,
+  LandingAssets,
+  Palette,
+  Radius,
+  Spacing,
+  Typography,
+} from '@/constants/design';
+import { supabase } from '@/lib/supabase';
 
 export default function HomeScreen() {
   // Auth state
@@ -15,6 +29,7 @@ export default function HomeScreen() {
   const [password, setPassword] = useState("");
   const [user, setUser] = useState<any>(null);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [authMessage, setAuthMessage] = useState<string | null>(null);
 
   // Items state
   const [items, setItems] = useState<any[]>([]);
@@ -43,175 +58,325 @@ export default function HomeScreen() {
       });
   }, [user]);
 
-  // Sign in handler
   const handleSignIn = async () => {
     setAuthError(null);
-    const { data, error } = await supabase.auth.signInWithPassword({
+    setAuthMessage(null);
+
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    if (error) setAuthError(error.message);
-    else setUser(data.user);
+
+    if (signInError) {
+      setAuthError(signInError.message);
+      return;
+    }
+
+    setUser(data.user);
   };
 
-  useEffect(() => {
-    supabase
-      .from("items")
-      .select("*")
-      .then(({ data, error }) => {
-        if (error) setError(error.message);
-        else setItems(data || []);
-        setLoading(false);
-      });
-  }, []);
+  const handleSignUp = async () => {
+    setAuthError(null);
+    setAuthMessage(null);
+
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (signUpError) {
+      setAuthError(signUpError.message);
+      return;
+    }
+
+    if (data.user) {
+      setUser(data.user);
+      setAuthMessage('Account created. Check your email if confirmation is required.');
+    }
+  };
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-      headerImage={
-        <Image
-          source={require("@/assets/images/partial-react-logo.png")}
-          style={styles.reactLogo}
-        />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      {/* Supabase items test display */}
-      {/* Supabase Auth and Items Test Display */}
-      <View style={{ padding: 16 }}>
-        <Text style={{ fontWeight: "bold", marginBottom: 8 }}>
-          Supabase Items Table Test
-        </Text>
-        {!user && (
-          <View>
-            <Text>Email:</Text>
-            <TextInput
-              style={{ borderWidth: 1, marginBottom: 8, padding: 4 }}
-              autoCapitalize="none"
-              value={email}
-              onChangeText={setEmail}
-              placeholder="email"
-            />
-            <Text>Password:</Text>
-            <TextInput
-              style={{ borderWidth: 1, marginBottom: 8, padding: 4 }}
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-              placeholder="password"
-            />
-            <Text
-              style={{ color: "blue", marginBottom: 8 }}
-              onPress={handleSignIn}
-            >
-              Sign In
-            </Text>
-            {authError && <Text style={{ color: "red" }}>{authError}</Text>}
-          </View>
-        )}
-        {user && (
-          <View>
-            <Text>User: {user.email}</Text>
-            {loading && <Text>Loading...</Text>}
-            {error && <Text style={{ color: "red" }}>{error}</Text>}
-            {!loading && !error && items.length === 0 && (
-              <Text>No items found.</Text>
-            )}
-            {!loading && !error && items.length > 0 && (
-              <View>
-                {items.map((item) => (
-                  <Text key={item.id}>
-                    {item.category} - {item.id}
-                  </Text>
-                ))}
-              </View>
-            )}
-          </View>
-        )}
-      </View>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText>{" "}
-          to see changes. Press{" "}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: "cmd + d",
-              android: "cmd + m",
-              web: "F12",
-            })}
-          </ThemedText>{" "}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction
-              title="Action"
-              icon="cube"
-              onPress={() => alert("Action pressed")}
-            />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert("Share pressed")}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert("Delete pressed")}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <View style={styles.screen}>
+      <Image
+        source={{ uri: LandingAssets.backgroundImage }}
+        style={styles.backgroundImage}
+        contentFit="cover"
+        blurRadius={2}
+      />
+      <View style={styles.backgroundScrim} />
+      <View style={styles.backgroundGradient} />
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">
-            npm run reset-project
-          </ThemedText>{" "}
-          to get a fresh <ThemedText type="defaultSemiBold">app</ThemedText>{" "}
-          directory. This will move the current{" "}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{" "}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <SafeAreaView style={styles.safeArea}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.keyboardAvoiding}
+        >
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.card}>
+              <View style={styles.logoSection}>
+                <Text style={styles.brandTitle}>FITTED</Text>
+                <Text style={styles.brandTagline}>Curate Your Collection</Text>
+              </View>
+
+              {!user ? (
+                <View style={styles.authSection}>
+                  <View style={styles.fieldGroup}>
+                    <Text style={styles.fieldLabel}>Email</Text>
+                    <TextInput
+                      autoCapitalize="none"
+                      autoComplete="email"
+                      keyboardType="email-address"
+                      onChangeText={setEmail}
+                      placeholder="you@example.com"
+                      placeholderTextColor={Palette.onSurfaceVariant}
+                      style={styles.input}
+                      value={email}
+                    />
+                  </View>
+
+                  <View style={styles.fieldGroup}>
+                    <Text style={styles.fieldLabel}>Password</Text>
+                    <TextInput
+                      autoCapitalize="none"
+                      autoComplete="password"
+                      onChangeText={setPassword}
+                      placeholder="Enter your password"
+                      placeholderTextColor={Palette.onSurfaceVariant}
+                      secureTextEntry
+                      style={styles.input}
+                      value={password}
+                    />
+                  </View>
+
+                  <View style={styles.actionStack}>
+                    <Pressable
+                      accessibilityRole="button"
+                      onPress={handleSignUp}
+                      style={({ pressed }) => [
+                        styles.primaryButton,
+                        pressed && styles.buttonPressed,
+                      ]}
+                    >
+                      <Text style={styles.primaryButtonText}>Create Account</Text>
+                    </Pressable>
+
+                    <Pressable
+                      accessibilityRole="button"
+                      onPress={handleSignIn}
+                      style={({ pressed }) => [
+                        styles.secondaryButton,
+                        pressed && styles.secondaryButtonPressed,
+                      ]}
+                    >
+                      <Text style={styles.secondaryButtonText}>Sign In</Text>
+                    </Pressable>
+                  </View>
+
+                  {authError ? <Text style={styles.errorText}>{authError}</Text> : null}
+                  {authMessage ? <Text style={styles.messageText}>{authMessage}</Text> : null}
+                </View>
+              ) : (
+                <View style={styles.authSection}>
+                  <Text style={styles.signedInLabel}>Signed in as</Text>
+                  <Text style={styles.signedInEmail}>{user.email}</Text>
+
+                  {loading ? (
+                    <ActivityIndicator color={Palette.primary} style={styles.loader} />
+                  ) : null}
+                  {error ? <Text style={styles.errorText}>{error}</Text> : null}
+                  {!loading && !error && items.length === 0 ? (
+                    <Text style={styles.emptyStateText}>No items found.</Text>
+                  ) : null}
+                  {!loading && !error && items.length > 0 ? (
+                    <View style={styles.itemsList}>
+                      {items.map((item) => (
+                        <Text key={item.id} style={styles.itemText}>
+                          {item.category} - {item.id}
+                        </Text>
+                      ))}
+                    </View>
+                  ) : null}
+                </View>
+              )}
+
+              <Text style={styles.footerText}>
+                By continuing, you agree to our{' '}
+                <Text style={styles.footerLink}>Terms</Text> and{' '}
+                <Text style={styles.footerLink}>Privacy</Text>.
+              </Text>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
+  screen: {
+    flex: 1,
+    backgroundColor: Palette.surface,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  backgroundImage: {
+    ...StyleSheet.absoluteFillObject,
+    opacity: 0.4,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: "absolute",
+  backgroundScrim: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: Palette.surface,
+    opacity: 0.35,
+  },
+  backgroundGradient: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(251, 249, 249, 0.72)',
+  },
+  safeArea: {
+    flex: 1,
+  },
+  keyboardAvoiding: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.containerMargin,
+    paddingVertical: Spacing.stackLg,
+  },
+  card: {
+    width: '100%',
+    maxWidth: 448,
+    alignSelf: 'center',
+  },
+  logoSection: {
+    alignItems: 'center',
+    marginBottom: Spacing.stackXl,
+  },
+  brandTitle: {
+    ...Typography.displayLg,
+    color: Palette.primary,
+    letterSpacing: 8,
+    textTransform: 'uppercase',
+    marginBottom: Spacing.stackSm,
+  },
+  brandTagline: {
+    ...Typography.labelSm,
+    color: Palette.onSurfaceVariant,
+    letterSpacing: 2.4,
+  },
+  authSection: {
+    width: '100%',
+    gap: Spacing.stackMd,
+  },
+  fieldGroup: {
+    gap: Spacing.stackSm,
+  },
+  fieldLabel: {
+    ...Typography.labelSm,
+    color: Palette.onSurfaceVariant,
+    letterSpacing: 1.2,
+  },
+  input: {
+    ...Typography.bodyMd,
+    height: 52,
+    borderWidth: 1,
+    borderColor: Palette.outlineVariant,
+    borderRadius: Radius.md,
+    backgroundColor: Palette.surfaceContainerLowest,
+    color: Palette.onSurface,
+    paddingHorizontal: Spacing.stackMd,
+  },
+  actionStack: {
+    gap: Spacing.stackMd,
+    marginTop: Spacing.stackSm,
+  },
+  primaryButton: {
+    height: 52,
+    borderRadius: Radius.md,
+    backgroundColor: Palette.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 4,
+  },
+  primaryButtonText: {
+    ...Typography.bodyMd,
+    color: Palette.onPrimary,
+  },
+  secondaryButton: {
+    height: 52,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Palette.outlineVariant,
+    backgroundColor: Palette.surfaceContainerLowest,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  secondaryButtonText: {
+    ...Typography.bodyMd,
+    color: Palette.onSurface,
+  },
+  buttonPressed: {
+    opacity: 0.9,
+  },
+  secondaryButtonPressed: {
+    backgroundColor: Palette.surfaceContainerLow,
+  },
+  errorText: {
+    ...Typography.bodyMd,
+    color: Palette.error,
+    textAlign: 'center',
+  },
+  messageText: {
+    ...Typography.bodyMd,
+    color: Palette.onSurfaceVariant,
+    textAlign: 'center',
+  },
+  signedInLabel: {
+    ...Typography.labelSm,
+    color: Palette.onSurfaceVariant,
+    textAlign: 'center',
+  },
+  signedInEmail: {
+    ...Typography.titleLg,
+    color: Palette.onSurface,
+    textAlign: 'center',
+  },
+  loader: {
+    marginTop: Spacing.stackSm,
+  },
+  emptyStateText: {
+    ...Typography.bodyMd,
+    color: Palette.onSurfaceVariant,
+    textAlign: 'center',
+  },
+  itemsList: {
+    gap: Spacing.stackSm,
+    marginTop: Spacing.stackSm,
+  },
+  itemText: {
+    ...Typography.bodyMd,
+    color: Palette.onSurface,
+    textAlign: 'center',
+  },
+  footerText: {
+    ...Typography.labelSm,
+    color: Palette.onSurfaceVariant,
+    textAlign: 'center',
+    marginTop: Spacing.stackXl,
+    textTransform: 'none',
+    letterSpacing: 0.4,
+    lineHeight: 18,
+  },
+  footerLink: {
+    color: Palette.primary,
+    textDecorationLine: 'underline',
+    fontFamily: FontFamilies.bodySemiBold,
   },
 });
