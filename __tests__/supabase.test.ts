@@ -9,6 +9,15 @@ vi.mock("@supabase/supabase-js", () => {
       signInWithPassword: vi.fn(),
       getUser: vi.fn(),
     },
+    from: vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(),
+        then: vi.fn((callback) => {
+          callback({ data: [], error: null });
+          return Promise.resolve({ data: [], error: null });
+        }),
+      })),
+    })),
   };
 
   return {
@@ -24,5 +33,45 @@ describe("lib/supabase", () => {
     );
 
     expect(supabase.auth).toBeDefined();
+  });
+
+  it("fetches items from the items table", () => {
+    const mockItems = [
+      { id: 1, name: "Item 1", user_id: "user-123" },
+      { id: 2, name: "Item 2", user_id: "user-123" },
+    ];
+
+    // required for Typescript linting
+    const mockThen = vi.fn((callback) => {
+      callback({ data: mockItems, error: null });
+    });
+
+    const mockEq = vi.fn(() => ({
+      then: mockThen,
+    }));
+
+    const mockSelect = vi.fn(() => ({
+      eq: mockEq,
+      then: mockThen,
+    }));
+
+    const mockFrom = vi.fn(() => ({
+      select: mockSelect,
+    }));
+
+    (supabase.from as any) = mockFrom;
+
+    // Test basic fetch
+    supabase
+      .from("items")
+      .select("*")
+      .then(({ data, error }: any) => {
+        expect(data).toEqual(mockItems);
+        expect(error).toBeNull();
+      });
+
+    expect(mockFrom).toHaveBeenCalledWith("items");
+    expect(mockSelect).toHaveBeenCalledWith("*");
+    expect(mockThen).toHaveBeenCalled();
   });
 });
