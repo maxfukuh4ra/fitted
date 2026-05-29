@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -21,9 +22,17 @@ import {
   Spacing,
   Typography,
 } from '@/constants/design';
+import { setSignUpDraft } from '@/lib/sign-up-draft';
 import { supabase } from '@/lib/supabase';
+import {
+  formatAuthError,
+  normalizeEmail,
+  validateAuthCredentials,
+} from '@/lib/validation';
 
 export default function HomeScreen() {
+  const router = useRouter();
+
   // Auth state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -62,37 +71,37 @@ export default function HomeScreen() {
     setAuthError(null);
     setAuthMessage(null);
 
+    const validationError = validateAuthCredentials(email, password);
+    if (validationError) {
+      setAuthError(validationError);
+      return;
+    }
+
     const { data, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
+      email: normalizeEmail(email),
       password,
     });
 
     if (signInError) {
-      setAuthError(signInError.message);
+      setAuthError(formatAuthError(signInError.message));
       return;
     }
 
     setUser(data.user);
   };
 
-  const handleSignUp = async () => {
+  const handleSignUp = () => {
     setAuthError(null);
     setAuthMessage(null);
 
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (signUpError) {
-      setAuthError(signUpError.message);
+    const validationError = validateAuthCredentials(email, password);
+    if (validationError) {
+      setAuthError(validationError);
       return;
     }
 
-    if (data.user) {
-      setUser(data.user);
-      setAuthMessage('Account created. Check your email if confirmation is required.');
-    }
+    setSignUpDraft(normalizeEmail(email), password);
+    router.push('/onboarding/personal-info');
   };
 
   return (
