@@ -82,7 +82,7 @@ export default function PersonalInfoScreen() {
     }
 
     clearSignUpDraft();
-    router.replace('/(tabs)');
+    router.replace('/closet');
   };
 
   return (

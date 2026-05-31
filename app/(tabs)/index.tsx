@@ -88,6 +88,7 @@ export default function HomeScreen() {
     }
 
     setUser(data.user);
+    router.replace('/closet');
   };
 
   const handleSignUp = () => {
