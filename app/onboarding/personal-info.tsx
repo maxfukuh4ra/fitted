@@ -82,7 +82,7 @@ export default function PersonalInfoScreen() {
     }
 
     clearSignUpDraft();
-    router.replace('/home');
+    router.replace('/closet');
   };
 
   return (

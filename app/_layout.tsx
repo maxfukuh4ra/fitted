@@ -50,7 +50,7 @@ export default function RootLayout() {
           name="onboarding/personal-info"
           options={{ headerShown: false, presentation: 'card' }}
         />
-        <Stack.Screen name="home" options={{ headerShown: false }} />
+        <Stack.Screen name="(main)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>
       <StatusBar style="auto" />
