@@ -13,6 +13,7 @@ import CategoryPicker from '@/components/upload/CategoryPicker';
 import CategoryCard from '@/components/upload/CategoryCard';
 import { router } from 'expo-router';
 import { Category, SUBCATEGORIES } from '@/constants/categories';
+import { useUpload } from '@/contexts/UploadContext';
 
 type Props = {
   onBack?: () => void;
@@ -32,6 +33,7 @@ const CATEGORY_IMAGES: Record<Category, string | undefined> = {
 export default function UploadCategoryScreen({ onBack, onProfile }: Props) {
   const CARD_HEIGHT = 200;
   const [picker, setPicker] = useState<Category | null>(null);
+  const { setCategory } = useUpload();
 
   const openPicker = (cat: Category) => setPicker(cat);
 
@@ -122,8 +124,10 @@ export default function UploadCategoryScreen({ onBack, onProfile }: Props) {
         visible={!!picker}
         title={picker ?? ''}
         subcategories={picker ? SUBCATEGORIES[picker] : []}
-        onNext={() => {
+        onNext={(sub) => {
           setPicker(null);
+          setCategory(picker!, sub);
+          console.log("Selected category:", picker, "subcategory:", sub);
           router.push('/upload/camera');
         }}
         onClose={() => setPicker(null)}
