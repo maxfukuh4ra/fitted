@@ -10,21 +10,28 @@ export default function UploadScreen() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   async function handleUpload() {
-  const result = await ImagePicker.launchImageLibraryAsync({ base64: true });
-  if (result.canceled || !result.assets[0].base64) return;
+  const result = await ImagePicker.launchImageLibraryAsync({});
+  if (result.canceled || !result.assets[0].uri) return;
 
   setLoading(true);
   const { data: { session } } = await supabase.auth.getSession();
   console.log('session:', session);
   
-  try{
+  try {
+    const imageResponse = await fetch(result.assets[0].uri);
+    const blob = await imageResponse.blob();
+
+    const formData = new FormData();
+    formData.append('image', blob, 'upload.jpg');
+    formData.append('category', 'tops');
+
     const response = await fetch('http://localhost:3000/api/process-image', {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${session?.access_token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageBase64: result.assets[0].base64, category: 'tops' })
+      headers: { 'Authorization': `Bearer ${session?.access_token}` },
+      body: formData
     });
-
     const data = await response.json();
+    console.log('response from server:', data);
     Alert.alert(data.success ? 'Success' : 'Error');
   } catch (e) {
     setError('Upload failed');
