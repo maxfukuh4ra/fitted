@@ -7,16 +7,16 @@ const supabase = createClient(
 );
 
 //Uploads base64 image to supabase storage and returns public url
-export async function uploadToStorage(base64: string, userId: string): Promise<string> {
-  const buffer = Buffer.from(base64, 'base64');
-  const path = `${userId}/${Date.now()}.png`;
+export async function uploadToStorage(buffer: Buffer, userId: string): Promise<string> {
+  const path = `${userId}/${Date.now()}.jpg`;
 
   await supabase.storage
     .from('clothing-images')
-    .upload(path, buffer, { contentType: 'image/png' });
+    .upload(path, buffer, { contentType: 'image/jpeg' });
 
   const { data } = supabase.storage
     .from('clothing-images')
     .getPublicUrl(path);
+
   return data.publicUrl;
 }
