@@ -11,16 +11,11 @@ import {
 } from 'react-native';
 import { Palette, Spacing, Radius, textVariants } from '@/constants/design';
 
-export type SubCategory = {
-  id: string;
-  label: string;
-};
-
 type Props = {
   visible: boolean;
   title: string;
-  subcategories: SubCategory[];
-  onNext: (subcategory: SubCategory) => void;
+  subcategories: string[];
+  onNext: (subcategory: string) => void;
   onClose: () => void;
 };
 
@@ -33,17 +28,15 @@ export default function CategoryPicker({
 }: Props) {
   const translateY = useRef(new Animated.Value(600)).current;
   const opacity = useRef(new Animated.Value(0)).current;
-  const [selected, setSelected] = useState<SubCategory | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
 
-  // Reset selection when sheet opens
   useEffect(() => {
     if (visible) setSelected(null);
   }, [visible]);
-  
 
   useEffect(() => {
     if (visible) {
-      translateY.setValue(600); 
+      translateY.setValue(600);
       opacity.setValue(0);
       Animated.parallel([
         Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }),
@@ -77,16 +70,16 @@ export default function CategoryPicker({
 
         <ScrollView bounces={false} showsVerticalScrollIndicator={true} contentContainerStyle={styles.listContent} style={styles.list}>
           {subcategories.map((sub, index) => {
-            const isSelected = selected?.id === sub.id;
+            const isSelected = selected === sub;
             return (
-              <React.Fragment key={sub.id}>
+              <React.Fragment key={sub}>
                 <TouchableOpacity
                   style={[styles.option, isSelected && styles.optionSelected]}
                   onPress={() => setSelected(sub)}
                   activeOpacity={0.6}
                 >
                   <Text style={[textVariants.bodyMd, styles.optionLabel, isSelected && styles.optionLabelSelected]}>
-                    {sub.label}
+                    {sub}
                   </Text>
                   {isSelected && <Text style={styles.checkmark}>✓</Text>}
                 </TouchableOpacity>
@@ -100,10 +93,10 @@ export default function CategoryPicker({
           style={[styles.actionBtn, !selected && styles.actionBtnDisabled]}
           onPress={() => {
             if (selected) {
-              handleClose(); 
-              setTimeout(() => onNext(selected), 160);//small delay once button pressed
+              handleClose();
+              setTimeout(() => onNext(selected), 160);
             } else {
-              handleClose(); 
+              handleClose();
             }
           }}
           activeOpacity={selected ? 0.7 : 1}
