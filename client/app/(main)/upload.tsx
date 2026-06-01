@@ -1,13 +1,45 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Alert, Button } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import * as ImagePicker from 'expo-image-picker';
+import { supabase } from '@/lib/supabase';
 import { Palette, Spacing, Typography } from '@/constants/design';
+import { useState } from 'react';
 
 export default function UploadScreen() {
+  //CODE BELOW IS DUMMY CODE FOR TESTING UPLOADS, JUST UPLOADS PHOTO WITHOUT CLEANING
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  async function handleUpload() {
+  const result = await ImagePicker.launchImageLibraryAsync({ base64: true });
+  if (result.canceled || !result.assets[0].base64) return;
+
+  setLoading(true);
+  const { data: { session } } = await supabase.auth.getSession();
+  console.log('session:', session);
+  
+  try{
+    const response = await fetch('http://localhost:3000/api/process-image', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${session?.access_token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64: result.assets[0].base64, category: 'tops' })
+    });
+
+    const data = await response.json();
+    Alert.alert(data.success ? 'Success' : 'Error');
+  } catch (e) {
+    setError('Upload failed');
+  } finally {
+    setLoading(false);
+  }
+  }
+  //END OF DUMMY CODE
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <View style={styles.screen}>
         <Text style={styles.title}>Upload</Text>
+        <Button title={loading ? 'Uploading...' : 'Upload'} onPress={handleUpload} disabled={loading} />
+        {error && <Text>{error}</Text>}
       </View>
     </SafeAreaView>
   );
