@@ -126,16 +126,6 @@ export default function ProfileScreen() {
 
         {/* Details bento */}
         <View style={styles.bentoGrid}>
-          <View style={styles.card}>
-            <Text style={styles.cardLabel}>EMAIL</Text>
-            <Text style={styles.cardValue}>{profile.email}</Text>
-          </View>
-
-          <View style={styles.card}>
-            <Text style={styles.cardLabel}>PASSWORD</Text>
-            <Text style={styles.cardValue}>••••••••••</Text>
-          </View>
-
           <View style={styles.bentoRow}>
             <View style={[styles.card, styles.cardHalf]}>
               <Text style={styles.cardLabel}>AGE</Text>
