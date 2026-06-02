@@ -4,3 +4,8 @@
 
 expo-env.d.ts
 # @end expo-cli
+
+# env
+.env
+.env.*
+!.env.example
