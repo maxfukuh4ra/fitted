@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { Palette, Radius, Spacing, Typography } from "@/constants/design";
+import { Palette, Radius, Typography } from "@/constants/design";
 import { capitalize } from "./profile-utils";
 
 const GENDER_OPTIONS = ["male", "female", "other"] as const;
@@ -24,6 +24,7 @@ export function GenderPicker({
           >
             <Text
               style={[
+                Typography.labelSm,
                 styles.genderChipText,
                 selected && styles.genderChipTextSelected,
               ]}
@@ -41,22 +42,26 @@ const styles = StyleSheet.create({
   genderRow: {
     flexDirection: "row",
     gap: 8,
-    marginTop: 4,
+    height: 30,
   },
   genderChip: {
     flex: 1,
-    paddingVertical: 6,
+    height: 30,
     borderRadius: Radius.md,
     borderWidth: 1,
     borderColor: Palette.outlineVariant,
-    alignItems: "center",
+    position: "relative",
   },
   genderChipSelected: {
     backgroundColor: Palette.primary,
     borderColor: Palette.primary,
   },
   genderChipText: {
-    ...Typography.labelSm,
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 7,
+    textAlign: "center",
     color: Palette.onSurfaceVariant,
   },
   genderChipTextSelected: {

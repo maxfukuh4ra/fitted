@@ -10,17 +10,13 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Palette } from "@/constants/design";
-import { signOut } from "@/lib/auth";
-import { getProfile, type UserProfile } from "@/lib/profile";
 import { GenderPicker } from "@/components/profile/gender-picker";
 import { styles } from "@/components/profile/profile-styles";
-import {
-  capitalize,
-  getInitials,
-  inchesToFeetAndInches,
-} from "@/components/profile/profile-utils";
+import { capitalize, getInitials } from "@/components/profile/profile-utils";
+import { Palette, Typography } from "@/constants/design";
 import { useProfileEdit } from "@/hooks/use-profile-edit";
+import { signOut } from "@/lib/auth";
+import { getProfile, type UserProfile } from "@/lib/profile";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -64,145 +60,213 @@ export default function ProfileScreen() {
     );
   }
 
+  const heightFeet = Math.floor((profile.height ?? 0) / 12);
+  const heightInches = (profile.height ?? 0) % 12;
+  const fieldProps = {
+    editable: edit.editing,
+    showSoftInputOnFocus: edit.editing,
+    caretHidden: !edit.editing,
+    pointerEvents: edit.editing ? ("auto" as const) : ("none" as const),
+    underlineColorAndroid: "transparent" as const,
+  };
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
-      {/* Top bar */}
       <View style={styles.topBar}>
         <Text style={styles.wordmark}>FITTED</Text>
-        {!edit.editing ? (
-          <Pressable onPress={edit.startEditing} style={styles.editButton}>
-            <Text style={styles.editButtonText}>Edit</Text>
-          </Pressable>
-        ) : (
-          <View style={styles.editActions}>
-            <Pressable onPress={edit.cancelEditing} style={styles.cancelButton}>
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </Pressable>
-            <Pressable
-              onPress={edit.saveEditing}
-              style={[
-                styles.saveButton,
-                edit.saving && styles.saveButtonDisabled,
-              ]}
-              disabled={edit.saving}
-            >
-              {edit.saving ? (
-                <ActivityIndicator size="small" color={Palette.onPrimary} />
-              ) : (
-                <Text style={styles.saveButtonText}>Save</Text>
-              )}
-            </Pressable>
-          </View>
-        )}
       </View>
 
       <ScrollView
+        style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Profile header */}
         <View style={styles.profileHeader}>
           <View style={styles.avatar}>
             <Text style={styles.avatarInitials}>
               {getInitials(edit.editing ? edit.draftName : profile.name)}
             </Text>
           </View>
-          {edit.editing ? (
-            <TextInput
-              style={styles.nameInput}
-              value={edit.draftName}
-              onChangeText={edit.setDraftName}
-              placeholder="Full name"
-              placeholderTextColor={Palette.onSurfaceVariant}
-              autoCapitalize="words"
-              returnKeyType="done"
-            />
-          ) : (
-            <Text style={styles.name}>{profile.name}</Text>
-          )}
+          <View style={styles.nameSlot}>
+            <View style={styles.nameField}>
+              <TextInput
+                {...fieldProps}
+                style={[Typography.headlineMd, styles.nameInput]}
+                value={edit.editing ? edit.draftName : profile.name}
+                onChangeText={edit.setDraftName}
+                selectTextOnFocus={edit.editing}
+                placeholder="Full name"
+                placeholderTextColor={Palette.onSurfaceVariant}
+                autoCapitalize="words"
+                returnKeyType="done"
+              />
+              <View
+                style={[
+                  styles.nameUnderlineWrap,
+                  !edit.editing && styles.underlineHidden,
+                ]}
+              >
+                <View style={styles.nameUnderline} />
+              </View>
+            </View>
+          </View>
           <Text style={styles.email}>{profile.email}</Text>
         </View>
 
-        {/* Details bento */}
         <View style={styles.bentoGrid}>
           <View style={styles.bentoRow}>
             <View style={[styles.card, styles.cardHalf]}>
               <Text style={styles.cardLabel}>AGE</Text>
-              {edit.editing ? (
-                <TextInput
-                  style={styles.fieldInput}
-                  value={edit.draftAge}
-                  onChangeText={edit.setDraftAge}
-                  keyboardType="number-pad"
-                  placeholder="—"
-                  placeholderTextColor={Palette.onSurfaceVariant}
-                  maxLength={3}
-                  returnKeyType="done"
-                />
-              ) : (
-                <Text style={styles.cardValue}>{String(profile.age)}</Text>
-              )}
+              <View style={styles.cardField}>
+                <View style={[styles.inputWrap, styles.ageWrap]}>
+                  <TextInput
+                    {...fieldProps}
+                    style={[Typography.titleLg, styles.fieldInput]}
+                    value={edit.editing ? edit.draftAge : String(profile.age)}
+                    onChangeText={edit.setDraftAge}
+                    keyboardType="number-pad"
+                    placeholder="—"
+                    placeholderTextColor={Palette.onSurfaceVariant}
+                    maxLength={3}
+                    returnKeyType="done"
+                  />
+                  <View
+                    style={[
+                      styles.inputUnderline,
+                      !edit.editing && styles.underlineHidden,
+                    ]}
+                  />
+                </View>
+              </View>
             </View>
 
             <View style={[styles.card, styles.cardHalf]}>
               <Text style={styles.cardLabel}>HEIGHT</Text>
-              {edit.editing ? (
+              <View style={styles.cardField}>
                 <View style={styles.heightRow}>
-                  <TextInput
-                    style={[styles.fieldInput, styles.heightInput]}
-                    value={edit.draftFeet}
-                    onChangeText={edit.setDraftFeet}
-                    keyboardType="number-pad"
-                    placeholder="ft"
-                    placeholderTextColor={Palette.onSurfaceVariant}
-                    maxLength={1}
-                    returnKeyType="next"
-                  />
-                  <Text style={styles.heightSep}>&apos;</Text>
-                  <TextInput
-                    style={[styles.fieldInput, styles.heightInput]}
-                    value={edit.draftInches}
-                    onChangeText={edit.setDraftInches}
-                    keyboardType="number-pad"
-                    placeholder="in"
-                    placeholderTextColor={Palette.onSurfaceVariant}
-                    maxLength={2}
-                    returnKeyType="done"
-                  />
-                  <Text style={styles.heightSep}>&quot;</Text>
+                  <View style={[styles.inputWrap, styles.feetWrap]}>
+                    <TextInput
+                      {...fieldProps}
+                      style={[Typography.titleLg, styles.fieldInput]}
+                      value={edit.editing ? edit.draftFeet : String(heightFeet)}
+                      onChangeText={edit.setDraftFeet}
+                      keyboardType="number-pad"
+                      placeholder="ft"
+                      placeholderTextColor={Palette.onSurfaceVariant}
+                      maxLength={1}
+                      returnKeyType="next"
+                    />
+                    <View
+                      style={[
+                        styles.inputUnderline,
+                        !edit.editing && styles.underlineHidden,
+                      ]}
+                    />
+                  </View>
+                  <Text style={[Typography.titleLg, styles.heightSep]}>&apos;</Text>
+                  <View style={[styles.inputWrap, styles.inchesWrap]}>
+                    <TextInput
+                      {...fieldProps}
+                      style={[Typography.titleLg, styles.fieldInput]}
+                      value={
+                        edit.editing ? edit.draftInches : String(heightInches)
+                      }
+                      onChangeText={edit.setDraftInches}
+                      keyboardType="number-pad"
+                      placeholder="in"
+                      placeholderTextColor={Palette.onSurfaceVariant}
+                      maxLength={2}
+                      returnKeyType="done"
+                    />
+                    <View
+                      style={[
+                        styles.inputUnderline,
+                        !edit.editing && styles.underlineHidden,
+                      ]}
+                    />
+                  </View>
+                  <Text style={[Typography.titleLg, styles.heightSep]}>&quot;</Text>
                 </View>
-              ) : (
-                <Text style={styles.cardValue}>
-                  {inchesToFeetAndInches(profile.height)}
-                </Text>
-              )}
+              </View>
             </View>
           </View>
 
           <View style={styles.card}>
             <Text style={styles.cardLabel}>GENDER</Text>
-            {edit.editing ? (
-              <GenderPicker
-                value={edit.draftGender}
-                onChange={edit.setDraftGender}
-              />
-            ) : (
-              <Text style={styles.cardValue}>{capitalize(profile.gender)}</Text>
-            )}
+            <View
+              style={[
+                styles.cardField,
+                edit.editing && styles.genderField,
+              ]}
+            >
+              {edit.editing ? (
+                <GenderPicker
+                  value={edit.draftGender}
+                  onChange={edit.setDraftGender}
+                />
+              ) : (
+                <Text style={[Typography.titleLg, styles.cardValue]}>
+                  {capitalize(profile.gender)}
+                </Text>
+              )}
+            </View>
           </View>
         </View>
 
-        <Pressable
-          accessibilityRole="button"
-          onPress={handleSignOut}
-          style={({ pressed }) => [
-            styles.signOutButton,
-            pressed && styles.signOutButtonPressed,
-          ]}
-        >
-          <Text style={styles.signOutText}>Sign Out</Text>
-        </Pressable>
+        <View style={styles.profileActions}>
+          {edit.editing ? (
+            <>
+              <Pressable
+                onPress={edit.cancelEditing}
+                style={({ pressed }) => [
+                  styles.cancelButton,
+                  pressed && styles.buttonPressed,
+                ]}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                onPress={edit.saveEditing}
+                style={({ pressed }) => [
+                  styles.saveButton,
+                  edit.saving && styles.saveButtonDisabled,
+                  pressed && !edit.saving && styles.buttonPressed,
+                ]}
+                disabled={edit.saving}
+              >
+                <View style={styles.saveButtonInner}>
+                  {edit.saving ? (
+                    <ActivityIndicator size="small" color={Palette.onPrimary} />
+                  ) : (
+                    <Text style={styles.saveButtonText}>Save</Text>
+                  )}
+                </View>
+              </Pressable>
+            </>
+          ) : (
+            <>
+              <Pressable
+                onPress={edit.startEditing}
+                style={({ pressed }) => [
+                  styles.editProfileButton,
+                  pressed && styles.buttonPressed,
+                ]}
+              >
+                <Text style={styles.editProfileButtonText}>Edit profile</Text>
+              </Pressable>
+              <Pressable
+                onPress={handleSignOut}
+                style={({ pressed }) => [
+                  styles.signOutButton,
+                  pressed && styles.buttonPressed,
+                ]}
+              >
+                <Text style={styles.signOutText}>Sign Out</Text>
+              </Pressable>
+            </>
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
