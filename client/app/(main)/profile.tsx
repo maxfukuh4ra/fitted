@@ -4,60 +4,31 @@ import {
   ActivityIndicator,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Palette, Radius, Spacing, Typography } from "@/constants/design";
+import { Palette } from "@/constants/design";
 import { signOut } from "@/lib/auth";
 import { getProfile, type UserProfile } from "@/lib/profile";
-
-function inchesToFeetAndInches(totalInches: number | null | undefined): string {
-  if (totalInches == null) return "—";
-  const feet = Math.floor(totalInches / 12);
-  const inches = totalInches % 12;
-  return `${feet}'${inches}"`;
-}
-
-function capitalize(s: string | null | undefined): string {
-  if (!s) return "—";
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
-function getInitials(name: string | null | undefined): string {
-  if (!name?.trim()) return "?";
-  return name
-    .trim()
-    .split(" ")
-    .map((part) => part.charAt(0).toUpperCase())
-    .slice(0, 2)
-    .join("");
-}
-
-function InfoCard({
-  label,
-  value,
-  fullWidth = true,
-}: {
-  label: string;
-  value: string;
-  fullWidth?: boolean;
-}) {
-  return (
-    <View style={[styles.card, fullWidth ? styles.cardFull : styles.cardHalf]}>
-      <Text style={styles.cardLabel}>{label}</Text>
-      <Text style={styles.cardValue}>{value}</Text>
-    </View>
-  );
-}
+import { GenderPicker } from "@/components/profile/gender-picker";
+import { styles } from "@/components/profile/profile-styles";
+import {
+  capitalize,
+  getInitials,
+  inchesToFeetAndInches,
+} from "@/components/profile/profile-utils";
+import { useProfileEdit } from "@/hooks/use-profile-edit";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const edit = useProfileEdit(profile, (updated) => setProfile(updated));
 
   useEffect(() => {
     getProfile()
@@ -70,7 +41,6 @@ export default function ProfileScreen() {
     await signOut();
     router.replace("/");
   };
-
 
   if (loading) {
     return (
@@ -96,42 +66,141 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+      {/* Top bar */}
       <View style={styles.topBar}>
         <Text style={styles.wordmark}>FITTED</Text>
+        {!edit.editing ? (
+          <Pressable onPress={edit.startEditing} style={styles.editButton}>
+            <Text style={styles.editButtonText}>Edit</Text>
+          </Pressable>
+        ) : (
+          <View style={styles.editActions}>
+            <Pressable onPress={edit.cancelEditing} style={styles.cancelButton}>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </Pressable>
+            <Pressable
+              onPress={edit.saveEditing}
+              style={[
+                styles.saveButton,
+                edit.saving && styles.saveButtonDisabled,
+              ]}
+              disabled={edit.saving}
+            >
+              {edit.saving ? (
+                <ActivityIndicator size="small" color={Palette.onPrimary} />
+              ) : (
+                <Text style={styles.saveButtonText}>Save</Text>
+              )}
+            </Pressable>
+          </View>
+        )}
       </View>
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        {/* Profile Header */}
+        {/* Profile header */}
         <View style={styles.profileHeader}>
           <View style={styles.avatar}>
             <Text style={styles.avatarInitials}>
-              {getInitials(profile.name)}
+              {getInitials(edit.editing ? edit.draftName : profile.name)}
             </Text>
           </View>
-          <Text style={styles.name}>{profile.name}</Text>
+          {edit.editing ? (
+            <TextInput
+              style={styles.nameInput}
+              value={edit.draftName}
+              onChangeText={edit.setDraftName}
+              placeholder="Full name"
+              placeholderTextColor={Palette.onSurfaceVariant}
+              autoCapitalize="words"
+              returnKeyType="done"
+            />
+          ) : (
+            <Text style={styles.name}>{profile.name}</Text>
+          )}
           <Text style={styles.email}>{profile.email}</Text>
         </View>
 
-        {/* Details Bento */}
+        {/* Details bento */}
         <View style={styles.bentoGrid}>
-          <InfoCard label="EMAIL" value={profile.email} />
-          <InfoCard label="PASSWORD" value="••••••••••" />
-          <View style={styles.bentoRow}>
-            <InfoCard
-              label="AGE"
-              value={String(profile.age)}
-              fullWidth={false}
-            />
-            <InfoCard
-              label="HEIGHT"
-              value={inchesToFeetAndInches(profile.height)}
-              fullWidth={false}
-            />
+          <View style={styles.card}>
+            <Text style={styles.cardLabel}>EMAIL</Text>
+            <Text style={styles.cardValue}>{profile.email}</Text>
           </View>
-          <InfoCard label="GENDER" value={capitalize(profile.gender)} />
+
+          <View style={styles.card}>
+            <Text style={styles.cardLabel}>PASSWORD</Text>
+            <Text style={styles.cardValue}>••••••••••</Text>
+          </View>
+
+          <View style={styles.bentoRow}>
+            <View style={[styles.card, styles.cardHalf]}>
+              <Text style={styles.cardLabel}>AGE</Text>
+              {edit.editing ? (
+                <TextInput
+                  style={styles.fieldInput}
+                  value={edit.draftAge}
+                  onChangeText={edit.setDraftAge}
+                  keyboardType="number-pad"
+                  placeholder="—"
+                  placeholderTextColor={Palette.onSurfaceVariant}
+                  maxLength={3}
+                  returnKeyType="done"
+                />
+              ) : (
+                <Text style={styles.cardValue}>{String(profile.age)}</Text>
+              )}
+            </View>
+
+            <View style={[styles.card, styles.cardHalf]}>
+              <Text style={styles.cardLabel}>HEIGHT</Text>
+              {edit.editing ? (
+                <View style={styles.heightRow}>
+                  <TextInput
+                    style={[styles.fieldInput, styles.heightInput]}
+                    value={edit.draftFeet}
+                    onChangeText={edit.setDraftFeet}
+                    keyboardType="number-pad"
+                    placeholder="ft"
+                    placeholderTextColor={Palette.onSurfaceVariant}
+                    maxLength={1}
+                    returnKeyType="next"
+                  />
+                  <Text style={styles.heightSep}>&apos;</Text>
+                  <TextInput
+                    style={[styles.fieldInput, styles.heightInput]}
+                    value={edit.draftInches}
+                    onChangeText={edit.setDraftInches}
+                    keyboardType="number-pad"
+                    placeholder="in"
+                    placeholderTextColor={Palette.onSurfaceVariant}
+                    maxLength={2}
+                    returnKeyType="done"
+                  />
+                  <Text style={styles.heightSep}>&quot;</Text>
+                </View>
+              ) : (
+                <Text style={styles.cardValue}>
+                  {inchesToFeetAndInches(profile.height)}
+                </Text>
+              )}
+            </View>
+          </View>
+
+          <View style={styles.card}>
+            <Text style={styles.cardLabel}>GENDER</Text>
+            {edit.editing ? (
+              <GenderPicker
+                value={edit.draftGender}
+                onChange={edit.setDraftGender}
+              />
+            ) : (
+              <Text style={styles.cardValue}>{capitalize(profile.gender)}</Text>
+            )}
+          </View>
         </View>
 
         {/* Preferences */}
@@ -159,143 +228,3 @@ export default function ProfileScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Palette.background,
-  },
-  centered: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  topBar: {
-    alignItems: "center",
-    paddingVertical: Spacing.stackMd,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Palette.outlineVariant,
-  },
-  wordmark: {
-    ...Typography.labelSm,
-    color: Palette.onSurface,
-    letterSpacing: 6,
-    fontSize: 14,
-  },
-  scrollContent: {
-    paddingHorizontal: Spacing.containerMargin,
-    paddingTop: Spacing.stackLg,
-    paddingBottom: Spacing.stackXl,
-    gap: Spacing.stackLg,
-  },
-
-  // Profile header
-  profileHeader: {
-    alignItems: "center",
-    gap: Spacing.stackSm,
-  },
-  avatar: {
-    width: 96,
-    height: 96,
-    borderRadius: Radius.full,
-    backgroundColor: Palette.surfaceContainerHigh,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: Spacing.stackSm,
-  },
-  avatarInitials: {
-    ...Typography.headlineMd,
-    color: Palette.onSurface,
-  },
-  name: {
-    ...Typography.headlineMd,
-    color: Palette.onSurface,
-  },
-  email: {
-    ...Typography.bodyMd,
-    color: Palette.onSurfaceVariant,
-  },
-
-  // Bento grid
-  bentoGrid: {
-    gap: Spacing.gutter,
-  },
-  bentoRow: {
-    flexDirection: "row",
-    gap: Spacing.gutter,
-  },
-  card: {
-    backgroundColor: Palette.surfaceContainer,
-    borderRadius: Radius.lg,
-    padding: Spacing.stackLg,
-  },
-  cardFull: {
-    // default: full width
-  },
-  cardHalf: {
-    flex: 1,
-  },
-  cardLabel: {
-    ...Typography.labelSm,
-    color: Palette.onSurfaceVariant,
-    marginBottom: Spacing.stackSm,
-  },
-  cardValue: {
-    ...Typography.titleLg,
-    color: Palette.onSurface,
-  },
-
-  // Preferences
-  section: {
-    gap: Spacing.stackMd,
-  },
-  sectionTitle: {
-    ...Typography.headlineMd,
-    color: Palette.onSurface,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Palette.surfaceVariant,
-    paddingBottom: Spacing.stackSm,
-  },
-  prefRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: Spacing.stackMd,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Palette.outlineVariant,
-  },
-  prefRowLast: {
-    borderBottomWidth: 0,
-    paddingBottom: 0,
-  },
-  prefKey: {
-    ...Typography.bodyMd,
-    color: Palette.onSurface,
-  },
-  prefValue: {
-    ...Typography.bodyMd,
-    color: Palette.onSurfaceVariant,
-  },
-
-  signOutButton: {
-    borderWidth: 1,
-    borderColor: Palette.error,
-    borderRadius: Radius.lg,
-    paddingVertical: Spacing.stackMd,
-    alignItems: "center",
-  },
-  signOutButtonPressed: {
-    opacity: 0.7,
-  },
-  signOutText: {
-    ...Typography.bodyMd,
-    color: Palette.error,
-  },
-
-  errorText: {
-    ...Typography.bodyMd,
-    color: Palette.error,
-    textAlign: "center",
-    paddingHorizontal: Spacing.containerMargin,
-  },
-});

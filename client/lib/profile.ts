@@ -9,6 +9,22 @@ export type UserProfile = {
   gender: string;
 };
 
+export type ProfileUpdate = {
+  name?: string;
+  age?: number;
+  height?: number;
+  gender?: string;
+};
+
+export async function updateProfile(userId: string, updates: ProfileUpdate): Promise<void> {
+  const { error } = await supabase
+    .from('users')
+    .update(updates)
+    .eq('id', userId);
+
+  if (error) throw new Error(error.message);
+}
+
 export async function getProfile(): Promise<UserProfile> {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
   if (sessionError) throw new Error(sessionError.message);
