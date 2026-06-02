@@ -94,7 +94,7 @@ export default function UploadCategoryScreen({ onBack, onProfile }: Props) {
               category={{
                 id: cat,
                 label: cat,
-                sublabel: SUBCATEGORIES[cat].slice(0, 3).join(', '),
+                sublabel: SUBCATEGORIES[cat].slice(0, cat === Category.Tops ? 4 : 3).join(', '),
                 image: CATEGORY_IMAGES[cat],
               }}
               onPress={() => openPicker(cat)}

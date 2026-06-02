@@ -1,6 +1,6 @@
+import { FontFamilies, Palette, Radius, Spacing, textVariants } from '@/constants/design';
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { Palette, Spacing, Radius, textVariants } from '@/constants/design';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export type Category = {
   id: string;
@@ -34,7 +34,7 @@ export default function CategoryCard({
           <Image source={{ uri: category.image }} style={styles.cardImage} />
           <View style={styles.cardOverlay} />
           <View style={styles.cardContent}>
-            <Text style={[textVariants.titleLg, styles.cardLabel]}>
+            <Text style={[textVariants.titleLg, styles.cardLabel, styles.cardLabelDisplayFont, styles.cardLabelSlightlyLarger]}>
               {category.label}
             </Text>
             <Text style={[textVariants.labelSm, styles.cardSublabel]}>
@@ -47,10 +47,10 @@ export default function CategoryCard({
           <View style={styles.cardIconCircle}>
             <Text style={styles.cardIcon}>···</Text>
           </View>
-          <Text style={[textVariants.titleLg, { color: Palette.onSurface, marginTop: Spacing.stackMd }]}>
+          <Text style={[textVariants.titleLg, styles.cardLabelDisplayFont, styles.cardLabelSlightlyLarger, { color: Palette.onSurface, marginTop: Spacing.stackMd }]}>
             {category.label}
           </Text>
-          <Text style={[textVariants.labelSm, { color: Palette.onSurfaceVariant, marginTop: 4 }]}>
+          <Text style={[textVariants.labelSm, styles.cardSublabel, { color: Palette.onSurfaceVariant }]}>
             {category.sublabel}
           </Text>
         </View>
@@ -86,9 +86,21 @@ const styles = StyleSheet.create({
   cardLabel: {
     color: Palette.onTertiary,
   },
+  cardLabelDisplayFont: {
+    fontFamily: FontFamilies.display,
+  },
+  cardLabelSlightlyLarger: {
+    fontSize: 22,
+    lineHeight: 30,
+  },
   cardSublabel: {
     color: Palette.surfaceContainerHigh,
-    marginTop: 4,
+    fontFamily: FontFamilies.body,
+    fontSize: 13,
+    fontWeight: '400',
+    letterSpacing: 0,
+    textTransform: 'none',
+    lineHeight: 15,
   },
   cardPlaceholder: {
     flex: 1,

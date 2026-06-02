@@ -75,7 +75,7 @@ export default function CategoryPicker({
               <React.Fragment key={sub}>
                 <TouchableOpacity
                   style={[styles.option, isSelected && styles.optionSelected]}
-                  onPress={() => setSelected(sub)}
+                  onPress={() => setSelected(prev => (prev === sub ? null : sub))}
                   activeOpacity={0.6}
                 >
                   <Text style={[textVariants.bodyMd, styles.optionLabel, isSelected && styles.optionLabelSelected]}>
@@ -161,9 +161,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: Spacing.stackMd + 2,
-    paddingHorizontal: Spacing.stackSm,
-    borderRadius: Radius.md,
+    paddingVertical: Spacing.stackMd,
+    paddingHorizontal: Spacing.stackMd,
+    borderRadius: Radius.lg,
   },
   optionSelected: {
     backgroundColor: Palette.primary,
@@ -178,16 +178,18 @@ const styles = StyleSheet.create({
   checkmark: {
     fontSize: 16,
     color: Palette.onPrimary ?? '#fff',
+    fontWeight: '600',
   },
   optionDivider: {
     height: 1,
     backgroundColor: Palette.surfaceContainerHigh,
+    marginVertical: Spacing.stackSm,
   },
   actionBtn: {
     marginHorizontal: Spacing.containerMargin,
     marginTop: Spacing.stackMd,
     paddingVertical: Spacing.stackMd,
-    borderRadius: Radius.md,
+    borderRadius: Radius.lg,
     backgroundColor: Palette.primary,
     alignItems: 'center',
   },
