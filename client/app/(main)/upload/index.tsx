@@ -115,6 +115,7 @@ export default function UploadCategoryScreen({ onBack, onProfile }: Props) {
                 image: CATEGORY_IMAGES[cat],
               }}
               onPress={() => openPicker(cat)}
+              disabled={cat === Category.Accessories}
               style={{ flex: 1, height: CARD_HEIGHT }}
             />
           ))}

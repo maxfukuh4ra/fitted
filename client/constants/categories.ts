@@ -11,5 +11,5 @@ export const SUBCATEGORIES: Record<Category, string[]> = {
   [Category.Tops]:      ['T-shirt', 'Shirt', 'Knit / Sweater', 'Tank Top'],
   [Category.Bottoms]:   ['Jeans', 'Trousers', 'Shorts', 'Skirt'],
   [Category.Shoes]:     ['Sneakers', 'Boots', 'Loafers', 'Sandals'],
-  [Category.Accessories]: ['Bag', 'Hat', 'Jewelry', 'Belt'],
+  [Category.Accessories]: ['Coming Soon'],
 };

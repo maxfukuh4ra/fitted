@@ -15,16 +15,19 @@ export default function CategoryCard({
   category,
   onPress,
   style,
+  disabled = false,
 }: {
   category: Category;
   onPress: () => void;
   style?: object;
+  disabled?: boolean;
 }) {
   return (
     <TouchableOpacity
-      activeOpacity={0.85}
+      activeOpacity={disabled ? 1 : 0.85}
+      disabled={disabled}
       onPress={onPress}
-      style={[styles.card, style]}
+      style={[styles.card, disabled && styles.cardDisabled, style]}
     >
       {category.image ? (
         <>
@@ -61,6 +64,9 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
     overflow: 'hidden',
     backgroundColor: Palette.surfaceContainer,
+  },
+  cardDisabled: {
+    opacity: 0.5,
   },
   cardImage: {
     ...StyleSheet.absoluteFillObject,

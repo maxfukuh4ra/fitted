@@ -10,6 +10,8 @@ export default function UploadLayout() {
           name="camera"
           options={{ presentation: 'fullScreenModal' }}
         />
+        <Stack.Screen name="processing" options={{ presentation: 'card' }} />
+        <Stack.Screen name="accept" options={{ presentation: 'card' }} />
       </Stack>
     </UploadProvider>
   );
