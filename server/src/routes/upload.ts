@@ -46,4 +46,19 @@ router.post('/process-image', upload.single('image'), async (req: Request, res: 
  
 });
 
+// POST /api/upload-image, raw upload to supabase storage only
+router.post('/upload-image', upload.single('image'), async (req: Request, res: Response) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'no token' });
+
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  if (!user) return res.status(401).json({ error: 'unauthorized' });
+
+  const buffer = req.file!.buffer;
+  const url = await uploadToStorage(buffer, user.id);
+
+  return res.status(200).json({ success: true, imageUrl: url });
+});
+
+
 export default router;
