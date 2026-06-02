@@ -7,6 +7,11 @@ To start frontend run:
 `npm install`
 `npx expo start`
 
+Make sure to add client/.env
+ - EXPO_PUBLIC_SUPABASE_URL=
+ - EXPO_PUBLIC_SUPABASE_KEY=
+ - EXPO_PUBLIC_SERVER_URL=
+
 ## Backend:
 To run background:
 
@@ -14,6 +19,7 @@ To run background:
 `npm install`
 `npm run dev`
 
-Make sure to add you .env keys for:
- - SUPABASE_URL
- - SUPABASE_SERVICE_KEY
+Make sure to add you server/.env keys for:
+ - GEMINI_API_KEY=
+ - SUPABASE_URL=
+ - SUPABASE_SERVICE_KEY=
