@@ -1,6 +1,8 @@
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -9,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Palette, Radius, Spacing, Typography } from "@/constants/design";
+import { signOut } from "@/lib/auth";
 import { getProfile, type UserProfile } from "@/lib/profile";
 
 function inchesToFeetAndInches(totalInches: number | null | undefined): string {
@@ -51,6 +54,7 @@ function InfoCard({
 }
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -61,6 +65,11 @@ export default function ProfileScreen() {
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.replace("/");
+  };
 
 
   if (loading) {
@@ -129,16 +138,23 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Preferences</Text>
           <View style={styles.card}>
-            <View style={styles.prefRow}>
+            <View style={[styles.prefRow, styles.prefRowLast]}>
               <Text style={styles.prefKey}>System</Text>
               <Text style={styles.prefValue}>Imperial</Text>
             </View>
-            <View style={[styles.prefRow, styles.prefRowLast]}>
-              <Text style={styles.prefKey}>Currency</Text>
-              <Text style={styles.prefValue}>USD ($)</Text>
-            </View>
           </View>
         </View>
+
+        <Pressable
+          accessibilityRole="button"
+          onPress={handleSignOut}
+          style={({ pressed }) => [
+            styles.signOutButton,
+            pressed && styles.signOutButtonPressed,
+          ]}
+        >
+          <Text style={styles.signOutText}>Sign Out</Text>
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
@@ -259,6 +275,21 @@ const styles = StyleSheet.create({
   prefValue: {
     ...Typography.bodyMd,
     color: Palette.onSurfaceVariant,
+  },
+
+  signOutButton: {
+    borderWidth: 1,
+    borderColor: Palette.error,
+    borderRadius: Radius.lg,
+    paddingVertical: Spacing.stackMd,
+    alignItems: "center",
+  },
+  signOutButtonPressed: {
+    opacity: 0.7,
+  },
+  signOutText: {
+    ...Typography.bodyMd,
+    color: Palette.error,
   },
 
   errorText: {
