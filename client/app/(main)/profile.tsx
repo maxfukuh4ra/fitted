@@ -203,17 +203,6 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Preferences */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Preferences</Text>
-          <View style={styles.card}>
-            <View style={[styles.prefRow, styles.prefRowLast]}>
-              <Text style={styles.prefKey}>System</Text>
-              <Text style={styles.prefValue}>Imperial</Text>
-            </View>
-          </View>
-        </View>
-
         <Pressable
           accessibilityRole="button"
           onPress={handleSignOut}
