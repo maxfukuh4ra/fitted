@@ -10,8 +10,18 @@ type ClosetItemCardProps = {
   item: ClosetItem;
 };
 
+// Display item name if it exists, otherwise use subcategory
+function getItemDisplayName(item: ClosetItem): string {
+  const name = item.item_name?.trim();
+  if (name) {
+    return name;
+  }
+  return formatSubcategoryLabel(item.subcategory);
+}
+
 export function ClosetItemCard({ item }: ClosetItemCardProps) {
-  const label = formatSubcategoryLabel(item.subcategory);
+  const title = getItemDisplayName(item);
+  const subcategoryLabel = formatSubcategoryLabel(item.subcategory);
 
   return (
     <View style={styles.card}>
@@ -21,7 +31,7 @@ export function ClosetItemCard({ item }: ClosetItemCardProps) {
             source={{ uri: item.image_url }}
             style={styles.image}
             contentFit="contain"
-            accessibilityLabel={label}
+            accessibilityLabel={title}
           />
         ) : (
           <View style={styles.imagePlaceholder} />
@@ -29,7 +39,10 @@ export function ClosetItemCard({ item }: ClosetItemCardProps) {
       </View>
       <View style={styles.textBlock}>
         <Text style={styles.title} numberOfLines={1}>
-          {label}
+          {title}
+        </Text>
+        <Text style={styles.subtitle} numberOfLines={1}>
+          {subcategoryLabel}
         </Text>
       </View>
     </View>
@@ -67,9 +80,16 @@ const styles = StyleSheet.create({
   },
   textBlock: {
     padding: 12,
+    gap: 4,
   },
   title: {
     ...Typography.bodyMd,
     color: Palette.onSurface,
+  },
+  subtitle: {
+    ...Typography.labelSm,
+    color: Palette.onSurfaceVariant,
+    textTransform: 'none',
+    letterSpacing: 0.2,
   },
 });

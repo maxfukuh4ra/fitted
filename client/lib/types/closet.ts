@@ -4,6 +4,7 @@ export type ClosetItem = {
   user_id: string | null;
   category: string | null;
   subcategory: string | null;
+  item_name: string | null;
   image_url: string | null;
   created_at: string;
 };
