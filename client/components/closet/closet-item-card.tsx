@@ -2,7 +2,7 @@
 import { Image } from 'expo-image';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { formatCategoryLabel } from '@/lib/closet-filters';
+import { formatSubcategoryLabel } from '@/lib/closet-filters';
 import type { ClosetItem } from '@/lib/types/closet';
 import { Palette, Radius, Spacing, Typography } from '@/constants/design';
 
@@ -11,7 +11,7 @@ type ClosetItemCardProps = {
 };
 
 export function ClosetItemCard({ item }: ClosetItemCardProps) {
-  const label = formatCategoryLabel(item.category);
+  const label = formatSubcategoryLabel(item.subcategory);
 
   return (
     <View style={styles.card}>

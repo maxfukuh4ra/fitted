@@ -18,9 +18,9 @@ import type { ClosetItem } from '@/lib/types/closet';
 export default function ClosetScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const {
-    categories,
-    selectedCategory,
-    setSelectedCategory,
+    subcategoryFilters,
+    selectedSubcategory,
+    setSelectedSubcategory,
     filteredItems,
     loading,
     error,
@@ -28,9 +28,9 @@ export default function ClosetScreen() {
 
   const listHeader = (
     <CategoryFilterBar
-      filters={categories}
-      selectedCategory={selectedCategory}
-      onSelect={setSelectedCategory}
+      filters={subcategoryFilters}
+      selectedValue={selectedSubcategory}
+      onSelect={setSelectedSubcategory}
     />
   );
 
@@ -55,9 +55,9 @@ export default function ClosetScreen() {
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyTitle}>Nothing here yet</Text>
         <Text style={styles.emptySubtitle}>
-          {selectedCategory === null
+          {selectedSubcategory === null
             ? 'Add pieces to your closet to see them here.'
-            : 'No items in this category.'}
+            : 'No items in this subcategory.'}
         </Text>
       </View>
     );

@@ -1,17 +1,17 @@
-// Hook to fetch and filter closet items
+// Hook to fetch and filter closet items by subcategory
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { getCurrentUser } from '@/lib/auth';
 import {
-  filterItemsByCategory,
-  getCategoryFilters,
+  filterItemsBySubcategory,
+  getSubcategoryFilters,
 } from '@/lib/closet-filters';
 import { fetchClosetItems } from '@/lib/items';
 import type { CategoryFilter, ClosetItem } from '@/lib/types/closet';
 
 export function useCloset() {
   const [items, setItems] = useState<ClosetItem[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,18 +41,21 @@ export function useCloset() {
     load();
   }, [load]);
 
-  const categories: CategoryFilter[] = useMemo(() => getCategoryFilters(items), [items]);
+  const subcategoryFilters: CategoryFilter[] = useMemo(
+    () => getSubcategoryFilters(items),
+    [items],
+  );
 
   const filteredItems = useMemo(
-    () => filterItemsByCategory(items, selectedCategory),
-    [items, selectedCategory],
+    () => filterItemsBySubcategory(items, selectedSubcategory),
+    [items, selectedSubcategory],
   );
 
   return {
     items,
-    categories,
-    selectedCategory,
-    setSelectedCategory,
+    subcategoryFilters,
+    selectedSubcategory,
+    setSelectedSubcategory,
     filteredItems,
     loading,
     error,

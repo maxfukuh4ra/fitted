@@ -1,7 +1,7 @@
 // Filter helpers for closet screen (chips and grid use subcategory)
 import type { CategoryFilter, ClosetItem } from '@/lib/types/closet';
 
-export function formatCategoryLabel(subcategory: string | null): string {
+export function formatSubcategoryLabel(subcategory: string | null): string {
   if (!subcategory?.trim()) {
     return 'Uncategorized';
   }
@@ -13,7 +13,7 @@ export function formatCategoryLabel(subcategory: string | null): string {
     .join(' ');
 }
 
-export function getCategoryFilters(items: ClosetItem[]): CategoryFilter[] {
+export function getSubcategoryFilters(items: ClosetItem[]): CategoryFilter[] {
   const subcategories = [
     ...new Set(
       items
@@ -29,12 +29,12 @@ export function getCategoryFilters(items: ClosetItem[]): CategoryFilter[] {
     { value: null, label: 'All Items' },
     ...subcategories.map((subcategory) => ({
       value: subcategory,
-      label: formatCategoryLabel(subcategory),
+      label: formatSubcategoryLabel(subcategory),
     })),
   ];
 }
 
-export function filterItemsByCategory(
+export function filterItemsBySubcategory(
   items: ClosetItem[],
   selectedSubcategory: string | null,
 ): ClosetItem[] {

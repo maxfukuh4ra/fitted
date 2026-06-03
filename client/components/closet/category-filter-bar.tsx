@@ -7,13 +7,13 @@ import type { CategoryFilter } from '@/lib/types/closet';
 // Able to pass in different filters (eg. 3 for avatar, more for closet) 
 type CategoryFilterBarProps = {
   filters: CategoryFilter[];
-  selectedCategory: string | null;
-  onSelect: (category: string | null) => void;
+  selectedValue: string | null;
+  onSelect: (value: string | null) => void;
 };
 
 export function CategoryFilterBar({
   filters,
-  selectedCategory,
+  selectedValue,
   onSelect,
 }: CategoryFilterBarProps) {
   return (
@@ -23,7 +23,7 @@ export function CategoryFilterBar({
       contentContainerStyle={styles.scrollContent}
       style={styles.scroll}>
       {filters.map((filter) => {
-        const isSelected = selectedCategory === filter.value;
+        const isSelected = selectedValue === filter.value;
 
         return (
           <Pressable
