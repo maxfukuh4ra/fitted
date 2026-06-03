@@ -1,5 +1,11 @@
 import { Image } from "expo-image";
-import { StyleSheet, Text, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 
 import { Palette, Radius, Spacing, Typography } from "@/constants/design";
 
@@ -7,19 +13,23 @@ type ClosetItemCardProps = {
   id: string;
   name?: string;
   category?: string;
+  subcategory?: string;
   imageUrl?: string;
+  style?: StyleProp<ViewStyle>;
 };
 
 export function ClosetItemCard({
   id,
   name,
   category,
+  subcategory,
   imageUrl,
+  style,
 }: ClosetItemCardProps) {
-  const displayName = name || category || "Unnamed item";
+  const displayName = name || subcategory || category || "Unnamed item";
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, style]}>
       {imageUrl ? (
         <Image
           source={{ uri: imageUrl }}
