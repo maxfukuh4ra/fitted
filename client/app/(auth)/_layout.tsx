@@ -1,57 +1,11 @@
-import {
-  Manrope_400Regular,
-  Manrope_600SemiBold,
-  useFonts as useManropeFonts,
-} from "@expo-google-fonts/manrope";
-import {
-  Newsreader_500Medium,
-  useFonts as useNewsreaderFonts,
-} from "@expo-google-fonts/newsreader";
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
-import { Stack } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
-import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
-import "react-native-reanimated";
+import { Stack } from 'expo-router';
 
-import { useColorScheme } from "@/hooks/use-color-scheme";
-
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [manropeLoaded] = useManropeFonts({
-    Manrope_400Regular,
-    Manrope_600SemiBold,
-  });
-  const [newsreaderLoaded] = useNewsreaderFonts({
-    Newsreader_500Medium,
-  });
-
-  useEffect(() => {
-    if (manropeLoaded && newsreaderLoaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [manropeLoaded, newsreaderLoaded]);
-
-  if (!manropeLoaded || !newsreaderLoaded) {
-    return null;
-  }
-
+export default function AuthLayout() {
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="personal-info" />
-        <Stack.Screen
-          name="modal"
-          options={{ presentation: "modal", title: "Modal" }}
-        />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="onboarding/personal-info" />
+      <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+    </Stack>
   );
 }
