@@ -1,12 +1,12 @@
-// Filter bar used in closet screen
+// Filter helpers for closet screen (chips and grid use subcategory)
 import type { CategoryFilter, ClosetItem } from '@/lib/types/closet';
 
-export function formatCategoryLabel(category: string | null): string {
-  if (!category?.trim()) {
+export function formatCategoryLabel(subcategory: string | null): string {
+  if (!subcategory?.trim()) {
     return 'Uncategorized';
   }
 
-  return category
+  return subcategory
     .trim()
     .split(/\s+/)
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
@@ -14,30 +14,33 @@ export function formatCategoryLabel(category: string | null): string {
 }
 
 export function getCategoryFilters(items: ClosetItem[]): CategoryFilter[] {
-  const categories = [
+  const subcategories = [
     ...new Set(
       items
-        .map((item) => item.category)
-        .filter((category): category is string => category != null && category.trim() !== ''),
+        .map((item) => item.subcategory)
+        .filter(
+          (subcategory): subcategory is string =>
+            subcategory != null && subcategory.trim() !== '',
+        ),
     ),
   ].sort((a, b) => a.localeCompare(b));
 
   return [
     { value: null, label: 'All Items' },
-    ...categories.map((category) => ({
-      value: category,
-      label: formatCategoryLabel(category),
+    ...subcategories.map((subcategory) => ({
+      value: subcategory,
+      label: formatCategoryLabel(subcategory),
     })),
   ];
 }
 
 export function filterItemsByCategory(
   items: ClosetItem[],
-  selectedCategory: string | null,
+  selectedSubcategory: string | null,
 ): ClosetItem[] {
-  if (selectedCategory === null) {
+  if (selectedSubcategory === null) {
     return items;
   }
 
-  return items.filter((item) => item.category === selectedCategory);
+  return items.filter((item) => item.subcategory === selectedSubcategory);
 }
