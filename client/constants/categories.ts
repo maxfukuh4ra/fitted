@@ -1,9 +1,9 @@
 export enum Category {
-  Outerwear = "Outerwear",
-  Tops = "Tops",
-  Bottoms = "Bottoms",
-  Shoes = "Shoes",
-  Accessories = "Accessories",
+  Outerwear = "outerwear",
+  Tops = "tops",
+  Bottoms = "bottoms",
+  Shoes = "shoes",
+  Accessories = "accessories",
 }
 
 export const SUBCATEGORIES: Record<Category, string[]> = {
