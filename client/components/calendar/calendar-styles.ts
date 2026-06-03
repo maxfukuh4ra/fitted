@@ -31,7 +31,23 @@ export const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: Spacing.containerMargin,
     paddingTop: Spacing.stackMd,
-    // room for the fixed bottom tab bar
     paddingBottom: 96,
+  },
+  monthHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  monthTitle: {
+    ...Typography.headlineMd,
+    color: Palette.onSurface,
+  },
+  monthNav: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.stackMd,
+  },
+  monthNavBtnPressed: {
+    opacity: 0.6,
   },
 });
