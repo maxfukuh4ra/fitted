@@ -1,38 +1,25 @@
-# Fitted Mobile (Expo)
+# Fitted
 
-Base React Native app initialized with Expo.
+## Frontend:
 
-## Getting Started
+To start frontend run:
+`cd client`
+`npm install`
+`npx expo start`
 
-### Prerequisites
+Make sure to add client/.env
+ - EXPO_PUBLIC_SUPABASE_URL=
+ - EXPO_PUBLIC_SUPABASE_KEY=
+ - EXPO_PUBLIC_SERVER_URL=
 
-- Node.js 20+ and npm
-- One of:
-  - iOS Simulator (Xcode), or
-  - Android Emulator (Android Studio), or
-  - Expo Go on a physical device
+## Backend:
+To run background:
 
-### Install Dependencies
+`cd server`
+`npm install`
+`npm run dev`
 
-```bash
-npm install
-```
-
-### Run the App
-
-```bash
-npx expo start
-```
-
-Then open the app using one of the options shown in the terminal:
-
-- press `i` for iOS simulator
-- press `a` for Android emulator
-- scan the QR code with Expo Go
-
-## Verification
-
-Successful setup means:
-
-- Metro starts without errors
-- the default Expo starter screen is visible on simulator or Expo Go
+Make sure to add you server/.env keys for:
+ - GEMINI_API_KEY=
+ - SUPABASE_URL=
+ - SUPABASE_SERVICE_KEY=

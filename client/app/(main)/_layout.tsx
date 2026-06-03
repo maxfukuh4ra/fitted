@@ -12,6 +12,13 @@ function MainTabBar({ state, navigation }: BottomTabBarProps) {
     <BottomNavBar
       activeTab={activeTab}
       onTabPress={(tab) => {
+        if (tab === 'upload') {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'upload' }],
+          });
+          return;
+        }
         if (tab === activeTab) {
           return;
         }

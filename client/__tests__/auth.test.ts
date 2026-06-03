@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getCurrentUser, signIn } from "../lib/auth";
+import { getCurrentUser, signIn, signOut } from "../lib/auth";
 
 // force hoist mock
 const mocks = vi.hoisted(() => {
   return {
     signInWithPassword: vi.fn(),
     getUser: vi.fn(),
+    signOut: vi.fn(),
   };
 });
 
@@ -15,6 +16,7 @@ vi.mock("../lib/supabase", () => {
       auth: {
         signInWithPassword: mocks.signInWithPassword,
         getUser: mocks.getUser,
+        signOut: mocks.signOut,
       },
     },
   };
@@ -25,6 +27,7 @@ const mockUser = { id: "u1", email: "test@example.com" };
 beforeEach(() => {
   mocks.signInWithPassword.mockReset();
   mocks.getUser.mockReset();
+  mocks.signOut.mockReset();
 });
 
 describe("lib/auth", () => {
@@ -77,5 +80,17 @@ describe("lib/auth", () => {
     });
 
     await expect(getCurrentUser()).rejects.toThrow("err");
+  });
+
+  it("signOut resolves without error on success", async () => {
+    mocks.signOut.mockResolvedValue({ error: null });
+
+    await expect(signOut()).resolves.toBeUndefined();
+  });
+
+  it("signOut throws on error", async () => {
+    mocks.signOut.mockResolvedValue({ error: { message: "sign out failed" } });
+
+    await expect(signOut()).rejects.toThrow("sign out failed");
   });
 });
