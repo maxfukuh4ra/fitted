@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { ClosetItemCard } from "@/components/closet/ClosetItemCard";
 import { Palette, Spacing, Typography } from "@/constants/design";
 import { supabase } from "@/lib/supabase";
 
@@ -45,22 +52,36 @@ export default function ClosetScreen() {
         <Text style={styles.title}>My Closet</Text>
 
         {loading ? (
-          <ActivityIndicator color={Palette.primary} />
+          <ActivityIndicator
+            color={Palette.primary}
+            size="large"
+            style={styles.loader}
+          />
         ) : error ? (
-          <Text>{error}</Text>
+          <Text style={styles.errorText}>{error}</Text>
         ) : !user ? (
-          <Text>Please sign in to view your closet.</Text>
+          <Text style={styles.messageText}>
+            Please sign in to view your closet.
+          </Text>
         ) : items.length === 0 ? (
-          <Text>No items found in your closet yet.</Text>
+          <Text style={styles.messageText}>
+            No items found in your closet yet.
+          </Text>
         ) : (
-          <View>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listContent}
+          >
             {items.map((item) => (
-              <View key={item.id}>
-                <Text>{item.category ?? "Unnamed item"}</Text>
-                <Text>ID: {item.id}</Text>
-              </View>
+              <ClosetItemCard
+                key={item.id}
+                id={item.id}
+                name={item.name}
+                category={item.category}
+                imageUrl={item.image_url}
+              />
             ))}
-          </View>
+          </ScrollView>
         )}
       </View>
     </SafeAreaView>
@@ -81,5 +102,22 @@ const styles = StyleSheet.create({
   title: {
     ...Typography.headlineMd,
     color: Palette.onSurface,
+    marginBottom: Spacing.stackMd,
+  },
+  loader: {
+    marginTop: Spacing.stackLg,
+  },
+  errorText: {
+    ...Typography.bodyMd,
+    color: Palette.error,
+    marginTop: Spacing.stackMd,
+  },
+  messageText: {
+    ...Typography.bodyMd,
+    color: Palette.onSurfaceVariant,
+    marginTop: Spacing.stackMd,
+  },
+  listContent: {
+    paddingBottom: Spacing.stackXl,
   },
 });
