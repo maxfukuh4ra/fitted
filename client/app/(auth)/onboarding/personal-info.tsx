@@ -1,5 +1,5 @@
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -9,45 +9,47 @@ import {
   StyleSheet,
   Text,
   View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { EditorialTextField } from '@/components/onboarding/EditorialTextField';
-import { HeightPickerField } from '@/components/onboarding/HeightPickerField';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Palette, Radius, Spacing, Typography } from '@/constants/design';
-import { signUpWithProfile } from '@/lib/sign-up';
-import { clearSignUpDraft, getSignUpDraft } from '@/lib/sign-up-draft';
-import { validateProfileForm } from '@/lib/validation';
+import { EditorialTextField } from "@/components/onboarding/EditorialTextField";
+import { HeightPickerField } from "@/components/onboarding/HeightPickerField";
+import { IconSymbol } from "@/components/ui/icon-symbol";
+import { Palette, Radius, Spacing, Typography } from "@/constants/design";
+import { signUpWithProfile } from "@/lib/sign-up";
+import { clearSignUpDraft, getSignUpDraft } from "@/lib/sign-up-draft";
+import { validateProfileForm } from "@/lib/validation";
 
-type Gender = 'female' | 'male' | 'other';
+type Gender = "female" | "male" | "other";
 
 const GENDER_OPTIONS: { value: Gender; label: string }[] = [
-  { value: 'female', label: 'Female' },
-  { value: 'male', label: 'Male' },
-  { value: 'other', label: 'Other' },
+  { value: "female", label: "Female" },
+  { value: "male", label: "Male" },
+  { value: "other", label: "Other" },
 ];
 
 export default function PersonalInfoScreen() {
   const router = useRouter();
-  const [fullName, setFullName] = useState('');
-  const [age, setAge] = useState('');
+  const [fullName, setFullName] = useState("");
+  const [age, setAge] = useState("");
   const [heightFeet, setHeightFeet] = useState(5);
   const [heightInches, setHeightInches] = useState(8);
-  const [gender, setGender] = useState<Gender>('female');
+  const [gender, setGender] = useState<Gender>("female");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!getSignUpDraft()) {
-      router.replace('/(tabs)');
+      router.replace("/");
     }
   }, [router]);
 
   const handleContinue = async () => {
     const draft = getSignUpDraft();
     if (!draft) {
-      setError('Session expired. Go back and enter your email and password again.');
+      setError(
+        "Session expired. Go back and enter your email and password again.",
+      );
       return;
     }
 
@@ -82,7 +84,7 @@ export default function PersonalInfoScreen() {
     }
 
     clearSignUpDraft();
-    router.replace('/closet');
+    router.replace("/closet");
   };
 
   return (
@@ -95,16 +97,23 @@ export default function PersonalInfoScreen() {
             accessibilityLabel="Go back"
             accessibilityRole="button"
             onPress={() => router.back()}
-            style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}
+            style={({ pressed }) => [
+              styles.backButton,
+              pressed && styles.backButtonPressed,
+            ]}
           >
-            <IconSymbol color={Palette.onSurfaceVariant} name="chevron.left" size={24} />
+            <IconSymbol
+              color={Palette.onSurfaceVariant}
+              name="chevron.left"
+              size={24}
+            />
           </Pressable>
           <Text style={styles.headerLabel}>Getting to Know You</Text>
           <View style={styles.headerSpacer} />
         </View>
 
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
           style={styles.keyboardAvoiding}
         >
           <ScrollView
@@ -116,8 +125,8 @@ export default function PersonalInfoScreen() {
               <View style={styles.introSection}>
                 <Text style={styles.title}>Tell us about yourself</Text>
                 <Text style={styles.subtitle}>
-                  To curate a wardrobe that perfectly suits you, we need a few basic details to get
-                  started.
+                  To curate a wardrobe that perfectly suits you, we need a few
+                  basic details to get started.
                 </Text>
               </View>
 
@@ -198,7 +207,11 @@ export default function PersonalInfoScreen() {
               ) : (
                 <>
                   <Text style={styles.continueButtonText}>Continue</Text>
-                  <IconSymbol color={Palette.onPrimary} name="arrow.forward" size={20} />
+                  <IconSymbol
+                    color={Palette.onPrimary}
+                    name="arrow.forward"
+                    size={20}
+                  />
                 </>
               )}
             </Pressable>
@@ -215,9 +228,9 @@ const styles = StyleSheet.create({
     backgroundColor: Palette.background,
   },
   decorativeCircle: {
-    position: 'absolute',
+    position: "absolute",
     right: -48,
-    top: '50%',
+    top: "50%",
     marginTop: -128,
     width: 256,
     height: 256,
@@ -229,9 +242,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: Spacing.containerMargin,
     paddingTop: Spacing.stackMd,
     paddingBottom: Spacing.stackMd,
@@ -239,8 +252,8 @@ const styles = StyleSheet.create({
   backButton: {
     width: 40,
     height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginLeft: -8,
     borderRadius: Radius.full,
   },
@@ -251,7 +264,7 @@ const styles = StyleSheet.create({
     ...Typography.labelSm,
     color: Palette.outline,
     letterSpacing: 2,
-    textAlign: 'center',
+    textAlign: "center",
     flex: 1,
   },
   headerSpacer: {
@@ -268,8 +281,8 @@ const styles = StyleSheet.create({
   },
   content: {
     maxWidth: 448,
-    width: '100%',
-    alignSelf: 'center',
+    width: "100%",
+    alignSelf: "center",
   },
   introSection: {
     marginBottom: Spacing.stackXl,
@@ -297,7 +310,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.stackSm,
   },
   genderRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: Spacing.gutter,
   },
   segmentButton: {
@@ -306,8 +319,8 @@ const styles = StyleSheet.create({
     borderColor: Palette.outlineVariant,
     borderRadius: Radius.sm,
     paddingVertical: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   segmentButtonActive: {
     backgroundColor: Palette.primary,
@@ -328,18 +341,18 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.stackXl,
     paddingBottom: Spacing.stackMd,
     maxWidth: 448,
-    width: '100%',
-    alignSelf: 'center',
+    width: "100%",
+    alignSelf: "center",
   },
   continueButton: {
     height: 52,
     borderRadius: Radius.md,
     backgroundColor: Palette.primary,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: Spacing.stackSm,
-    shadowColor: '#000000',
+    shadowColor: "#000000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,

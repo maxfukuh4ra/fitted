@@ -15,12 +15,6 @@ import { router } from 'expo-router';
 import { Category, SUBCATEGORIES } from '@/constants/categories';
 import { useUpload } from '@/contexts/UploadContext';
 
-type Props = {
-  onBack?: () => void;
-  onProfile?: () => void;
-  onNav?: (tab: string) => void;
-};
-
 // Hard Coded Images, consider moving to S3 or bundle
 const CATEGORY_IMAGES: Record<Category, string | undefined> = {
   [Category.Outerwear]: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBbQxwpYTEfuXsYnRBmo-FXoGD4iFGIerElDgQf61cZl_1bgxJHW3oxRiGKcgL_UYB6YZvSKlidsxO6LDpBqlYlR4GfwMq28dpH0FSK_V61z2r-tCnmeW5O3Qd74YSYt2O6oBRQihZSEkKl04qjr5VEua_23hkOlhYdLLagQBxRvLwjFsLOwMyigVYK9G-NILbhw-Lqtgqp8T7KZqFOlEZ9RZPDma1ODUqKT9VPw3rbfU3v6At12VYnDVqDgwZnWoFc7mmDlueVSZQ',
@@ -30,7 +24,7 @@ const CATEGORY_IMAGES: Record<Category, string | undefined> = {
   [Category.Accessories]: undefined,
 };
 
-export default function UploadCategoryScreen({ onBack, onProfile }: Props) {
+export default function UploadCategoryScreen() {
   const CARD_HEIGHT = 200;
   const [picker, setPicker] = useState<Category | null>(null);
   const { setCategory } = useUpload();
@@ -43,11 +37,11 @@ export default function UploadCategoryScreen({ onBack, onProfile }: Props) {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={onBack} style={styles.headerBtn} activeOpacity={0.6}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn} activeOpacity={0.6}>
           <Text style={styles.headerIcon}>←</Text>
         </TouchableOpacity>
         <Text style={styles.wordmark}>FITTED</Text>
-        <TouchableOpacity onPress={onProfile} style={styles.headerBtn} activeOpacity={0.6}>
+        <TouchableOpacity onPress={() => router.push('/(app)/(tabs)/profile')} style={styles.headerBtn} activeOpacity={0.6}>
           <Text style={styles.headerIcon}>◯</Text>
         </TouchableOpacity>
       </View>
