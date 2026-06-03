@@ -19,7 +19,7 @@
     const [facing, setFacing] = useState<CameraType>('back');
     const [permission, requestPermission] = useCameraPermissions();
     const cameraRef = useRef<CameraView>(null);
-    const { setImage } = useUpload();
+    const { setImageUri } = useUpload();
     const guidanceOpacity = useRef(new Animated.Value(1)).current;
     const isCapturing = useRef(false);
 
@@ -35,7 +35,7 @@
       });
       if (!result.canceled) {
         const uri = result.assets[0].uri;
-        setImage(uri); // save to context
+        setImageUri(uri); // save to context
         router.replace({ pathname: '/upload/processing', params: { uri } });
       }
     };
@@ -47,7 +47,7 @@
       try {
         const photo = await cameraRef.current.takePictureAsync({ quality: 1 });
         if (photo?.uri) {
-          setImage(photo.uri);
+          setImageUri(photo.uri);
           router.replace({ pathname: '/upload/processing', params: { uri: photo.uri } });
         }
       } finally {
