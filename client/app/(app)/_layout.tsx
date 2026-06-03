@@ -1,4 +1,4 @@
-import { Redirect, Slot } from 'expo-router';
+import { Redirect, Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 
 import type { Session } from '@supabase/supabase-js';
@@ -25,5 +25,10 @@ export default function AppLayout() {
 
   if (!session) return <Redirect href="/(auth)" />;
 
-  return <Slot />;
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="upload" />
+    </Stack>
+  );
 }

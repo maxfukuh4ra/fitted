@@ -1,9 +1,12 @@
-import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { Tabs } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { router, Tabs } from "expo-router";
+import { StyleSheet, View } from "react-native";
 
-import { BottomNavBar, type BottomNavTab } from '@/components/ui/bottom-nav-bar';
-import { Palette } from '@/constants/design';
+import {
+  BottomNavBar,
+  type BottomNavTab,
+} from "@/components/ui/bottom-nav-bar";
+import { Palette } from "@/constants/design";
 
 function MainTabBar({ state, navigation }: BottomTabBarProps) {
   const activeTab = state.routes[state.index].name as BottomNavTab;
@@ -12,11 +15,8 @@ function MainTabBar({ state, navigation }: BottomTabBarProps) {
     <BottomNavBar
       activeTab={activeTab}
       onTabPress={(tab) => {
-        if (tab === 'upload') {
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'upload' }],
-          });
+        if (tab === "upload") {
+          router.push("/upload");
           return;
         }
         if (tab === activeTab) {
@@ -36,13 +36,14 @@ export default function MainLayout() {
         tabBar={(props) => <MainTabBar {...props} />}
         screenOptions={{
           headerShown: false,
-          animation: 'none',
-        }}>
-        <Tabs.Screen name="closet" options={{ title: 'My Closet' }} />
-        <Tabs.Screen name="collections" options={{ title: 'Collections' }} />
-        <Tabs.Screen name="upload" options={{ title: 'Upload' }} />
-        <Tabs.Screen name="calendar" options={{ title: 'Calendar' }} />
-        <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
+          animation: "none",
+        }}
+      >
+        <Tabs.Screen name="closet" options={{ title: "My Closet" }} />
+        <Tabs.Screen name="collections" options={{ title: "Collections" }} />
+        <Tabs.Screen name="upload" options={{ title: "Upload" }} />
+        <Tabs.Screen name="calendar" options={{ title: "Calendar" }} />
+        <Tabs.Screen name="profile" options={{ title: "Profile" }} />
       </Tabs>
     </View>
   );
