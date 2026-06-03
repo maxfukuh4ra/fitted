@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -23,6 +24,10 @@ export default function AvatarScreen() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -51,6 +56,22 @@ export default function AvatarScreen() {
         setLoading(false);
       });
   }, [user]);
+
+  const toggleItemSelection = (itemId: string) => {
+    setSelectedItemIds((prev) => {
+      const updated = new Set(prev);
+      if (updated.has(itemId)) {
+        updated.delete(itemId);
+      } else {
+        updated.add(itemId);
+      }
+      return updated;
+    });
+  };
+
+  const saveOutfit = async () => {
+    console.log("Saving outfit with item IDs:", Array.from(selectedItemIds));
+  };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
@@ -89,15 +110,24 @@ export default function AvatarScreen() {
                   >
                     {sectionItems.length > 0 ? (
                       sectionItems.map((item) => (
-                        <ClosetItemCard
+                        <Pressable
                           key={item.id}
-                          id={item.id}
-                          name={item.name}
-                          category={item.category}
-                          subcategory={item.subcategory}
-                          imageUrl={item.image_url}
-                          style={styles.horizontalCard}
-                        />
+                          onPress={() => toggleItemSelection(item.id)}
+                          style={[
+                            styles.cardWrapper,
+                            selectedItemIds.has(item.id) &&
+                              styles.cardWrapperSelected,
+                          ]}
+                        >
+                          <ClosetItemCard
+                            id={item.id}
+                            name={item.name}
+                            category={item.category}
+                            subcategory={item.subcategory}
+                            imageUrl={item.image_url}
+                            style={styles.horizontalCard}
+                          />
+                        </Pressable>
                       ))
                     ) : (
                       <View style={styles.emptySection}>
@@ -110,6 +140,22 @@ export default function AvatarScreen() {
                 </View>
               );
             })}
+
+            <View style={styles.submitContainer}>
+              <Pressable
+                style={[
+                  styles.submitButton,
+                  (!user || selectedItemIds.size === 0 || saving) &&
+                    styles.submitButtonDisabled,
+                ]}
+                onPress={saveOutfit}
+                disabled={!user || selectedItemIds.size === 0 || saving}
+              >
+                <Text style={styles.submitButtonText}>
+                  {saving ? "Saving..." : "Save Outfit"}
+                </Text>
+              </Pressable>
+            </View>
           </ScrollView>
         )}
       </View>
@@ -171,5 +217,34 @@ const styles = StyleSheet.create({
   emptyText: {
     ...Typography.bodyMd,
     color: Palette.onSurfaceVariant,
+  },
+  cardWrapper: {
+    marginRight: Spacing.stackMd,
+  },
+  cardWrapperSelected: {
+    opacity: 0.6,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: Palette.primary,
+  },
+  submitContainer: {
+    marginTop: Spacing.stackLg,
+    paddingVertical: Spacing.stackMd,
+  },
+  submitButton: {
+    backgroundColor: Palette.primary,
+    paddingVertical: Spacing.stackMd,
+    paddingHorizontal: Spacing.containerMargin,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  submitButtonDisabled: {
+    backgroundColor: Palette.surfaceContainerHigh,
+    opacity: 0.5,
+  },
+  submitButtonText: {
+    ...Typography.titleLg,
+    color: Palette.onPrimary,
   },
 });
