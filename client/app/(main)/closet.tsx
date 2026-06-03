@@ -78,6 +78,7 @@ export default function ClosetScreen() {
                 id={item.id}
                 name={item.name}
                 category={item.category}
+                subcategory={item.subcategory}
                 imageUrl={item.image_url}
               />
             ))}
