@@ -52,7 +52,6 @@ export function useCloset() {
   );
 
   return {
-    items,
     subcategoryFilters,
     selectedSubcategory,
     setSelectedSubcategory,
