@@ -10,14 +10,21 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ClosetItemCard } from "@/components/closet/ClosetItemCard";
+import { Category } from "@/constants/categories";
 import { Palette, Spacing, Typography } from "@/constants/design";
 import { supabase } from "@/lib/supabase";
 
 const SECTIONS = [
-  { title: "Tops", category: "tops" },
-  { title: "Bottoms", category: "bottoms" },
-  { title: "Shoes", category: "shoes" },
+  { title: "Tops", category: Category.Tops },
+  { title: "Bottoms", category: Category.Bottoms },
+  { title: "Shoes", category: Category.Shoes },
 ] as const;
+
+const CATEGORY_SLOT_MAP: Partial<Record<Category, string>> = {
+  [Category.Tops]: "top",
+  [Category.Bottoms]: "bottom",
+  [Category.Shoes]: "footwear",
+};
 
 export default function AvatarScreen() {
   const [user, setUser] = useState<any>(null);
@@ -25,7 +32,7 @@ export default function AvatarScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedItemIds, setSelectedItemIds] = useState<
-    Record<string, string>
+    Partial<Record<Category, string>>
   >({});
   const [saving, setSaving] = useState(false);
 
@@ -57,7 +64,7 @@ export default function AvatarScreen() {
       });
   }, [user]);
 
-  const toggleItemSelection = (itemId: string, category: string) => {
+  const toggleItemSelection = (itemId: string, category: Category) => {
     setSelectedItemIds((prev) => {
       if (prev[category] === itemId) {
         const { [category]: _, ...rest } = prev;
@@ -93,7 +100,7 @@ export default function AvatarScreen() {
         ([category, itemId]) => ({
           outfit_id: outfitId,
           item_id: itemId,
-          slot: category,
+          slot: CATEGORY_SLOT_MAP[category as Category],
         }),
       );
 
@@ -153,12 +160,15 @@ export default function AvatarScreen() {
                         <Pressable
                           key={item.id}
                           onPress={() =>
-                            toggleItemSelection(item.id, item.category)
+                            toggleItemSelection(
+                              item.id,
+                              item.category as Category,
+                            )
                           }
                           style={[
                             styles.cardWrapper,
-                            selectedItemIds[item.category] === item.id &&
-                              styles.cardWrapperSelected,
+                            selectedItemIds[item.category as Category] ===
+                              item.id && styles.cardWrapperSelected,
                           ]}
                         >
                           <ClosetItemCard
