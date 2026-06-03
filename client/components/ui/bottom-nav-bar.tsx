@@ -1,30 +1,37 @@
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { ComponentProps } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { ComponentProps } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Palette, Spacing } from '@/constants/design';
+import { Palette, Spacing } from "@/constants/design";
 
 // Bottom navigation bar items
-export type BottomNavTab = 'closet' | 'collections' | 'upload' | 'calendar' | 'profile';
+export type BottomNavTab =
+  | "closet"
+  | "collections"
+  | "upload"
+  | "calendar"
+  | "avatar"
+  | "profile";
 // Bottom navigation bar as a whole knows which one is active and what to do when a tab is pressed
 export type BottomNavBarProps = {
   activeTab: BottomNavTab;
   onTabPress: (tab: BottomNavTab) => void;
 };
 
-type MaterialIconName = ComponentProps<typeof MaterialIcons>['name'];
+type MaterialIconName = ComponentProps<typeof MaterialIcons>["name"];
 type NavItemConfig = {
   id: BottomNavTab;
   label: string;
   icon: MaterialIconName;
 };
 const NAV_ITEMS: NavItemConfig[] = [
-  { id: 'closet', label: 'My Closet', icon: 'checkroom' },
-  { id: 'collections', label: 'Collections', icon: 'accessibility' },
-  { id: 'upload', label: 'Upload', icon: 'add-circle' },
-  { id: 'calendar', label: 'Calendar', icon: 'calendar-month' },
-  { id: 'profile', label: 'Profile', icon: 'person' },
+  { id: "closet", label: "My Closet", icon: "checkroom" },
+  { id: "collections", label: "Collections", icon: "accessibility" },
+  { id: "upload", label: "Upload", icon: "add-circle" },
+  { id: "avatar", label: "Avatar", icon: "face" },
+  { id: "calendar", label: "Calendar", icon: "calendar-month" },
+  { id: "profile", label: "Profile", icon: "person" },
 ];
 
 const ICON_SIZE = 24;
@@ -49,7 +56,8 @@ function NavItem({ item, isActive, onPress }: NavItemProps) {
         styles.navItem,
         isActive && styles.navItemActive,
         pressed && styles.navItemPressed,
-      ]}>
+      ]}
+    >
       <MaterialIcons
         name={item.icon}
         size={isActive ? ICON_SIZE + 2 : ICON_SIZE}
@@ -63,7 +71,12 @@ export function BottomNavBar({ activeTab, onTabPress }: BottomNavBarProps) {
   const { bottom } = useSafeAreaInsets();
 
   return (
-    <View style={[styles.container, { paddingBottom: Math.max(bottom, Spacing.stackMd) }]}>
+    <View
+      style={[
+        styles.container,
+        { paddingBottom: Math.max(bottom, Spacing.stackMd) },
+      ]}
+    >
       {NAV_ITEMS.map((item) => (
         <NavItem
           key={item.id}
@@ -78,25 +91,25 @@ export function BottomNavBar({ activeTab, onTabPress }: BottomNavBarProps) {
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
     paddingTop: Spacing.stackMd,
     paddingHorizontal: Spacing.containerMargin,
     backgroundColor: Palette.surfaceContainerLowest,
-    shadowColor: '#000000',
+    shadowColor: "#000000",
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.04,
     shadowRadius: 24,
     elevation: 8,
   },
   navItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     transform: [{ scale: 1 }],
   },
   navItemActive: {
