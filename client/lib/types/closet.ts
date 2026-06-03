@@ -3,6 +3,7 @@ export type ClosetItem = {
   id: string;
   user_id: string | null;
   category: string | null;
+  subcategory: string | null;
   image_url: string | null;
   created_at: string;
 };
