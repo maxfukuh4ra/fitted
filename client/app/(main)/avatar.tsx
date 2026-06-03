@@ -24,9 +24,9 @@ export default function AvatarScreen() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(
-    new Set(),
-  );
+  const [selectedItemIds, setSelectedItemIds] = useState<
+    Record<string, string>
+  >({});
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -57,20 +57,60 @@ export default function AvatarScreen() {
       });
   }, [user]);
 
-  const toggleItemSelection = (itemId: string) => {
+  const toggleItemSelection = (itemId: string, category: string) => {
     setSelectedItemIds((prev) => {
-      const updated = new Set(prev);
-      if (updated.has(itemId)) {
-        updated.delete(itemId);
-      } else {
-        updated.add(itemId);
+      if (prev[category] === itemId) {
+        const { [category]: _, ...rest } = prev;
+        return rest;
       }
-      return updated;
+
+      return {
+        ...prev,
+        [category]: itemId,
+      };
     });
   };
 
   const saveOutfit = async () => {
-    console.log("Saving outfit with item IDs:", Array.from(selectedItemIds));
+    if (!user || Object.keys(selectedItemIds).length !== SECTIONS.length)
+      return;
+
+    setSaving(true);
+    try {
+      // Create outfit
+      const { data: outfitData, error: outfitError } = await supabase
+        .from("outfits")
+        .insert([{ user_id: user.id }])
+        .select();
+
+      if (outfitError) throw outfitError;
+
+      const outfitId = outfitData?.[0]?.id;
+      if (!outfitId) throw new Error("Failed to create outfit");
+
+      // Create outfit items with slot metadata
+      const outfitItems = Object.entries(selectedItemIds).map(
+        ([category, itemId]) => ({
+          outfit_id: outfitId,
+          item_id: itemId,
+          slot: category,
+        }),
+      );
+
+      const { error: itemsError } = await supabase
+        .from("outfit_items")
+        .insert(outfitItems);
+
+      if (itemsError) throw itemsError;
+
+      // Reset selection
+      setSelectedItemIds({});
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save outfit");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -112,10 +152,12 @@ export default function AvatarScreen() {
                       sectionItems.map((item) => (
                         <Pressable
                           key={item.id}
-                          onPress={() => toggleItemSelection(item.id)}
+                          onPress={() =>
+                            toggleItemSelection(item.id, item.category)
+                          }
                           style={[
                             styles.cardWrapper,
-                            selectedItemIds.has(item.id) &&
+                            selectedItemIds[item.category] === item.id &&
                               styles.cardWrapperSelected,
                           ]}
                         >
@@ -145,11 +187,17 @@ export default function AvatarScreen() {
               <Pressable
                 style={[
                   styles.submitButton,
-                  (!user || selectedItemIds.size === 0 || saving) &&
+                  (!user ||
+                    Object.keys(selectedItemIds).length !== SECTIONS.length ||
+                    saving) &&
                     styles.submitButtonDisabled,
                 ]}
                 onPress={saveOutfit}
-                disabled={!user || selectedItemIds.size === 0 || saving}
+                disabled={
+                  !user ||
+                  Object.keys(selectedItemIds).length !== SECTIONS.length ||
+                  saving
+                }
               >
                 <Text style={styles.submitButtonText}>
                   {saving ? "Saving..." : "Save Outfit"}
