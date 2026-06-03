@@ -132,6 +132,7 @@ export const styles = StyleSheet.create({
   cardField: {
     height: 40,
     justifyContent: "center",
+    alignItems: "flex-start",
   },
   genderField: {
     justifyContent: "flex-end",
@@ -143,14 +144,12 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     gap: 2,
     height: 28,
-    alignSelf: "flex-start",
   },
   inputWrap: {
     height: 28,
     position: "relative",
   },
   ageWrap: {
-    alignSelf: "flex-start",
     width: 40,
   },
   feetWrap: { width: 24 },
@@ -162,7 +161,7 @@ export const styles = StyleSheet.create({
     color: Palette.onSurface,
     padding: 0,
     margin: 0,
-    textAlign: "center",
+    textAlign: "left",
     backgroundColor: "transparent",
     borderWidth: 0,
   },
