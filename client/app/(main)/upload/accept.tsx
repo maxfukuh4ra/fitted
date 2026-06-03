@@ -7,33 +7,27 @@ import { supabase } from '@/lib/supabase';
 import { API } from '@/constants/api';
 
 export default function AcceptScreen() {
-  const { imageUri } = useUpload();
+  const { imageUrl, category, subcategory } = useUpload();
 
   const handleConfirm = async () => {
-    if (!imageUri) return;
+    if (!imageUrl) return;
 
     const { data: { session } } = await supabase.auth.getSession();
 
     try {
-      const formData = new FormData();
-      formData.append('image', {
-        uri: imageUri,
-        type: 'image/jpeg',
-        name: 'upload.jpg',
-      } as any);
-
-      const response = await fetch( API.uploadImage, {
+      const response = await fetch(API.uploadImage, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${session?.access_token}` },
-        body: formData,
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ imageUrl, category, subcategory }),
       });
 
       const data = await response.json();
-      if (data.success) {
-        router.replace('/closet');
-      }
+      if (data.success) router.replace('/closet');
     } catch (e) {
-      console.error('Upload failed', e);
+      console.error('Confirm failed', e);
     }
   };
 
@@ -42,7 +36,7 @@ export default function AcceptScreen() {
       {/* Image card */}
       <View style={styles.imageCard}>
         <Image
-          source={{ uri: imageUri ?? undefined }}
+          source={{ uri: imageUrl ?? undefined }}
           style={styles.image}
           contentFit="contain"
         />

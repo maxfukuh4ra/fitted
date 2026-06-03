@@ -141,7 +141,7 @@
     permissionBtn: {
       paddingHorizontal: 24,
       paddingVertical: 12,
-      borderRadius: Radius.lg,
+      borderRadius: Radius.md,
       backgroundColor: Palette.primary,
     },
     permissionBtnText: {
