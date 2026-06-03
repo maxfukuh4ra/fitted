@@ -1,4 +1,13 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { useState, useRef, useEffect } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { Palette, Spacing, Radius, textVariants } from '@/constants/design';
 import { useUpload } from '@/contexts/UploadContext';
 import { Image } from 'expo-image';
@@ -8,9 +17,19 @@ import { API } from '@/constants/api';
 
 export default function AcceptScreen() {
   const { imageUrl, category, subcategory } = useUpload();
+  const [phase, setPhase] = useState<'confirm' | 'name'>('confirm');
+  const [itemName, setItemName] = useState('');
+  const [saving, setSaving] = useState(false);
+  const inputRef = useRef<TextInput>(null);
 
-  const handleConfirm = async () => {
-    if (!imageUrl) return;
+  const handleConfirm = () => {
+    setPhase('name');
+    setTimeout(() => inputRef.current?.focus(), 100);
+  };
+
+  const handleSave = async () => {
+    if (!imageUrl || !itemName.trim()) return;
+    setSaving(true);
 
     const { data: { session } } = await supabase.auth.getSession();
 
@@ -21,47 +40,79 @@ export default function AcceptScreen() {
           Authorization: `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ imageUrl, category, subcategory }),
+        body: JSON.stringify({ imageUrl, category, subcategory, name: itemName.trim() }),
       });
 
       const data = await response.json();
       if (data.success) router.replace('/closet');
     } catch (e) {
       console.error('Confirm failed', e);
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      {/* Image card */}
-      <View style={styles.imageCard}>
-        <Image
-          source={{ uri: imageUrl ?? undefined }}
-          style={styles.image}
-          contentFit="contain"
-        />
-      </View>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <View style={styles.container}>
+        <View style={styles.imageCard}>
+          <Image
+            source={{ uri: imageUrl ?? undefined }}
+            style={styles.image}
+            contentFit="contain"
+          />
+        </View>
 
-      {/* Text */}
-      <View style={styles.textBlock}>
-        <Text style={[textVariants.headlineMd, { color: Palette.onSurface }]}>
-          Does this look right?
-        </Text>
-        <Text style={[textVariants.bodyMd, { color: Palette.onSurfaceVariant, marginTop: Spacing.stackSm }]}>
-          Our AI has isolated your item. Confirm to add it to your closet.
-        </Text>
-      </View>
+        {phase === 'confirm' ? (
+          <>
+            <View style={styles.textBlock}>
+              <Text style={[textVariants.headlineMd, { color: Palette.onSurface }]}>
+                Does this look right?
+              </Text>
+              <Text style={[textVariants.bodyMd, { color: Palette.onSurfaceVariant, marginTop: Spacing.stackSm }]}>
+                Our AI has isolated your item. Confirm to add it to your closet.
+              </Text>
+            </View>
 
-      {/* Buttons */}
-      <View style={styles.actions}>
-        <TouchableOpacity style={styles.btnPrimary} activeOpacity={0.8} onPress={handleConfirm}>
-          <Text style={[textVariants.labelSm, { color: Palette.onPrimary }]}>Looks Good</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.btnSecondary} activeOpacity={0.8} onPress={() => router.replace('/upload/camera')}>
-          <Text style={[textVariants.labelSm, { color: Palette.onSurface }]}>Retake</Text>
-        </TouchableOpacity>
+            <View style={styles.actions}>
+              <TouchableOpacity style={styles.btnPrimary} activeOpacity={0.8} onPress={handleConfirm}>
+                <Text style={[textVariants.labelSm, { color: Palette.onPrimary }]}>Looks Good</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.btnSecondary} activeOpacity={0.8} onPress={() => router.replace('/upload/camera')}>
+                <Text style={[textVariants.labelSm, { color: Palette.onSurface }]}>Retake</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        ) : (
+          <>
+            <View style={styles.actions}>
+              <TextInput
+                ref={inputRef}
+                style={styles.input}
+                placeholder="Item Name"
+                placeholderTextColor={Palette.onSurfaceVariant}
+                value={itemName}
+                onChangeText={setItemName}
+                returnKeyType="done"
+              />
+              <TouchableOpacity
+                style={[styles.btnPrimary, (!itemName.trim() || saving) && styles.btnDisabled]}
+                activeOpacity={0.8}
+                onPress={handleSave}
+                disabled={!itemName.trim() || saving}
+              >
+                <Text style={[textVariants.labelSm, { color: Palette.onPrimary }]}>
+                  {saving ? 'Saving…' : 'Save to Closet'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -90,11 +141,22 @@ const styles = StyleSheet.create({
   },
   textBlock: {
     alignItems: 'center',
-    textAlign: 'center',
   },
   actions: {
     width: '100%',
     gap: Spacing.stackMd,
+  },
+  input: {
+    width: '100%',
+    height: 52,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Palette.outlineVariant,
+    paddingHorizontal: Spacing.gutter,
+    backgroundColor: Palette.surfaceContainerLow,
+    color: Palette.onSurface,
+    fontFamily: 'Manrope_400Regular',
+    fontSize: 16,
   },
   btnPrimary: {
     width: '100%',
@@ -113,5 +175,8 @@ const styles = StyleSheet.create({
     borderColor: Palette.outlineVariant,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  btnDisabled: {
+    opacity: 0.4,
   },
 });
