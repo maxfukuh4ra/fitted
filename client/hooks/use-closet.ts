@@ -13,10 +13,15 @@ export function useCloset() {
   const [items, setItems] = useState<ClosetItem[]>([]);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
     setError(null);
 
     try {
@@ -33,9 +38,15 @@ export function useCloset() {
       setItems([]);
       setError(err instanceof Error ? err.message : 'Failed to load closet.');
     } finally {
-      setLoading(false);
+      if (isRefresh) {
+        setRefreshing(false);
+      } else {
+        setLoading(false);
+      }
     }
   }, []);
+
+  const refresh = useCallback(() => load(true), [load]);
 
   useEffect(() => {
     load();
@@ -57,7 +68,8 @@ export function useCloset() {
     setSelectedSubcategory,
     filteredItems,
     loading,
+    refreshing,
     error,
-    refresh: load,
+    refresh,
   };
 }

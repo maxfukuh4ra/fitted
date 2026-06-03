@@ -3,14 +3,15 @@ import { StatusBar } from 'expo-status-bar';
 import {
   ActivityIndicator,
   FlatList,
+  RefreshControl,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 
 import { CategoryFilterBar } from '@/components/closet/category-filter-bar';
-import { MainHeader } from '@/components/ui/main-header';
 import { ClosetItemCard } from '@/components/closet/closet-item-card';
+import { MainHeader } from '@/components/ui/main-header';
 import { Palette, Spacing, Typography } from '@/constants/design';
 import { useCloset } from '@/hooks/use-closet';
 import type { ClosetItem } from '@/lib/types/closet';
@@ -23,7 +24,9 @@ export default function ClosetScreen() {
     setSelectedSubcategory,
     filteredItems,
     loading,
+    refreshing,
     error,
+    refresh,
   } = useCloset();
 
   const listHeader = (
@@ -85,6 +88,14 @@ export default function ClosetScreen() {
         ]}
         columnWrapperStyle={filteredItems.length > 0 ? styles.row : undefined}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refresh}
+            tintColor={Palette.primary}
+            colors={[Palette.primary]}
+          />
+        }
       />
     </View>
   );
