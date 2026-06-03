@@ -32,7 +32,6 @@ router.post('/prepare-image', upload.single('image'), async (req: Request, res: 
   if (!user) return res.status(401).json({ error: 'unauthorized' });
 
   const buffer = req.file!.buffer;
-
   /*
   const standardized = await standardizeImage(buffer);
   const cleaned = await removeBackground(standardized);
@@ -55,20 +54,22 @@ router.post('/confirm-image', async (req: Request, res: Response) => {
   const { data: { user } } = await supabase.auth.getUser(token);
   if (!user) return res.status(401).json({ error: 'unauthorized' });
 
-  const { imageUrl, category, subcategory } = req.body;
+  const { imageUrl, category, subcategory, name } = req.body;
   if (!imageUrl || !category) {
     return res.status(400).json({ error: 'imageUrl and category are required' });
   }
-
   const { error: insertError } = await supabase.from('items').insert({
     user_id: user.id,
     image_url: imageUrl,
-    category: subcategory ? subcategory : category,
+    category: category,
+    subcategory: subcategory || null,
+    item_name: name || null,
   });
 
   if (insertError) {
     return res.status(500).json({ success: false, error: insertError.message });
   }
+  console.log("sucess")
 
   return res.status(200).json({ success: true });
 });
