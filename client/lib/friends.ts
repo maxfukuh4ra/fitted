@@ -33,17 +33,26 @@ export async function sendFriendRequest(email: string): Promise<void> {
     throw new Error("No user found with that email.");
 
   const uid = await getCurrentUserId();
+  const targetId = data[0].id;
+
+  const { data: existing } = await supabase
+    .from("friendships")
+    .select("status")
+    .or(
+      `and(requester_id.eq.${uid},addressee_id.eq.${targetId}),and(requester_id.eq.${targetId},addressee_id.eq.${uid})`,
+    )
+    .maybeSingle();
+
+  if (existing) {
+    if (existing.status === "accepted") throw new Error("Already friends.");
+    throw new Error("Friend request already pending.");
+  }
+
   const { error: insertError } = await supabase
     .from("friendships")
-    .insert([
-      { requester_id: uid, addressee_id: data[0].id, status: "pending" },
-    ]);
+    .insert([{ requester_id: uid, addressee_id: targetId, status: "pending" }]);
 
-  if (insertError) {
-    if (insertError.code === "23505")
-      throw new Error("Friend request already sent.");
-    throw new Error(insertError.message);
-  }
+  if (insertError) throw new Error(insertError.message);
 }
 
 export async function acceptFriendRequest(friendshipId: string): Promise<void> {
