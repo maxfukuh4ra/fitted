@@ -1,3 +1,4 @@
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -255,6 +256,16 @@ export default function ProfileScreen() {
                 ]}
               >
                 <Text style={styles.editProfileButtonText}>Edit profile</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => router.push("/(app)/friends")}
+                style={({ pressed }) => [
+                  styles.friendsButton,
+                  pressed && styles.buttonPressed,
+                ]}
+              >
+                <MaterialIcons name="people" size={18} color={Palette.onSurface} />
+                <Text style={styles.friendsButtonText}>Friends</Text>
               </Pressable>
               <Pressable
                 onPress={handleSignOut}

@@ -175,6 +175,14 @@ export const styles = StyleSheet.create({
   },
   underlineHidden: { opacity: 0 },
   heightSep: { color: Palette.onSurface },
+  friendsButton: {
+    ...actionButton,
+    borderColor: Palette.outlineVariant,
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: Spacing.stackSm,
+  },
+  friendsButtonText: { ...Typography.labelSm, color: Palette.onSurface },
   signOutButton: {
     ...actionButton,
     borderColor: Palette.error,
