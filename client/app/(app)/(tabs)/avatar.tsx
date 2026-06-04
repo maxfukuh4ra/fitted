@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
+import { FilterModal } from '@/components/avatar/filter-modal';
+import type { SubcategoryFilters } from '@/components/avatar/filter-modal';
 import { SaveOutfitModal } from '@/components/avatar/save-outfit-modal';
 import { SlotRow } from '@/components/avatar/slot-row';
 import { SLOTS, SUB_TO_CAT } from '@/components/avatar/slots';
@@ -25,6 +27,12 @@ export default function AvatarScreen() {
     [Category.BOTTOMS]: 0,
     [Category.SHOES]: 0,
   });
+  const [filters, setFilters] = useState<SubcategoryFilters>({
+    [Category.TOPS]: [],
+    [Category.BOTTOMS]: [],
+    [Category.SHOES]: [],
+  });
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [addToFavorites, setAddToFavorites] = useState(false);
   const [outfitName, setOutfitName] = useState('');
@@ -59,12 +67,20 @@ export default function AvatarScreen() {
       const catFromField = item.category?.toLowerCase() as SlotCategory | undefined;
 
       const cat = catFromSub ?? catFromField;
-      if (cat && cat in result) result[cat].push(item);
+      if (!cat || !(cat in result)) continue;
+
+      const activeFilters = filters[cat];
+      if (activeFilters.length > 0 && item.subcategory && !activeFilters.some((f) => f.toLowerCase() === item.subcategory!.toLowerCase())) continue;
+
+      result[cat].push(item);
     }
     return result;
-  }, [items]);
+  }, [items, filters]);
 
   const canSave = SLOTS.every(({ category }) => grouped[category].length > 0);
+
+  const activeFilterCount = SLOTS.reduce((sum, { category }) => sum + filters[category].length, 0);
+  const hasActiveFilters = activeFilterCount > 0;
 
   const navigate = (category: SlotCategory, dir: 1 | -1) => {
     const len = grouped[category].length;
@@ -135,6 +151,17 @@ export default function AvatarScreen() {
       <MainHeader />
 
       <View style={[styles.body, { paddingBottom: tabBarHeight }]}>
+        <Pressable
+          style={[styles.filterBtn, hasActiveFilters && styles.filterBtnActive]}
+          onPress={() => setFilterModalVisible(true)}
+          hitSlop={8}
+        >
+          <MaterialIcons
+            name="tune"
+            size={20}
+            color={hasActiveFilters ? Palette.onPrimary : Palette.onSurface}
+          />
+        </Pressable>
         {SLOTS.map(({ label, category, slotFlex }) => (
           <SlotRow
             key={category}
@@ -158,6 +185,13 @@ export default function AvatarScreen() {
           </Pressable>
         </View>
       </View>
+
+      <FilterModal
+        visible={filterModalVisible}
+        filters={filters}
+        onChangeFilters={setFilters}
+        onClose={() => setFilterModalVisible(false)}
+      />
 
       <SaveOutfitModal
         visible={modalVisible}
@@ -184,6 +218,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Palette.background,
+  },
+  filterBtn: {
+    position: 'absolute',
+    top: Spacing.stackMd,
+    right: Spacing.containerMargin,
+    zIndex: 1,
+    padding: Spacing.stackSm,
+    borderRadius: Radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Palette.surfaceContainerLow,
+    borderWidth: 1,
+    borderColor: Palette.outlineVariant,
+  },
+  filterBtnActive: {
+    backgroundColor: Palette.primary,
+    borderColor: Palette.primary,
   },
   body: {
     flex: 1,
