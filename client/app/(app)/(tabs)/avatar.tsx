@@ -12,7 +12,6 @@ import {
   View,
 } from 'react-native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Image } from 'expo-image';
 import { MainHeader } from '@/components/ui/main-header';
@@ -23,9 +22,9 @@ import { supabase } from '@/lib/supabase';
 import type { ClosetItem } from '@/lib/types/closet';
 
 const SLOTS = [
-  { label: 'Top', category: Category.TOPS, slot: 'top' },
-  { label: 'Bottom', category: Category.BOTTOMS, slot: 'bottom' },
-  { label: 'Shoes', category: Category.SHOES, slot: 'footwear' },
+  { label: 'Top', category: Category.TOPS, slot: 'top', slotFlex: 6 },
+  { label: 'Bottom', category: Category.BOTTOMS, slot: 'bottom', slotFlex: 7 },
+  { label: 'Shoes', category: Category.SHOES, slot: 'footwear', slotFlex: 5 },
 ] as const;
 
 type SlotCategory = (typeof SLOTS)[number]['category'];
@@ -46,9 +45,10 @@ type SlotRowProps = {
   slotItems: ClosetItem[];
   idx: number;
   onNavigate: (dir: 1 | -1) => void;
+  slotFlex: number;
 };
 
-function SlotRow({ label, slotItems, idx, onNavigate }: SlotRowProps) {
+function SlotRow({ label, slotItems, idx, onNavigate, slotFlex }: SlotRowProps) {
   const onNavigateRef = useRef(onNavigate);
   useEffect(() => {
     onNavigateRef.current = onNavigate;
@@ -68,8 +68,7 @@ function SlotRow({ label, slotItems, idx, onNavigate }: SlotRowProps) {
   const current = slotItems[idx] ?? null;
 
   return (
-    <View style={styles.slot}>
-      <Text style={styles.slotLabel}>{label}</Text>
+    <View style={[styles.slot, { flex: slotFlex }]}>
       <View style={styles.slotRow}>
         <Pressable
           style={[styles.arrowBtn, slotItems.length < 2 && styles.arrowBtnDisabled]}
@@ -114,11 +113,6 @@ function SlotRow({ label, slotItems, idx, onNavigate }: SlotRowProps) {
         </Pressable>
       </View>
 
-      {slotItems.length > 1 && (
-        <Text style={styles.counter}>
-          {idx + 1} / {slotItems.length}
-        </Text>
-      )}
     </View>
   );
 }
@@ -248,16 +242,17 @@ export default function AvatarScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+    <View style={styles.safeArea}>
       <StatusBar style="dark" />
       <MainHeader />
 
       <View style={[styles.screen, { paddingBottom: tabBarHeight }]}>
-        {SLOTS.map(({ label, category }) => (
+        {SLOTS.map(({ label, category, slotFlex }) => (
           <SlotRow
             key={category}
             label={label}
             category={category}
+            slotFlex={slotFlex}
             slotItems={grouped[category]}
             idx={indices[category]}
             onNavigate={(dir) => navigate(category, dir)}
@@ -336,7 +331,7 @@ export default function AvatarScreen() {
           </Pressable>
         </Pressable>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -355,12 +350,12 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: Spacing.containerMargin,
     paddingTop: Spacing.stackMd,
-    gap: Spacing.stackMd,
+    gap: Spacing.stackSm,
   },
   slot: {
-    flex: 1,
-    gap: Spacing.stackSm,
+    // flex is applied inline per slot via slotFlex
     minHeight: 0,
+    gap: 4,
   },
   slotLabel: {
     ...Typography.labelSm,
