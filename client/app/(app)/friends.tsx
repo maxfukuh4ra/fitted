@@ -285,9 +285,11 @@ export default function FriendsScreen() {
               {feed.length === 0 ? (
                 <Text style={styles.emptyText}>No shared outfits yet.</Text>
               ) : (
-                feed.map((outfit) => (
-                  <OutfitCard key={outfit.id} outfit={outfit} />
-                ))
+                <View style={styles.outfitGrid}>
+                  {feed.map((outfit) => (
+                    <OutfitCard key={outfit.id} outfit={outfit} />
+                  ))}
+                </View>
               )}
             </View>
           )}
@@ -449,7 +451,13 @@ const styles = StyleSheet.create({
     color: Palette.onSurfaceVariant,
     paddingVertical: Spacing.stackSm,
   },
+  outfitGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: Spacing.stackSm,
+  },
   outfitCard: {
+    width: "48%",
     backgroundColor: Palette.surfaceContainerLowest,
     borderRadius: Radius.lg,
     padding: Spacing.stackMd,
@@ -475,11 +483,12 @@ const styles = StyleSheet.create({
     color: Palette.onSurfaceVariant,
   },
   outfitImages: {
-    flexDirection: "row",
+    flexDirection: "column",
     gap: Spacing.stackSm,
+    alignSelf: "flex-start",
   },
   outfitItemImage: {
-    flex: 1,
+    width: 72,
     aspectRatio: 3 / 4,
     borderRadius: Radius.md,
     backgroundColor: Palette.surfaceContainerLow,
