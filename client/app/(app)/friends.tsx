@@ -142,6 +142,8 @@ export default function FriendsScreen() {
     setFriends((prev) => prev.filter((f) => f.friendshipId !== friendshipId));
   }
 
+  console.log(friends);
+  console.log(pending);
   return (
     <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
       <View style={styles.header}>
@@ -207,14 +209,18 @@ export default function FriendsScreen() {
           {addSuccess && (
             <Text style={styles.addSuccess}>Friend request sent!</Text>
           )}
-
           {/* Pending requests */}
           {pending.length > 0 && (
             <View style={styles.section}>
               <SectionHeader title="Requests" count={pending.length} />
               {pending.map((req) => (
                 <View key={req.friendshipId} style={styles.friendRow}>
-                  <Text style={styles.friendName}>{req.name}</Text>
+                  <View style={styles.friendInfo}>
+                    <Text style={styles.friendName}>{req.name}</Text>
+                    {req.email && (
+                      <Text style={styles.friendEmail}>{req.email}</Text>
+                    )}
+                  </View>
                   <View style={styles.requestActions}>
                     <Pressable
                       style={styles.acceptBtn}
@@ -241,7 +247,6 @@ export default function FriendsScreen() {
               ))}
             </View>
           )}
-
           {/* Friends list */}
           <View style={styles.section}>
             <SectionHeader title="Friends" />
@@ -273,7 +278,6 @@ export default function FriendsScreen() {
               ))
             )}
           </View>
-
           {/* Feed */}
           {friends.length > 0 && (
             <View style={styles.section}>
@@ -406,10 +410,16 @@ const styles = StyleSheet.create({
     ...Typography.bodyMd,
     color: Palette.onSurface,
   },
+  friendInfo: {
+    flex: 1,
+  },
   friendName: {
     ...Typography.bodyMd,
     color: Palette.onSurface,
-    flex: 1,
+  },
+  friendEmail: {
+    ...Typography.labelSm,
+    color: Palette.onSurfaceVariant,
   },
   requestActions: {
     flexDirection: "row",

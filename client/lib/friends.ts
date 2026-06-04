@@ -4,6 +4,7 @@ export type Friend = {
   friendshipId: string;
   userId: string;
   name: string;
+  email?: string;
   direction: "sent" | "received";
 };
 
@@ -118,11 +119,24 @@ export async function getPendingRequests(): Promise<Friend[]> {
   if (error) throw new Error(error.message);
   if (!data || data.length === 0) return [];
 
-  const nameMap = await fetchUserNames(data.map((f) => f.requester_id));
+  const requesterIds = data.map((f) => f.requester_id);
+  const { data: usersInfo, error: infoError } = await supabase.rpc(
+    "get_users_info",
+    { user_ids: requesterIds },
+  );
+  if (infoError) throw new Error(infoError.message);
+  const infoMap = Object.fromEntries(
+    (usersInfo ?? []).map((p: { id: string; name: string; email: string }) => [
+      p.id,
+      p,
+    ]),
+  );
+
   return data.map((f) => ({
     friendshipId: f.id,
     userId: f.requester_id,
-    name: nameMap[f.requester_id] ?? "Unknown",
+    name: infoMap[f.requester_id]?.name ?? "Unknown",
+    email: infoMap[f.requester_id]?.email,
     direction: "received" as const,
   }));
 }
