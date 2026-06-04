@@ -164,7 +164,9 @@ export default function ProfileScreen() {
                       ]}
                     />
                   </View>
-                  <Text style={[Typography.titleLg, styles.heightSep]}>&apos;</Text>
+                  <Text style={[Typography.titleLg, styles.heightSep]}>
+                    &apos;
+                  </Text>
                   <View style={[styles.inputWrap, styles.inchesWrap]}>
                     <TextInput
                       {...fieldProps}
@@ -186,7 +188,9 @@ export default function ProfileScreen() {
                       ]}
                     />
                   </View>
-                  <Text style={[Typography.titleLg, styles.heightSep]}>&quot;</Text>
+                  <Text style={[Typography.titleLg, styles.heightSep]}>
+                    &quot;
+                  </Text>
                 </View>
               </View>
             </View>
@@ -195,10 +199,7 @@ export default function ProfileScreen() {
           <View style={styles.card}>
             <Text style={styles.cardLabel}>GENDER</Text>
             <View
-              style={[
-                styles.cardField,
-                edit.editing && styles.genderField,
-              ]}
+              style={[styles.cardField, edit.editing && styles.genderField]}
             >
               {edit.editing ? (
                 <GenderPicker
