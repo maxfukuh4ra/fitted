@@ -5,10 +5,10 @@ import { Palette, Radius, Spacing, Typography } from '@/constants/design';
 
 export type OutfitVisibility = 'private' | 'friends' | 'public';
 
-const VISIBILITY_OPTIONS: { value: OutfitVisibility; label: string; icon: string }[] = [
-  { value: 'private', label: 'Private', icon: 'lock' },
-  { value: 'friends', label: 'Friends', icon: 'people' },
-  { value: 'public', label: 'Public', icon: 'public' },
+const VISIBILITY_OPTIONS: { value: OutfitVisibility; icon: string; label: string }[] = [
+  { value: 'private', icon: 'lock', label: 'Private' },
+  { value: 'friends', icon: 'people', label: 'Friends' },
+  { value: 'public', icon: 'public', label: 'Public' },
 ];
 
 type Props = {
@@ -55,34 +55,32 @@ export function SaveOutfitModal({
             returnKeyType="done"
           />
 
-          <Pressable style={styles.favRow} onPress={onToggleFavorites}>
-            <MaterialIcons
-              name={addToFavorites ? 'favorite' : 'favorite-border'}
-              size={24}
-              color={addToFavorites ? Palette.error : Palette.onSurface}
-            />
-            <Text style={styles.favLabel}>Add to Favorites</Text>
-          </Pressable>
+          <View style={styles.optionsRow}>
+            <Pressable style={styles.favToggle} onPress={onToggleFavorites}>
+              <MaterialIcons
+                name={addToFavorites ? 'favorite' : 'favorite-border'}
+                size={22}
+                color={addToFavorites ? Palette.error : Palette.onSurface}
+              />
+              <Text style={styles.favLabel}>Add to Favorites</Text>
+            </Pressable>
 
-          <View style={styles.visibilityRow}>
-            <Text style={styles.visibilityLabel}>Visibility</Text>
             <View style={styles.visibilityPicker}>
               {VISIBILITY_OPTIONS.map((opt) => {
                 const active = visibility === opt.value;
                 return (
                   <Pressable
                     key={opt.value}
-                    style={[styles.visibilityOption, active && styles.visibilityOptionActive]}
+                    style={[styles.visibilityBtn, active && styles.visibilityBtnActive]}
                     onPress={() => onChangeVisibility(opt.value)}
+                    accessibilityLabel={opt.label}
+                    hitSlop={4}
                   >
                     <MaterialIcons
                       name={opt.icon as any}
                       size={16}
                       color={active ? Palette.onPrimary : Palette.onSurfaceVariant}
                     />
-                    <Text style={[styles.visibilityOptionText, active && styles.visibilityOptionTextActive]}>
-                      {opt.label}
-                    </Text>
                   </Pressable>
                 );
               })}
@@ -148,21 +146,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.stackMd,
     paddingVertical: Spacing.stackSm,
   },
-  favRow: {
+  optionsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.stackMd,
+    justifyContent: 'space-between',
     paddingVertical: Spacing.stackSm,
+  },
+  favToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.stackSm,
   },
   favLabel: {
-    ...Typography.bodyMd,
-    color: Palette.onSurface,
-  },
-  visibilityRow: {
-    gap: Spacing.stackSm,
-    paddingVertical: Spacing.stackSm,
-  },
-  visibilityLabel: {
     ...Typography.bodyMd,
     color: Palette.onSurface,
   },
@@ -173,24 +168,13 @@ const styles = StyleSheet.create({
     borderColor: Palette.outlineVariant,
     overflow: 'hidden',
   },
-  visibilityOption: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    paddingVertical: Spacing.stackSm,
+  visibilityBtn: {
+    paddingHorizontal: Spacing.stackSm,
+    paddingVertical: 6,
     backgroundColor: Palette.surfaceContainerLow,
   },
-  visibilityOptionActive: {
+  visibilityBtnActive: {
     backgroundColor: Palette.primary,
-  },
-  visibilityOptionText: {
-    ...Typography.labelSm,
-    color: Palette.onSurfaceVariant,
-  },
-  visibilityOptionTextActive: {
-    color: Palette.onPrimary,
   },
   collectionsRow: {
     flexDirection: 'row',
