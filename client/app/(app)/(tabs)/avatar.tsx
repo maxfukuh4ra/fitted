@@ -15,7 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Image } from 'expo-image';
 import { MainHeader } from '@/components/ui/main-header';
-import { Category } from '@/constants/categories';
+import { Category, SUBCATEGORIES } from '@/constants/categories';
 import { Palette, Radius, Spacing, Typography } from '@/constants/design';
 import { fetchClosetItems } from '@/lib/items';
 import { supabase } from '@/lib/supabase';
@@ -29,6 +29,15 @@ const SLOTS = [
 
 type SlotCategory = (typeof SLOTS)[number]['category'];
 type SlotIndices = Record<SlotCategory, number>;
+const SLOT_CATEGORIES = new Set<string>([Category.TOPS, Category.BOTTOMS, Category.SHOES]);
+const SUB_TO_CAT: Record<string, SlotCategory> = {};
+for (const [cat, subs] of Object.entries(SUBCATEGORIES)) {
+  if (SLOT_CATEGORIES.has(cat)) {
+    for (const sub of subs) {
+      SUB_TO_CAT[sub.toLowerCase()] = cat as SlotCategory;
+    }
+  }
+}
 
 type SlotRowProps = {
   label: string;
@@ -39,7 +48,6 @@ type SlotRowProps = {
 };
 
 function SlotRow({ label, slotItems, idx, onNavigate }: SlotRowProps) {
-  // Keep a ref so PanResponder always calls the latest onNavigate without re-creating itself
   const onNavigateRef = useRef(onNavigate);
   useEffect(() => {
     onNavigateRef.current = onNavigate;
@@ -159,10 +167,13 @@ export default function AvatarScreen() {
       [Category.SHOES]: [],
     };
     for (const item of items) {
-      const cat = (item.category?.toLowerCase() ?? '') as SlotCategory;
-      if (cat in result) result[cat].push(item);
+      // Primary: look up the slot by subcategory (ground truth — comes from a fixed list).
+      // Fallback: use the stored category field, normalised to lowercase.
+      const catFromSub = item.subcategory ? SUB_TO_CAT[item.subcategory.toLowerCase()] : undefined;
+      const catFromField = item.category?.toLowerCase() as SlotCategory | undefined;
+      const cat = catFromSub ?? catFromField;
+      if (cat && cat in result) result[cat].push(item);
     }
-    console.log('[Avatar] grouped counts:', Object.fromEntries(Object.entries(result).map(([k, v]) => [k, v.length])));
     return result;
   }, [items]);
 
