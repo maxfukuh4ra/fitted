@@ -17,12 +17,6 @@ import {
 } from "@/constants/design";
 import type { WornStatItem } from "@/types/calendar";
 
-export const MOCK_MONTHLY_STATS: WornStatItem[] = [
-  { rank: "01", name: "White Oxford", wears: 12 },
-  { rank: "02", name: "Selvedge Denim", wears: 8 },
-  { rank: "03", name: "Black Loafers", wears: 5 },
-];
-
 type Props = {
   item: WornStatItem;
   variant: "hero" | "compact";

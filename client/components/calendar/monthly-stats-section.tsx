@@ -1,33 +1,34 @@
 import { Text, View } from "react-native";
 
-import {
-  MOCK_MONTHLY_STATS,
-  StatRankCard,
-} from "@/components/calendar/stat-rank-card";
+import { StatRankCard } from "@/components/calendar/stat-rank-card";
 import { styles } from "@/components/calendar/calendar-styles";
+import type { WornStatItem } from "@/types/calendar";
 
-export function MonthlyStatsSection() {
-  const [first, second, third] = MOCK_MONTHLY_STATS;
-
+export function MonthlyStatsSection({ items }: { items: WornStatItem[] }) {
   return (
     <View style={styles.statsSection}>
       <Text style={styles.statsTitle}>Monthly Stats</Text>
       <Text style={styles.statsSubtitle}>TOP 3 MOST WORN</Text>
 
-      <StatRankCard item={first} variant="hero" />
-
-      <View style={styles.statsRow}>
-        <StatRankCard
-          item={second}
-          variant="compact"
-          style={styles.statsCardHalf}
-        />
-        <StatRankCard
-          item={third}
-          variant="compact"
-          style={styles.statsCardHalf}
-        />
-      </View>
+      {items.length === 0 ? (
+        <Text style={styles.statsEmpty}>No wears logged this month yet.</Text>
+      ) : (
+        <>
+          <StatRankCard item={items[0]} variant="hero" />
+          {items.length > 1 ? (
+            <View style={styles.statsRow}>
+              {items.slice(1).map((item) => (
+                <StatRankCard
+                  key={item.rank}
+                  item={item}
+                  variant="compact"
+                  style={styles.statsCardHalf}
+                />
+              ))}
+            </View>
+          ) : null}
+        </>
+      )}
     </View>
   );
 }

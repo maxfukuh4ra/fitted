@@ -6,25 +6,21 @@ import {
 } from "@/components/calendar/calendar-utils";
 import { styles } from "@/components/calendar/calendar-styles";
 
-const MOCK_OUTFIT_DAYS = [5, 12, 19];
-
-function getMockOutfitDays(year: number, month: number) {
-  const lastDay = new Date(year, month + 1, 0).getDate();
-  return MOCK_OUTFIT_DAYS.filter((day) => day <= lastDay);
-}
-
-type Props = {
+export function CalendarGrid({
+  viewDate,
+  selectedDay,
+  outfitDays,
+  onSelectDay,
+}: {
   viewDate: Date;
   selectedDay: number | null;
+  outfitDays: number[];
   onSelectDay: (day: number) => void;
-};
-
-export function CalendarGrid({ viewDate, selectedDay, onSelectDay }: Props) {
+}) {
   const today = new Date();
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
   const cells = getCalendarCells(year, month);
-  const outfitDays = getMockOutfitDays(year, month);
   const viewingCurrentMonth =
     year === today.getFullYear() && month === today.getMonth();
 

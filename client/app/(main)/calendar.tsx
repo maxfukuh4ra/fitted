@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CalendarGrid } from "@/components/calendar/calendar-grid";
@@ -10,6 +10,9 @@ import {
   addMonths,
   getDefaultSelectedDay,
 } from "@/components/calendar/calendar-utils";
+import { Palette } from "@/constants/design";
+import { loadCalendarMonth } from "@/lib/calendar";
+import type { WornStatItem } from "@/types/calendar";
 
 export default function CalendarScreen() {
   const today = new Date();
@@ -17,9 +20,26 @@ export default function CalendarScreen() {
   const [selectedDay, setSelectedDay] = useState<number | null>(
     getDefaultSelectedDay(today),
   );
+  const [outfitDays, setOutfitDays] = useState<number[]>([]);
+  const [monthlyStats, setMonthlyStats] = useState<WornStatItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setSelectedDay(getDefaultSelectedDay(viewDate));
+  }, [viewDate]);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+
+    loadCalendarMonth(viewDate.getFullYear(), viewDate.getMonth())
+      .then((result) => {
+        setOutfitDays(result.outfitDays);
+        setMonthlyStats(result.stats);
+      })
+      .catch((e: Error) => setError(e.message))
+      .finally(() => setLoading(false));
   }, [viewDate]);
 
   return (
@@ -38,12 +58,24 @@ export default function CalendarScreen() {
           onPrevMonth={() => setViewDate((d) => addMonths(d, -1))}
           onNextMonth={() => setViewDate((d) => addMonths(d, 1))}
         />
-        <CalendarGrid
-          viewDate={viewDate}
-          selectedDay={selectedDay}
-          onSelectDay={setSelectedDay}
-        />
-        <MonthlyStatsSection />
+
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+        {loading ? (
+          <View style={styles.centered}>
+            <ActivityIndicator color={Palette.primary} size="large" />
+          </View>
+        ) : (
+          <>
+            <CalendarGrid
+              viewDate={viewDate}
+              selectedDay={selectedDay}
+              outfitDays={outfitDays}
+              onSelectDay={setSelectedDay}
+            />
+            <MonthlyStatsSection items={monthlyStats} />
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

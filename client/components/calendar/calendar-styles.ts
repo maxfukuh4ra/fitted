@@ -139,4 +139,20 @@ export const styles = StyleSheet.create({
   statsCardHalf: {
     flex: 1,
   },
+  statsEmpty: {
+    ...Typography.bodyMd,
+    color: Palette.onSurfaceVariant,
+  },
+  centered: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.stackXl,
+  },
+  errorText: {
+    ...Typography.bodyMd,
+    color: Palette.error,
+    textAlign: "center",
+    marginBottom: Spacing.stackMd,
+  },
 });
