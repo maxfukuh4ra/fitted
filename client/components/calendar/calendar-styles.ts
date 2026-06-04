@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 import { Palette, Radius, Spacing, Typography } from "@/constants/design";
 
 const DAY_CELL_WIDTH = "14.28%";
-const DAY_MARKER_SIZE = 40;
+const DAY_MARKER_SIZE = 44;
 
 export const styles = StyleSheet.create({
   safeArea: {
@@ -76,6 +76,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: Spacing.stackMd,
+    overflow: "visible",
   },
   dayMarker: {
     width: DAY_MARKER_SIZE,
@@ -83,6 +84,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: Radius.full,
+    overflow: "visible",
   },
   dayMarkerWithOutfit: {
     backgroundColor: Palette.surfaceVariant,
@@ -112,7 +114,7 @@ export const styles = StyleSheet.create({
   },
   dayDot: {
     position: "absolute",
-    bottom: 7,
+    bottom: 6,
     width: 3,
     height: 3,
     borderRadius: 1.5,
@@ -154,5 +156,17 @@ export const styles = StyleSheet.create({
     color: Palette.error,
     textAlign: "center",
     marginBottom: Spacing.stackMd,
+  },
+  logOutfitBtn: {
+    marginTop: Spacing.stackSm,
+    height: 48,
+    borderRadius: Radius.lg,
+    backgroundColor: Palette.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logOutfitText: {
+    ...Typography.labelSm,
+    color: Palette.onPrimary,
   },
 });

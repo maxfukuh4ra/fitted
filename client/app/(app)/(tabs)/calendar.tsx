@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { router } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CalendarGrid } from "@/components/calendar/calendar-grid";
@@ -12,6 +14,7 @@ import {
 } from "@/components/calendar/calendar-utils";
 import { Palette } from "@/constants/design";
 import { loadCalendarMonth } from "@/lib/calendar";
+import { formatWornOn } from "@/lib/wear-log";
 import type { WornStatItem } from "@/types/calendar";
 
 export default function CalendarScreen() {
@@ -29,7 +32,7 @@ export default function CalendarScreen() {
     setSelectedDay(getDefaultSelectedDay(viewDate));
   }, [viewDate]);
 
-  useEffect(() => {
+  const loadMonth = useCallback(() => {
     setLoading(true);
     setError(null);
 
@@ -41,6 +44,30 @@ export default function CalendarScreen() {
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false));
   }, [viewDate]);
+
+  useEffect(() => {
+    loadMonth();
+  }, [loadMonth]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadMonth();
+    }, [loadMonth]),
+  );
+
+  const openLogOutfit = () => {
+    if (selectedDay === null) return;
+    router.push({
+      pathname: "/log-outfit",
+      params: {
+        wornOn: formatWornOn(
+          viewDate.getFullYear(),
+          viewDate.getMonth(),
+          selectedDay,
+        ),
+      },
+    });
+  };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
@@ -73,6 +100,13 @@ export default function CalendarScreen() {
               outfitDays={outfitDays}
               onSelectDay={setSelectedDay}
             />
+            {selectedDay !== null ? (
+              <Pressable style={styles.logOutfitBtn} onPress={openLogOutfit}>
+                <Text style={styles.logOutfitText}>
+                  Log what you wore · {viewDate.getMonth() + 1}/{selectedDay}
+                </Text>
+              </Pressable>
+            ) : null}
             <MonthlyStatsSection items={monthlyStats} />
           </>
         )}

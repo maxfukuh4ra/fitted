@@ -23,6 +23,10 @@ type Props = {
   style?: StyleProp<ViewStyle>;
 };
 
+function wearLabel(count: number) {
+  return count === 1 ? "WEAR" : "WEARS";
+}
+
 export function StatRankCard({ item, variant, style }: Props) {
   const isHero = variant === "hero";
 
@@ -54,14 +58,16 @@ export function StatRankCard({ item, variant, style }: Props) {
           </View>
           <View style={styles.heroWearBlock}>
             <Text style={styles.heroWearCount}>{item.wears}</Text>
-            <Text style={styles.heroWearLabel}>WEARS</Text>
+            <Text style={styles.heroWearLabel}>{wearLabel(item.wears)}</Text>
           </View>
         </View>
       ) : (
         <View style={styles.compactFooter}>
           <Text style={styles.rankPillSmall}>{item.rank}</Text>
           <Text style={styles.compactTitle}>{item.name}</Text>
-          <Text style={styles.compactWears}>{item.wears} WEARS</Text>
+          <Text style={styles.compactWears}>
+            {item.wears} {wearLabel(item.wears)}
+          </Text>
         </View>
       )}
     </Pressable>
@@ -112,11 +118,13 @@ const styles = StyleSheet.create({
     color: Palette.onPrimary,
     backgroundColor: "rgba(0,0,0,0.8)",
     paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingTop: 6,
+    paddingBottom: 3,
     borderRadius: Radius.full,
     overflow: "hidden",
     alignSelf: "flex-start",
     marginBottom: Spacing.stackSm,
+    transform: [{ translateY: 1 }],
   },
   heroTitle: {
     ...Typography.titleLg,
@@ -146,11 +154,13 @@ const styles = StyleSheet.create({
     color: Palette.onPrimary,
     backgroundColor: "rgba(0,0,0,0.8)",
     paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingTop: 4,
+    paddingBottom: 2,
     borderRadius: Radius.full,
     overflow: "hidden",
     alignSelf: "flex-start",
     marginBottom: 4,
+    transform: [{ translateY: 1 }],
   },
   compactTitle: {
     ...Typography.bodyMd,

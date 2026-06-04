@@ -29,6 +29,10 @@ export default function AppLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="upload" />
+      <Stack.Screen
+        name="log-outfit"
+        options={{ presentation: 'card' }}
+      />
     </Stack>
   );
 }
