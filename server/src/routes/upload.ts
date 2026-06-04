@@ -25,21 +25,22 @@ const router = Router();
 // POST /api/prepare-image
 // uploads + AI processes image, returns url for user preview — does NOT insert to DB
 router.post('/prepare-image', upload.single('image'), async (req: Request, res: Response) => {
+  console.log("prepare-image called");
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ error: 'no token' });
 
   const { data: { user } } = await supabase.auth.getUser(token);
   if (!user) return res.status(401).json({ error: 'unauthorized' });
 
+  console.log("User authenticated:", user.id);
   const buffer = req.file!.buffer;
-  /*
-  const standardized = await standardizeImage(buffer);
-  const cleaned = await removeBackground(standardized);
-  const url = await uploadToStorage(cleaned, user.id);
-  */
-  // TODO: replace buffer with cleaned once AI pipeline is ready
-  const url = await uploadToStorage(buffer, user.id);
-  console.log(url)
+  const base64 = `data:${req.file!.mimetype};base64,${buffer.toString('base64')}`;
+  console.log("Calling Gemini API for image standardization...");
+  const standardized = await standardizeImage(base64);
+  const cleanedBuffer = Buffer.from(standardized, 'base64');
+  //TODO: RemoveBG
+  const url = await uploadToStorage(cleanedBuffer, user.id);
+  console.log("Image processed and uploaded, URL:", url);
 
   return res.status(200).json({ success: true, imageUrl: url });
 });
