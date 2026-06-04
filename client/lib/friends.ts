@@ -107,14 +107,26 @@ export async function listFriends(): Promise<Friend[]> {
   const friendIds = data.map((f) =>
     f.requester_id === uid ? f.addressee_id : f.requester_id,
   );
-  const nameMap = await fetchUserNames(friendIds);
+
+  const { data: usersInfo, error: infoError } = await supabase.rpc(
+    "get_users_info",
+    { user_ids: friendIds },
+  );
+  if (infoError) throw new Error(infoError.message);
+  const infoMap = Object.fromEntries(
+    (usersInfo ?? []).map((p: { id: string; name: string; email: string }) => [
+      p.id,
+      p,
+    ]),
+  );
 
   return data.map((f) => {
     const friendId = f.requester_id === uid ? f.addressee_id : f.requester_id;
     return {
       friendshipId: f.id,
       userId: friendId,
-      name: nameMap[friendId] ?? "Unknown",
+      name: infoMap[friendId]?.name ?? "Unknown",
+      email: infoMap[friendId]?.email,
       direction: f.requester_id === uid ? "sent" : "received",
     };
   });
@@ -172,7 +184,7 @@ export async function getFriendsOutfits(): Promise<FriendOutfit[]> {
     .from("outfits")
     .select("id, name, user_id, created_at")
     .in("user_id", friendIds)
-    .eq("is_public", true)
+    .in("visibility", ["Public", "Friends"])
     .order("created_at", { ascending: false });
 
   if (outfitError) throw new Error(outfitError.message);

@@ -257,12 +257,12 @@ export default function FriendsScreen() {
             ) : (
               friends.map((f) => (
                 <View key={f.friendshipId} style={styles.friendRow}>
-                  <View style={styles.friendAvatar}>
-                    <Text style={styles.friendAvatarText}>
-                      {f.name.charAt(0).toUpperCase()}
-                    </Text>
+                  <View style={styles.friendInfo}>
+                    <Text style={styles.friendName}>{f.name}</Text>
+                    {f.email && (
+                      <Text style={styles.friendEmail}>{f.email}</Text>
+                    )}
                   </View>
-                  <Text style={styles.friendName}>{f.name}</Text>
                   <Pressable
                     onPress={() => handleRemove(f.friendshipId)}
                     hitSlop={8}
