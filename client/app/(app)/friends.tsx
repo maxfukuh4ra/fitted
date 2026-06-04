@@ -2,7 +2,15 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Palette, Radius, Spacing, Typography } from "@/constants/design";
@@ -151,6 +159,136 @@ export default function FriendsScreen() {
         <Text style={styles.headerTitle}>Friends</Text>
         <View style={styles.backBtn} />
       </View>
+      {loading ? (
+        <View style={styles.centered}>
+          <ActivityIndicator color={Palette.primary} />
+        </View>
+      ) : (
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Add friend */}
+          <View style={styles.addSection}>
+            <TextInput
+              style={styles.emailInput}
+              placeholder="Add by email"
+              placeholderTextColor={Palette.onSurfaceVariant}
+              value={email}
+              onChangeText={(t) => {
+                setEmail(t);
+                setAddError(null);
+                setAddSuccess(false);
+              }}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              returnKeyType="send"
+              onSubmitEditing={handleAdd}
+            />
+            <Pressable
+              style={[styles.addBtn, addLoading && styles.addBtnDisabled]}
+              onPress={handleAdd}
+              disabled={addLoading}
+            >
+              {addLoading ? (
+                <ActivityIndicator size="small" color={Palette.onPrimary} />
+              ) : (
+                <MaterialIcons
+                  name="person-add"
+                  size={20}
+                  color={Palette.onPrimary}
+                />
+              )}
+            </Pressable>
+          </View>
+          {addError && <Text style={styles.addError}>{addError}</Text>}
+          {addSuccess && (
+            <Text style={styles.addSuccess}>Friend request sent!</Text>
+          )}
+
+          {/* Pending requests */}
+          {pending.length > 0 && (
+            <View style={styles.section}>
+              <SectionHeader title="Requests" count={pending.length} />
+              {pending.map((req) => (
+                <View key={req.friendshipId} style={styles.friendRow}>
+                  <Text style={styles.friendName}>{req.name}</Text>
+                  <View style={styles.requestActions}>
+                    <Pressable
+                      style={styles.acceptBtn}
+                      onPress={() => handleAccept(req.friendshipId)}
+                    >
+                      <MaterialIcons
+                        name="check"
+                        size={18}
+                        color={Palette.onPrimary}
+                      />
+                    </Pressable>
+                    <Pressable
+                      style={styles.declineBtn}
+                      onPress={() => handleDecline(req.friendshipId)}
+                    >
+                      <MaterialIcons
+                        name="close"
+                        size={18}
+                        color={Palette.onSurfaceVariant}
+                      />
+                    </Pressable>
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {/* Friends list */}
+          <View style={styles.section}>
+            <SectionHeader title="Friends" />
+            {friends.length === 0 ? (
+              <Text style={styles.emptyText}>
+                No friends yet. Add someone above.
+              </Text>
+            ) : (
+              friends.map((f) => (
+                <View key={f.friendshipId} style={styles.friendRow}>
+                  <View style={styles.friendAvatar}>
+                    <Text style={styles.friendAvatarText}>
+                      {f.name.charAt(0).toUpperCase()}
+                    </Text>
+                  </View>
+                  <Text style={styles.friendName}>{f.name}</Text>
+                  <Pressable
+                    onPress={() => handleRemove(f.friendshipId)}
+                    hitSlop={8}
+                    style={styles.removeBtn}
+                  >
+                    <MaterialIcons
+                      name="person-remove"
+                      size={18}
+                      color={Palette.onSurfaceVariant}
+                    />
+                  </Pressable>
+                </View>
+              ))
+            )}
+          </View>
+
+          {/* Feed */}
+          {friends.length > 0 && (
+            <View style={styles.section}>
+              <SectionHeader title="Their Outfits" />
+              {feed.length === 0 ? (
+                <Text style={styles.emptyText}>No shared outfits yet.</Text>
+              ) : (
+                feed.map((outfit) => (
+                  <OutfitCard key={outfit.id} outfit={outfit} />
+                ))
+              )}
+            </View>
+          )}
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
