@@ -7,6 +7,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { FilterModal } from '@/components/avatar/filter-modal';
 import type { SubcategoryFilters } from '@/components/avatar/filter-modal';
 import { SaveOutfitModal } from '@/components/avatar/save-outfit-modal';
+import type { OutfitVisibility } from '@/components/avatar/save-outfit-modal';
 import { SlotRow } from '@/components/avatar/slot-row';
 import { SLOTS, SUB_TO_CAT } from '@/components/avatar/slots';
 import type { SlotCategory, SlotIndices } from '@/components/avatar/slots';
@@ -35,6 +36,7 @@ export default function AvatarScreen() {
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [addToFavorites, setAddToFavorites] = useState(false);
+  const [visibility, setVisibility] = useState<OutfitVisibility>('private');
   const [outfitName, setOutfitName] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -90,6 +92,7 @@ export default function AvatarScreen() {
 
   const openModal = () => {
     setAddToFavorites(false);
+    setVisibility('private');
     setOutfitName('');
     setSaveError(null);
     setModalVisible(true);
@@ -105,7 +108,7 @@ export default function AvatarScreen() {
 
       const { data: outfitData, error: outfitError } = await supabase
         .from('outfits')
-        .insert([{ user_id: uid, name: outfitName.trim() || null }])
+        .insert([{ user_id: uid, name: outfitName.trim() || null, visibility }])
         .select();
       if (outfitError) throw outfitError;
 
@@ -197,10 +200,12 @@ export default function AvatarScreen() {
         visible={modalVisible}
         outfitName={outfitName}
         addToFavorites={addToFavorites}
+        visibility={visibility}
         saving={saving}
         saveError={saveError}
         onChangeName={setOutfitName}
         onToggleFavorites={() => setAddToFavorites((v) => !v)}
+        onChangeVisibility={setVisibility}
         onSave={saveOutfit}
         onClose={() => setModalVisible(false)}
       />

@@ -3,14 +3,24 @@ import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-nativ
 
 import { Palette, Radius, Spacing, Typography } from '@/constants/design';
 
+export type OutfitVisibility = 'private' | 'friends' | 'public';
+
+const VISIBILITY_OPTIONS: { value: OutfitVisibility; label: string; icon: string }[] = [
+  { value: 'private', label: 'Private', icon: 'lock' },
+  { value: 'friends', label: 'Friends', icon: 'people' },
+  { value: 'public', label: 'Public', icon: 'public' },
+];
+
 type Props = {
   visible: boolean;
   outfitName: string;
   addToFavorites: boolean;
+  visibility: OutfitVisibility;
   saving: boolean;
   saveError: string | null;
   onChangeName: (name: string) => void;
   onToggleFavorites: () => void;
+  onChangeVisibility: (v: OutfitVisibility) => void;
   onSave: () => void;
   onClose: () => void;
 };
@@ -19,10 +29,12 @@ export function SaveOutfitModal({
   visible,
   outfitName,
   addToFavorites,
+  visibility,
   saving,
   saveError,
   onChangeName,
   onToggleFavorites,
+  onChangeVisibility,
   onSave,
   onClose,
 }: Props) {
@@ -51,6 +63,31 @@ export function SaveOutfitModal({
             />
             <Text style={styles.favLabel}>Add to Favorites</Text>
           </Pressable>
+
+          <View style={styles.visibilityRow}>
+            <Text style={styles.visibilityLabel}>Visibility</Text>
+            <View style={styles.visibilityPicker}>
+              {VISIBILITY_OPTIONS.map((opt) => {
+                const active = visibility === opt.value;
+                return (
+                  <Pressable
+                    key={opt.value}
+                    style={[styles.visibilityOption, active && styles.visibilityOptionActive]}
+                    onPress={() => onChangeVisibility(opt.value)}
+                  >
+                    <MaterialIcons
+                      name={opt.icon as any}
+                      size={16}
+                      color={active ? Palette.onPrimary : Palette.onSurfaceVariant}
+                    />
+                    <Text style={[styles.visibilityOptionText, active && styles.visibilityOptionTextActive]}>
+                      {opt.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
 
           <View style={styles.collectionsRow}>
             <Text style={styles.collectionsLabel}>Save to Collection</Text>
@@ -120,6 +157,40 @@ const styles = StyleSheet.create({
   favLabel: {
     ...Typography.bodyMd,
     color: Palette.onSurface,
+  },
+  visibilityRow: {
+    gap: Spacing.stackSm,
+    paddingVertical: Spacing.stackSm,
+  },
+  visibilityLabel: {
+    ...Typography.bodyMd,
+    color: Palette.onSurface,
+  },
+  visibilityPicker: {
+    flexDirection: 'row',
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Palette.outlineVariant,
+    overflow: 'hidden',
+  },
+  visibilityOption: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: Spacing.stackSm,
+    backgroundColor: Palette.surfaceContainerLow,
+  },
+  visibilityOptionActive: {
+    backgroundColor: Palette.primary,
+  },
+  visibilityOptionText: {
+    ...Typography.labelSm,
+    color: Palette.onSurfaceVariant,
+  },
+  visibilityOptionTextActive: {
+    color: Palette.onPrimary,
   },
   collectionsRow: {
     flexDirection: 'row',
