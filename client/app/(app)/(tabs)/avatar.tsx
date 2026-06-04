@@ -8,6 +8,7 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
@@ -134,6 +135,7 @@ export default function AvatarScreen() {
   });
   const [saveModalVisible, setSaveModalVisible] = useState(false);
   const [addToFavorites, setAddToFavorites] = useState(false);
+  const [outfitName, setOutfitName] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -190,6 +192,7 @@ export default function AvatarScreen() {
 
   const openSaveModal = () => {
     setAddToFavorites(false);
+    setOutfitName('');
     setSaveError(null);
     setSaveModalVisible(true);
   };
@@ -204,7 +207,7 @@ export default function AvatarScreen() {
 
       const { data: outfitData, error: outfitError } = await supabase
         .from('outfits')
-        .insert([{ user_id: uid }])
+        .insert([{ user_id: uid, name: outfitName.trim() || null }])
         .select();
       if (outfitError) throw outfitError;
 
@@ -283,6 +286,16 @@ export default function AvatarScreen() {
           <Pressable style={styles.modalSheet} onPress={() => {}}>
             <View style={styles.modalHandle} />
             <Text style={styles.modalTitle}>Save Outfit</Text>
+
+            <TextInput
+              style={styles.nameInput}
+              placeholder="Outfit name (optional)"
+              placeholderTextColor={Palette.onSurfaceVariant}
+              value={outfitName}
+              onChangeText={setOutfitName}
+              maxLength={80}
+              returnKeyType="done"
+            />
 
             <Pressable
               style={styles.favRow}
@@ -436,6 +449,15 @@ const styles = StyleSheet.create({
   modalTitle: {
     ...Typography.headlineMd,
     color: Palette.onSurface,
+  },
+  nameInput: {
+    ...Typography.bodyMd,
+    color: Palette.onSurface,
+    borderWidth: 1,
+    borderColor: Palette.outlineVariant,
+    borderRadius: Radius.md,
+    paddingHorizontal: Spacing.stackMd,
+    paddingVertical: Spacing.stackSm,
   },
   favRow: {
     flexDirection: 'row',
