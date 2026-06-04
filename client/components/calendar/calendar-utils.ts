@@ -32,6 +32,21 @@ export function getDaysInMonth(year: number, month: number): number {
   return new Date(year, month + 1, 0).getDate();
 }
 
+export function isCurrentMonth(viewDate: Date): boolean {
+  const today = new Date();
+  return (
+    viewDate.getFullYear() === today.getFullYear() &&
+    viewDate.getMonth() === today.getMonth()
+  );
+}
+
+export function getDefaultSelectedDay(viewDate: Date): number | null {
+  if (isCurrentMonth(viewDate)) {
+    return new Date().getDate();
+  }
+  return null;
+}
+
 export function getCalendarCells(year: number, month: number): CalendarDayCell[] {
   const firstWeekday = new Date(year, month, 1).getDay();
   const daysInMonth = getDaysInMonth(year, month);

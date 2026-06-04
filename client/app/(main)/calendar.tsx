@@ -4,20 +4,22 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CalendarGrid } from "@/components/calendar/calendar-grid";
 import { CalendarMonthHeader } from "@/components/calendar/calendar-month-header";
+import { MonthlyStatsSection } from "@/components/calendar/monthly-stats-section";
 import { styles } from "@/components/calendar/calendar-styles";
-import { addMonths, getDaysInMonth } from "@/components/calendar/calendar-utils";
+import {
+  addMonths,
+  getDefaultSelectedDay,
+} from "@/components/calendar/calendar-utils";
 
 export default function CalendarScreen() {
   const today = new Date();
   const [viewDate, setViewDate] = useState(today);
-  const [selectedDay, setSelectedDay] = useState(today.getDate());
+  const [selectedDay, setSelectedDay] = useState<number | null>(
+    getDefaultSelectedDay(today),
+  );
 
   useEffect(() => {
-    const maxDay = getDaysInMonth(
-      viewDate.getFullYear(),
-      viewDate.getMonth(),
-    );
-    setSelectedDay((day) => Math.min(day, maxDay));
+    setSelectedDay(getDefaultSelectedDay(viewDate));
   }, [viewDate]);
 
   return (
@@ -41,6 +43,7 @@ export default function CalendarScreen() {
           selectedDay={selectedDay}
           onSelectDay={setSelectedDay}
         />
+        <MonthlyStatsSection />
       </ScrollView>
     </SafeAreaView>
   );

@@ -112,10 +112,31 @@ export const styles = StyleSheet.create({
   },
   dayDot: {
     position: "absolute",
-    bottom: 4,
-    width: 4,
-    height: 4,
-    borderRadius: 2,
+    bottom: 7,
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
     backgroundColor: Palette.primary,
+  },
+  statsSection: {
+    marginTop: Spacing.stackLg,
+  },
+  statsTitle: {
+    ...Typography.titleLg,
+    color: Palette.onBackground,
+  },
+  statsSubtitle: {
+    ...Typography.labelSm,
+    color: Palette.onSurfaceVariant,
+    marginTop: 4,
+    marginBottom: Spacing.stackMd,
+  },
+  statsRow: {
+    flexDirection: "row",
+    gap: Spacing.gutter,
+    marginTop: Spacing.gutter,
+  },
+  statsCardHalf: {
+    flex: 1,
   },
 });

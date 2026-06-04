@@ -15,7 +15,7 @@ function getMockOutfitDays(year: number, month: number) {
 
 type Props = {
   viewDate: Date;
-  selectedDay: number;
+  selectedDay: number | null;
   onSelectDay: (day: number) => void;
 };
 
@@ -45,7 +45,8 @@ export function CalendarGrid({ viewDate, selectedDay, onSelectDay }: Props) {
           }
 
           const hasOutfit = outfitDays.includes(cell.day);
-          const isSelected = cell.day === selectedDay;
+          const isSelected =
+            selectedDay !== null && cell.day === selectedDay;
           const isToday =
             viewingCurrentMonth && cell.day === today.getDate();
 
