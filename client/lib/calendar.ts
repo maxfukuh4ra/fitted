@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { formatWornOn } from "./wear-log";
 import type { WornStatItem } from "@/types/calendar";
 
 export async function loadCalendarMonth(year: number, month: number) {
@@ -8,10 +9,9 @@ export async function loadCalendarMonth(year: number, month: number) {
   if (!sessionData.session) throw new Error("No active session.");
 
   const userId = sessionData.session.user.id;
-  const m = String(month + 1).padStart(2, "0");
   const lastDay = new Date(year, month + 1, 0).getDate();
-  const start = `${year}-${m}-01`;
-  const end = `${year}-${m}-${String(lastDay).padStart(2, "0")}`;
+  const start = formatWornOn(year, month, 1);
+  const end = formatWornOn(year, month, lastDay);
 
   const logsRes = await supabase
     .from("wear_log")
