@@ -52,7 +52,10 @@ export async function sendFriendRequest(email: string): Promise<void> {
     .from("friendships")
     .insert([{ requester_id: uid, addressee_id: targetId, status: "pending" }]);
 
-  if (insertError) throw new Error(insertError.message);
+  if (insertError) {
+    if (insertError.code === "23505") throw new Error("Already friends or request already pending.");
+    throw new Error(insertError.message);
+  }
 }
 
 export async function acceptFriendRequest(friendshipId: string): Promise<void> {
