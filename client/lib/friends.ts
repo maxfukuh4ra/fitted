@@ -24,6 +24,30 @@ async function getCurrentUserId(): Promise<string> {
   return uid;
 }
 
+async function fetchUsersInfo(
+  ids: string[],
+): Promise<Record<string, { id: string; name: string; email: string }>> {
+  if (ids.length === 0) return {};
+  const { data, error } = await supabase.rpc("get_users_info", {
+    user_ids: ids,
+  });
+  if (error) throw new Error(error.message);
+  return Object.fromEntries(
+    (data ?? []).map((p: { id: string; name: string; email: string }) => [
+      p.id,
+      p,
+    ]),
+  );
+}
+
+async function deleteFriendship(friendshipId: string): Promise<void> {
+  const { error } = await supabase
+    .from("friendships")
+    .delete()
+    .eq("id", friendshipId);
+  if (error) throw new Error(error.message);
+}
+
 export async function sendFriendRequest(email: string): Promise<void> {
   const { data, error } = await supabase.rpc("find_user_by_email", {
     search_email: email.trim(),
@@ -53,7 +77,8 @@ export async function sendFriendRequest(email: string): Promise<void> {
     .insert([{ requester_id: uid, addressee_id: targetId, status: "pending" }]);
 
   if (insertError) {
-    if (insertError.code === "23505") throw new Error("Already friends or request already pending.");
+    if (insertError.code === "23505")
+      throw new Error("Already friends or request already pending.");
     throw new Error(insertError.message);
   }
 }
@@ -66,32 +91,8 @@ export async function acceptFriendRequest(friendshipId: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
-export async function declineFriendRequest(
-  friendshipId: string,
-): Promise<void> {
-  const { error } = await supabase
-    .from("friendships")
-    .delete()
-    .eq("id", friendshipId);
-  if (error) throw new Error(error.message);
-}
-
-export async function removeFriend(friendshipId: string): Promise<void> {
-  const { error } = await supabase
-    .from("friendships")
-    .delete()
-    .eq("id", friendshipId);
-  if (error) throw new Error(error.message);
-}
-
-async function fetchUserNames(ids: string[]): Promise<Record<string, string>> {
-  if (ids.length === 0) return {};
-  const { data } = await supabase
-    .from("users")
-    .select("id, name")
-    .in("id", ids);
-  return Object.fromEntries((data ?? []).map((p) => [p.id, p.name]));
-}
+export const declineFriendRequest = deleteFriendship;
+export const removeFriend = deleteFriendship;
 
 export async function listFriends(): Promise<Friend[]> {
   const uid = await getCurrentUserId();
@@ -107,18 +108,7 @@ export async function listFriends(): Promise<Friend[]> {
   const friendIds = data.map((f) =>
     f.requester_id === uid ? f.addressee_id : f.requester_id,
   );
-
-  const { data: usersInfo, error: infoError } = await supabase.rpc(
-    "get_users_info",
-    { user_ids: friendIds },
-  );
-  if (infoError) throw new Error(infoError.message);
-  const infoMap = Object.fromEntries(
-    (usersInfo ?? []).map((p: { id: string; name: string; email: string }) => [
-      p.id,
-      p,
-    ]),
-  );
+  const infoMap = await fetchUsersInfo(friendIds);
 
   return data.map((f) => {
     const friendId = f.requester_id === uid ? f.addressee_id : f.requester_id;
@@ -143,18 +133,7 @@ export async function getPendingRequests(): Promise<Friend[]> {
   if (error) throw new Error(error.message);
   if (!data || data.length === 0) return [];
 
-  const requesterIds = data.map((f) => f.requester_id);
-  const { data: usersInfo, error: infoError } = await supabase.rpc(
-    "get_users_info",
-    { user_ids: requesterIds },
-  );
-  if (infoError) throw new Error(infoError.message);
-  const infoMap = Object.fromEntries(
-    (usersInfo ?? []).map((p: { id: string; name: string; email: string }) => [
-      p.id,
-      p,
-    ]),
-  );
+  const infoMap = await fetchUsersInfo(data.map((f) => f.requester_id));
 
   return data.map((f) => ({
     friendshipId: f.id,
@@ -190,7 +169,7 @@ export async function getFriendsOutfits(): Promise<FriendOutfit[]> {
   if (outfitError) throw new Error(outfitError.message);
   if (!outfits || outfits.length === 0) return [];
 
-  const nameMap = await fetchUserNames(friendIds);
+  const infoMap = await fetchUsersInfo(friendIds);
 
   const outfitIds = outfits.map((o) => o.id);
   const { data: outfitItems } = await supabase
@@ -224,7 +203,7 @@ export async function getFriendsOutfits(): Promise<FriendOutfit[]> {
     id: o.id,
     name: o.name,
     userId: o.user_id,
-    userName: nameMap[o.user_id] ?? "Unknown",
+    userName: infoMap[o.user_id]?.name ?? "Unknown",
     createdAt: o.created_at,
     items: itemsByOutfit[o.id] ?? [],
   }));
