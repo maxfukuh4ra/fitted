@@ -1,6 +1,6 @@
 # Fitted Mobile (Expo)
 
-Base React Native app initialized with Expo.
+Mobile client for Fitted, built with Expo and Expo Router.
 
 ## Getting Started
 
@@ -35,4 +35,5 @@ Then open the app using one of the options shown in the terminal:
 Successful setup means:
 
 - Metro starts without errors
-- the default Expo starter screen is visible on simulator or Expo Go
+- the auth screen loads without missing import or route errors
+- authenticated navigation still reaches the main tab flow
