@@ -1,25 +1,25 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { Image } from 'expo-image';
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Modal,
+  PanResponder,
   Pressable,
   StyleSheet,
   Text,
   View,
-  useWindowDimensions,
 } from 'react-native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Image } from 'expo-image';
 import { MainHeader } from '@/components/ui/main-header';
 import { Category } from '@/constants/categories';
 import { Palette, Radius, Spacing, Typography } from '@/constants/design';
-import { getCurrentUser } from '@/lib/auth';
-import { fetchAvatarItems } from '@/lib/items';
+import { fetchClosetItems } from '@/lib/items';
 import { supabase } from '@/lib/supabase';
-import type { AvatarItem } from '@/lib/types/closet';
+import type { ClosetItem } from '@/lib/types/closet';
 
 const SLOTS = [
   { label: 'Top', category: Category.TOPS, slot: 'top' },
@@ -28,13 +28,95 @@ const SLOTS = [
 ] as const;
 
 type SlotCategory = (typeof SLOTS)[number]['category'];
-
 type SlotIndices = Record<SlotCategory, number>;
 
+type SlotRowProps = {
+  label: string;
+  category: SlotCategory;
+  slotItems: ClosetItem[];
+  idx: number;
+  onNavigate: (dir: 1 | -1) => void;
+};
+
+function SlotRow({ label, slotItems, idx, onNavigate }: SlotRowProps) {
+  // Keep a ref so PanResponder always calls the latest onNavigate without re-creating itself
+  const onNavigateRef = useRef(onNavigate);
+  useEffect(() => {
+    onNavigateRef.current = onNavigate;
+  }, [onNavigate]);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gs) =>
+        Math.abs(gs.dx) > Math.abs(gs.dy) * 1.5 && Math.abs(gs.dx) > 12,
+      onPanResponderRelease: (_, gs) => {
+        if (gs.dx < -50) onNavigateRef.current(1);
+        else if (gs.dx > 50) onNavigateRef.current(-1);
+      },
+    })
+  ).current;
+
+  const current = slotItems[idx] ?? null;
+
+  return (
+    <View style={styles.slot}>
+      <Text style={styles.slotLabel}>{label}</Text>
+      <View style={styles.slotRow}>
+        <Pressable
+          style={[styles.arrowBtn, slotItems.length < 2 && styles.arrowBtnDisabled]}
+          onPress={() => onNavigate(-1)}
+          disabled={slotItems.length < 2}
+        >
+          <MaterialIcons
+            name="chevron-left"
+            size={28}
+            color={slotItems.length < 2 ? Palette.outlineVariant : Palette.onSurface}
+          />
+        </Pressable>
+
+        <View style={styles.itemCard} {...panResponder.panHandlers}>
+          {current?.image_url ? (
+            <Image
+              source={{ uri: current.image_url }}
+              style={styles.itemImage}
+              contentFit="contain"
+            />
+          ) : (
+            <View style={styles.itemPlaceholder}>
+              <Text style={styles.placeholderText}>
+                {slotItems.length === 0
+                  ? `No ${label.toLowerCase()}${label === 'Shoes' ? '' : 's'} in closet`
+                  : 'No image'}
+              </Text>
+            </View>
+          )}
+        </View>
+
+        <Pressable
+          style={[styles.arrowBtn, slotItems.length < 2 && styles.arrowBtnDisabled]}
+          onPress={() => onNavigate(1)}
+          disabled={slotItems.length < 2}
+        >
+          <MaterialIcons
+            name="chevron-right"
+            size={28}
+            color={slotItems.length < 2 ? Palette.outlineVariant : Palette.onSurface}
+          />
+        </Pressable>
+      </View>
+
+      {slotItems.length > 1 && (
+        <Text style={styles.counter}>
+          {idx + 1} / {slotItems.length}
+        </Text>
+      )}
+    </View>
+  );
+}
+
 export default function AvatarScreen() {
-  const { height: screenHeight } = useWindowDimensions();
-  const cardHeight = screenHeight * 0.2;
-  const [items, setItems] = useState<AvatarItem[]>([]);
+  const tabBarHeight = useBottomTabBarHeight();
+  const [items, setItems] = useState<ClosetItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [indices, setIndices] = useState<SlotIndices>({
@@ -50,13 +132,16 @@ export default function AvatarScreen() {
   useEffect(() => {
     async function load() {
       try {
-        const user = await getCurrentUser();
-        if (!user) {
+        const { data: { session } } = await supabase.auth.getSession();
+        const uid = session?.user?.id;
+        if (!uid) {
           setError('Sign in to create outfits.');
           setLoading(false);
           return;
         }
-        const fetched = await fetchAvatarItems(user.id);
+        console.log('[Avatar] loading items for uid:', uid);
+        const fetched = await fetchClosetItems(uid);
+        console.log('[Avatar] fetched items:', fetched.map(i => ({ id: i.id, category: i.category, name: i.item_name })));
         setItems(fetched);
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Failed to load items.');
@@ -68,17 +153,16 @@ export default function AvatarScreen() {
   }, []);
 
   const grouped = useMemo(() => {
-    const result: Record<SlotCategory, AvatarItem[]> = {
+    const result: Record<SlotCategory, ClosetItem[]> = {
       [Category.TOPS]: [],
       [Category.BOTTOMS]: [],
       [Category.SHOES]: [],
     };
     for (const item of items) {
-      const cat = item.category as SlotCategory;
-      if (cat in result) {
-        result[cat].push(item);
-      }
+      const cat = (item.category?.toLowerCase() ?? '') as SlotCategory;
+      if (cat in result) result[cat].push(item);
     }
+    console.log('[Avatar] grouped counts:', Object.fromEntries(Object.entries(result).map(([k, v]) => [k, v.length])));
     return result;
   }, [items]);
 
@@ -103,12 +187,13 @@ export default function AvatarScreen() {
     setSaving(true);
     setSaveError(null);
     try {
-      const user = await getCurrentUser();
-      if (!user) throw new Error('Not signed in.');
+      const { data: { session } } = await supabase.auth.getSession();
+      const uid = session?.user?.id;
+      if (!uid) throw new Error('Not signed in.');
 
       const { data: outfitData, error: outfitError } = await supabase
         .from('outfits')
-        .insert([{ user_id: user.id }])
+        .insert([{ user_id: uid }])
         .select();
       if (outfitError) throw outfitError;
 
@@ -121,9 +206,7 @@ export default function AvatarScreen() {
         slot,
       })).filter((r) => r.item_id);
 
-      const { error: itemsError } = await supabase
-        .from('outfit_items')
-        .insert(outfitItems);
+      const { error: itemsError } = await supabase.from('outfit_items').insert(outfitItems);
       if (itemsError) throw itemsError;
 
       setSaveModalVisible(false);
@@ -155,65 +238,17 @@ export default function AvatarScreen() {
       <StatusBar style="dark" />
       <MainHeader />
 
-      <View style={styles.screen}>
-        {SLOTS.map(({ label, category }) => {
-          const slotItems = grouped[category];
-          const idx = indices[category];
-          const current = slotItems[idx] ?? null;
-
-          return (
-            <View key={category} style={styles.slot}>
-              <Text style={styles.slotLabel}>{label}</Text>
-              <View style={styles.slotRow}>
-                <Pressable
-                  style={[styles.arrowBtn, slotItems.length < 2 && styles.arrowBtnDisabled]}
-                  onPress={() => navigate(category, -1)}
-                  disabled={slotItems.length < 2}
-                >
-                  <MaterialIcons
-                    name="chevron-left"
-                    size={28}
-                    color={slotItems.length < 2 ? Palette.outlineVariant : Palette.onSurface}
-                  />
-                </Pressable>
-
-                <View style={[styles.itemCard, { height: cardHeight }]}>
-                  {current?.image_url ? (
-                    <Image
-                      source={{ uri: current.image_url }}
-                      style={styles.itemImage}
-                      contentFit="contain"
-                    />
-                  ) : (
-                    <View style={styles.itemPlaceholder}>
-                      <Text style={styles.placeholderText}>
-                        {slotItems.length === 0 ? `No ${label.toLowerCase()}${label === 'Shoes' ? '' : 's'}` : 'No image'}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-
-                <Pressable
-                  style={[styles.arrowBtn, slotItems.length < 2 && styles.arrowBtnDisabled]}
-                  onPress={() => navigate(category, 1)}
-                  disabled={slotItems.length < 2}
-                >
-                  <MaterialIcons
-                    name="chevron-right"
-                    size={28}
-                    color={slotItems.length < 2 ? Palette.outlineVariant : Palette.onSurface}
-                  />
-                </Pressable>
-              </View>
-
-              {slotItems.length > 1 && (
-                <Text style={styles.counter}>
-                  {idx + 1} / {slotItems.length}
-                </Text>
-              )}
-            </View>
-          );
-        })}
+      <View style={[styles.screen, { paddingBottom: tabBarHeight }]}>
+        {SLOTS.map(({ label, category }) => (
+          <SlotRow
+            key={category}
+            label={label}
+            category={category}
+            slotItems={grouped[category]}
+            idx={indices[category]}
+            onNavigate={(dir) => navigate(category, dir)}
+          />
+        ))}
 
         <View style={styles.actions}>
           <Pressable
@@ -301,20 +336,23 @@ const styles = StyleSheet.create({
   slot: {
     flex: 1,
     gap: Spacing.stackSm,
+    minHeight: 0,
   },
   slotLabel: {
     ...Typography.labelSm,
     color: Palette.onSurfaceVariant,
   },
   slotRow: {
+    flex: 1,
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'stretch',
     gap: Spacing.stackSm,
   },
   arrowBtn: {
     padding: Spacing.stackSm,
     borderRadius: Radius.full,
     backgroundColor: Palette.surfaceContainerLow,
+    alignSelf: 'center',
   },
   arrowBtnDisabled: {
     opacity: 0.3,
@@ -333,6 +371,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: Palette.surfaceContainerLow,
+    borderRadius: Radius.lg,
   },
   placeholderText: {
     ...Typography.bodyMd,
@@ -362,7 +402,6 @@ const styles = StyleSheet.create({
     ...Typography.titleLg,
     color: Palette.onPrimary,
   },
-  // Modal
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
