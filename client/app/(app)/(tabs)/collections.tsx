@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CreateCollectionModal } from '@/components/collections/create-collection-modal';
+import { MainHeader } from '@/components/ui/main-header';
 import { Palette, Radius, Spacing, Typography } from '@/constants/design';
 import { getCurrentUser } from '@/lib/auth';
 import { createCollection, fetchCollections, type Collection } from '@/lib/collections';
@@ -122,7 +123,8 @@ export default function CollectionsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
+      <MainHeader />
       <View style={styles.screen}>
         <Text style={styles.title}>Collections</Text>
         <Text style={styles.description}>
