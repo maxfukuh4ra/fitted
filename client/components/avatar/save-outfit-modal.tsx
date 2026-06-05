@@ -3,12 +3,12 @@ import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-nativ
 
 import { FontFamilies, Palette, Radius, Spacing, Typography } from '@/constants/design';
 
-export type OutfitVisibility = 'private' | 'friends' | 'public';
+export type OutfitVisibility = 'Private' | 'Friends' | 'Public';
 
 const VISIBILITY_OPTIONS: { value: OutfitVisibility; icon: string; label: string }[] = [
-  { value: 'private', icon: 'lock', label: 'Private' },
-  { value: 'friends', icon: 'people', label: 'Friends' },
-  { value: 'public', icon: 'public', label: 'Public' },
+  { value: 'Private', icon: 'lock', label: 'Private' },
+  { value: 'Friends', icon: 'people', label: 'Friends' },
+  { value: 'Public', icon: 'public', label: 'Public' },
 ];
 
 type Props = {
