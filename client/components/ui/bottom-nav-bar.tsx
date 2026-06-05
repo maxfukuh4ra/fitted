@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Palette, Spacing } from '@/constants/design';
 
 // Bottom navigation bar items
-export type BottomNavTab = 'closet' | 'collections' | 'upload' | 'calendar' | 'profile';
+export type BottomNavTab = 'closet' | 'collections' | 'avatar' | 'upload' | 'calendar' | 'profile';
 // Bottom navigation bar as a whole knows which one is active and what to do when a tab is pressed
 export type BottomNavBarProps = {
   activeTab: BottomNavTab;
@@ -22,6 +22,7 @@ type NavItemConfig = {
 const NAV_ITEMS: NavItemConfig[] = [
   { id: 'closet', label: 'My Closet', icon: 'checkroom' },
   { id: 'collections', label: 'Collections', icon: 'accessibility' },
+  { id: 'avatar', label: 'Avatar', icon: 'style' },
   { id: 'upload', label: 'Upload', icon: 'add-circle' },
   { id: 'calendar', label: 'Calendar', icon: 'calendar-month' },
   { id: 'profile', label: 'Profile', icon: 'person' },

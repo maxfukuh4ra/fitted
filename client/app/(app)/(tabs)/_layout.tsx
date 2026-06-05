@@ -41,6 +41,7 @@ export default function MainLayout() {
       >
         <Tabs.Screen name="closet" options={{ title: "My Closet" }} />
         <Tabs.Screen name="collections" options={{ title: "Collections" }} />
+        <Tabs.Screen name="avatar" options={{ title: "Avatar" }} />
         <Tabs.Screen name="upload" options={{ title: "Upload" }} />
         <Tabs.Screen name="calendar" options={{ title: "Calendar" }} />
         <Tabs.Screen name="profile" options={{ title: "Profile" }} />

@@ -14,6 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { GenderPicker } from "@/components/profile/gender-picker";
 import { styles } from "@/components/profile/profile-styles";
 import { capitalize, getInitials } from "@/components/profile/profile-utils";
+import { MainHeader } from "@/components/ui/main-header";
 import { Palette, Typography } from "@/constants/design";
 import { useProfileEdit } from "@/hooks/use-profile-edit";
 import { signOut } from "@/lib/auth";
@@ -50,7 +51,8 @@ export default function ProfileScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+      <SafeAreaView style={styles.safeArea} edges={["left", "right"]}>
+        <MainHeader />
         <View style={styles.centered}>
           <ActivityIndicator color={Palette.primary} size="large" />
         </View>
@@ -60,7 +62,8 @@ export default function ProfileScreen() {
 
   if (error || !profile) {
     return (
-      <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+      <SafeAreaView style={styles.safeArea} edges={["left", "right"]}>
+        <MainHeader />
         <View style={styles.centered}>
           <Text style={styles.errorText}>
             {error ?? "Could not load profile."}
@@ -101,10 +104,8 @@ export default function ProfileScreen() {
   });
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
-      <View style={styles.topBar}>
-        <Text style={styles.wordmark}>FITTED</Text>
-      </View>
+    <SafeAreaView style={styles.safeArea} edges={["left", "right"]}>
+      <MainHeader />
 
       <ScrollView
         style={styles.scrollView}
