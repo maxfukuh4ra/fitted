@@ -1,3 +1,4 @@
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -73,6 +74,21 @@ function HeightEditor({
       </View>
       <Text style={[Typography.titleLg, styles.heightSep]}>&quot;</Text>
     </View>
+  );
+}
+
+function FriendsButton({ onPress }: { onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.friendsBtn,
+        pressed && styles.buttonPressed,
+      ]}
+    >
+      <MaterialIcons name="people" size={18} color={Palette.onSurface} />
+      <Text style={styles.friendsBtnText}>Friends</Text>
+    </Pressable>
   );
 }
 
@@ -160,8 +176,11 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={["left", "right"]}>
       <MainHeader />
-
-      <ScrollView
+      <View style={styles.body}>
+        {!edit.editing ? (
+          <FriendsButton onPress={() => router.push("/(app)/friends")} />
+        ) : null}
+        <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -332,6 +351,7 @@ export default function ProfileScreen() {
           </Animated.View>
         </View>
       </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }

@@ -16,6 +16,10 @@ const ACTION_BUTTON_HEIGHT = 44;
 
 export const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Palette.background },
+  body: {
+    flex: 1,
+    position: "relative",
+  },
   centered: { flex: 1, alignItems: "center", justifyContent: "center" },
   topBar: {
     flexDirection: "row",
@@ -189,6 +193,28 @@ export const styles = StyleSheet.create({
     backgroundColor: Palette.primary,
   },
   heightSep: { color: Palette.onSurface },
+  friendsBtn: {
+    position: "absolute",
+    top: Spacing.stackSm,
+    right: Spacing.stackMd,
+    zIndex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    height: 32,
+    paddingHorizontal: Spacing.stackSm,
+    borderWidth: 1,
+    borderColor: Palette.outlineVariant,
+    borderRadius: Radius.sm,
+    backgroundColor: Palette.surfaceContainerLowest,
+  },
+  friendsBtnText: {
+    ...Typography.labelSm,
+    color: Palette.onSurface,
+    textTransform: "none",
+    letterSpacing: 0,
+    transform: [{ translateY: 1 }],
+  },
   signOutButton: {
     ...actionButton,
     borderColor: Palette.error,

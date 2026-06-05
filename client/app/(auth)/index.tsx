@@ -1,8 +1,7 @@
-import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -11,8 +10,8 @@ import {
   Text,
   TextInput,
   View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
   FontFamilies,
@@ -21,14 +20,14 @@ import {
   Radius,
   Spacing,
   Typography,
-} from '@/constants/design';
-import { setSignUpDraft } from '@/lib/sign-up-draft';
-import { supabase } from '@/lib/supabase';
+} from "@/constants/design";
+import { setSignUpDraft } from "@/lib/sign-up-draft";
+import { supabase } from "@/lib/supabase";
 import {
   formatAuthError,
   normalizeEmail,
   validateAuthCredentials,
-} from '@/lib/validation';
+} from "@/lib/validation";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -45,12 +44,14 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Check for user on mount
+  // Check for user on mount and redirect if already authenticated
   useEffect(() => {
-    supabase.auth.getUser().then(({ data, error }) => {
-      if (data?.user) setUser(data.user);
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user) {
+        router.replace("/(app)/(tabs)/closet");
+      }
     });
-  }, []);
+  }, [router]);
 
   // Fetch items if user is logged in
   useEffect(() => {
@@ -77,10 +78,12 @@ export default function HomeScreen() {
       return;
     }
 
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({
-      email: normalizeEmail(email),
-      password,
-    });
+    const { data, error: signInError } = await supabase.auth.signInWithPassword(
+      {
+        email: normalizeEmail(email),
+        password,
+      },
+    );
 
     if (signInError) {
       setAuthError(formatAuthError(signInError.message));
@@ -88,7 +91,7 @@ export default function HomeScreen() {
     }
 
     setUser(data.user);
-    router.replace('/closet');
+    router.replace("/closet");
   };
 
   const handleSignUp = () => {
@@ -102,7 +105,7 @@ export default function HomeScreen() {
     }
 
     setSignUpDraft(normalizeEmail(email), password);
-    router.push('/onboarding/personal-info');
+    router.push("/onboarding/personal-info");
   };
 
   return (
@@ -118,7 +121,7 @@ export default function HomeScreen() {
 
       <SafeAreaView style={styles.safeArea}>
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
           style={styles.keyboardAvoiding}
         >
           <ScrollView
@@ -132,7 +135,7 @@ export default function HomeScreen() {
                 <Text style={styles.brandTagline}>Curate Your Collection</Text>
               </View>
 
-              {!user ? (
+              {!user && (
                 <View style={styles.authSection}>
                   <View style={styles.fieldGroup}>
                     <Text style={styles.fieldLabel}>Email</Text>
@@ -202,36 +205,18 @@ export default function HomeScreen() {
                     </Pressable>
                   </View>
 
-                  {authError ? <Text style={styles.errorText}>{authError}</Text> : null}
-                  {authMessage ? <Text style={styles.messageText}>{authMessage}</Text> : null}
-                </View>
-              ) : (
-                <View style={styles.authSection}>
-                  <Text style={styles.signedInLabel}>Signed in as</Text>
-                  <Text style={styles.signedInEmail}>{user.email}</Text>
-
-                  {loading ? (
-                    <ActivityIndicator color={Palette.primary} style={styles.loader} />
+                  {authError ? (
+                    <Text style={styles.errorText}>{authError}</Text>
                   ) : null}
-                  {error ? <Text style={styles.errorText}>{error}</Text> : null}
-                  {!loading && !error && items.length === 0 ? (
-                    <Text style={styles.emptyStateText}>No items found.</Text>
-                  ) : null}
-                  {!loading && !error && items.length > 0 ? (
-                    <View style={styles.itemsList}>
-                      {items.map((item) => (
-                        <Text key={item.id} style={styles.itemText}>
-                          {item.category} - {item.id}
-                        </Text>
-                      ))}
-                    </View>
+                  {authMessage ? (
+                    <Text style={styles.messageText}>{authMessage}</Text>
                   ) : null}
                 </View>
               )}
 
               <Text style={styles.footerText}>
-                By continuing, you agree to our{' '}
-                <Text style={styles.footerLink}>Terms</Text> and{' '}
+                By continuing, you agree to our{" "}
+                <Text style={styles.footerLink}>Terms</Text> and{" "}
                 <Text style={styles.footerLink}>Privacy</Text>.
               </Text>
             </View>
@@ -258,7 +243,7 @@ const styles = StyleSheet.create({
   },
   backgroundGradient: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(251, 249, 249, 0.72)',
+    backgroundColor: "rgba(251, 249, 249, 0.72)",
   },
   safeArea: {
     flex: 1,
@@ -268,24 +253,24 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: Spacing.containerMargin,
     paddingVertical: Spacing.stackLg,
   },
   card: {
-    width: '100%',
+    width: "100%",
     maxWidth: 448,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   logoSection: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: Spacing.stackXl,
   },
   brandTitle: {
     ...Typography.displayLg,
     color: Palette.primary,
     letterSpacing: 8,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     marginBottom: Spacing.stackSm,
   },
   brandTagline: {
@@ -294,7 +279,7 @@ const styles = StyleSheet.create({
     letterSpacing: 2.4,
   },
   authSection: {
-    width: '100%',
+    width: "100%",
     gap: Spacing.stackMd,
   },
   fieldGroup: {
@@ -342,9 +327,9 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: Radius.lg,
     backgroundColor: Palette.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000000',
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000000",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
     shadowRadius: 16,
@@ -360,8 +345,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Palette.outlineVariant,
     backgroundColor: Palette.surfaceContainerLowest,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   secondaryButtonText: {
     ...Typography.bodyMd,
@@ -376,22 +361,22 @@ const styles = StyleSheet.create({
   errorText: {
     ...Typography.bodyMd,
     color: Palette.error,
-    textAlign: 'center',
+    textAlign: "center",
   },
   messageText: {
     ...Typography.bodyMd,
     color: Palette.onSurfaceVariant,
-    textAlign: 'center',
+    textAlign: "center",
   },
   signedInLabel: {
     ...Typography.labelSm,
     color: Palette.onSurfaceVariant,
-    textAlign: 'center',
+    textAlign: "center",
   },
   signedInEmail: {
     ...Typography.titleLg,
     color: Palette.onSurface,
-    textAlign: 'center',
+    textAlign: "center",
   },
   loader: {
     marginTop: Spacing.stackSm,
@@ -399,7 +384,7 @@ const styles = StyleSheet.create({
   emptyStateText: {
     ...Typography.bodyMd,
     color: Palette.onSurfaceVariant,
-    textAlign: 'center',
+    textAlign: "center",
   },
   itemsList: {
     gap: Spacing.stackSm,
@@ -408,7 +393,7 @@ const styles = StyleSheet.create({
   itemText: {
     ...Typography.bodyMd,
     color: Palette.onSurface,
-    textAlign: 'center',
+    textAlign: "center",
   },
   footerText: {
     ...Typography.labelSm,
@@ -421,7 +406,7 @@ const styles = StyleSheet.create({
   },
   footerLink: {
     color: Palette.primary,
-    textDecorationLine: 'underline',
+    textDecorationLine: "underline",
     fontFamily: FontFamilies.bodySemiBold,
   },
 });
