@@ -16,7 +16,7 @@ export async function fetchCollections(userId: string) {
       'id, user_id, name, is_favorite, collection_outfits(outfits(outfit_items(items(image_url))))',
     )
     .eq('user_id', userId)
-    .order('name', { ascending: true });
+    .order('created_at', { ascending: true });
 
   if (error) throw new Error(error.message);
 

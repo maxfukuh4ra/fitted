@@ -108,9 +108,7 @@ export default function CollectionsScreen() {
         collectionName,
         [...selectedItemIds],
       );
-      setCollections((prev) =>
-        [...prev, created].sort((a, b) => a.name.localeCompare(b.name)),
-      );
+      setCollections((prev) => [...prev, created]);
       setModalVisible(false);
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : 'Failed to create collection.');
