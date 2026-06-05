@@ -1,8 +1,9 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Animated,
   Pressable,
   ScrollView,
   Text,
@@ -25,6 +26,7 @@ export default function ProfileScreen() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const editTransition = useRef(new Animated.Value(0)).current;
 
   const edit = useProfileEdit(profile, (updated) => setProfile(updated));
 
@@ -34,6 +36,14 @@ export default function ProfileScreen() {
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    Animated.timing(editTransition, {
+      toValue: edit.editing ? 1 : 0,
+      duration: 220,
+      useNativeDriver: true,
+    }).start();
+  }, [edit.editing, editTransition]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -73,6 +83,26 @@ export default function ProfileScreen() {
     pointerEvents: edit.editing ? ("auto" as const) : ("none" as const),
     underlineColorAndroid: "transparent" as const,
   };
+  const viewActionsOpacity = editTransition.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0],
+  });
+  const editActionsOpacity = editTransition.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],
+  });
+  const viewActionsTranslateY = editTransition.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 8],
+  });
+  const editActionsTranslateY = editTransition.interpolate({
+    inputRange: [0, 1],
+    outputRange: [8, 0],
+  });
+  const underlineOpacity = editTransition.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],
+  });
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["left", "right"]}>
@@ -103,14 +133,11 @@ export default function ProfileScreen() {
                 autoCapitalize="words"
                 returnKeyType="done"
               />
-              <View
-                style={[
-                  styles.nameUnderlineWrap,
-                  !edit.editing && styles.underlineHidden,
-                ]}
+              <Animated.View
+                style={[styles.nameUnderlineWrap, { opacity: underlineOpacity }]}
               >
                 <View style={styles.nameUnderline} />
-              </View>
+              </Animated.View>
             </View>
           </View>
           <Text style={styles.email}>{profile.email}</Text>
@@ -133,11 +160,8 @@ export default function ProfileScreen() {
                     maxLength={3}
                     returnKeyType="done"
                   />
-                  <View
-                    style={[
-                      styles.inputUnderline,
-                      !edit.editing && styles.underlineHidden,
-                    ]}
+                  <Animated.View
+                    style={[styles.inputUnderline, { opacity: underlineOpacity }]}
                   />
                 </View>
               </View>
@@ -159,11 +183,8 @@ export default function ProfileScreen() {
                       maxLength={1}
                       returnKeyType="next"
                     />
-                    <View
-                      style={[
-                        styles.inputUnderline,
-                        !edit.editing && styles.underlineHidden,
-                      ]}
+                    <Animated.View
+                      style={[styles.inputUnderline, { opacity: underlineOpacity }]}
                     />
                   </View>
                   <Text style={[Typography.titleLg, styles.heightSep]}>&apos;</Text>
@@ -181,11 +202,8 @@ export default function ProfileScreen() {
                       maxLength={2}
                       returnKeyType="done"
                     />
-                    <View
-                      style={[
-                        styles.inputUnderline,
-                        !edit.editing && styles.underlineHidden,
-                      ]}
+                    <Animated.View
+                      style={[styles.inputUnderline, { opacity: underlineOpacity }]}
                     />
                   </View>
                   <Text style={[Typography.titleLg, styles.heightSep]}>&quot;</Text>
@@ -217,36 +235,16 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.profileActions}>
-          {edit.editing ? (
-            <>
-              <Pressable
-                onPress={edit.cancelEditing}
-                style={({ pressed }) => [
-                  styles.cancelButton,
-                  pressed && styles.buttonPressed,
-                ]}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </Pressable>
-              <Pressable
-                onPress={edit.saveEditing}
-                style={({ pressed }) => [
-                  styles.saveButton,
-                  edit.saving && styles.saveButtonDisabled,
-                  pressed && !edit.saving && styles.buttonPressed,
-                ]}
-                disabled={edit.saving}
-              >
-                <View style={styles.saveButtonInner}>
-                  {edit.saving ? (
-                    <ActivityIndicator size="small" color={Palette.onPrimary} />
-                  ) : (
-                    <Text style={styles.saveButtonText}>Save</Text>
-                  )}
-                </View>
-              </Pressable>
-            </>
-          ) : (
+          <Animated.View
+            pointerEvents={edit.editing ? "none" : "auto"}
+            style={[
+              styles.actionGroup,
+              {
+                opacity: viewActionsOpacity,
+                transform: [{ translateY: viewActionsTranslateY }],
+              },
+            ]}
+          >
             <>
               <Pressable
                 onPress={edit.startEditing}
@@ -277,7 +275,46 @@ export default function ProfileScreen() {
                 <Text style={styles.signOutText}>Sign Out</Text>
               </Pressable>
             </>
-          )}
+          </Animated.View>
+          <Animated.View
+            pointerEvents={edit.editing ? "auto" : "none"}
+            style={[
+              styles.actionGroup,
+              {
+                opacity: editActionsOpacity,
+                transform: [{ translateY: editActionsTranslateY }],
+              },
+            ]}
+          >
+            <>
+              <Pressable
+                onPress={edit.cancelEditing}
+                style={({ pressed }) => [
+                  styles.cancelButton,
+                  pressed && styles.buttonPressed,
+                ]}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                onPress={edit.saveEditing}
+                style={({ pressed }) => [
+                  styles.saveButton,
+                  edit.saving && styles.saveButtonDisabled,
+                  pressed && !edit.saving && styles.buttonPressed,
+                ]}
+                disabled={edit.saving}
+              >
+                <View style={styles.saveButtonInner}>
+                  {edit.saving ? (
+                    <ActivityIndicator size="small" color={Palette.onPrimary} />
+                  ) : (
+                    <Text style={styles.saveButtonText}>Save</Text>
+                  )}
+                </View>
+              </Pressable>
+            </>
+          </Animated.View>
         </View>
       </ScrollView>
     </SafeAreaView>
