@@ -10,23 +10,6 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Palette.background,
   },
-  topBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 48,
-    paddingVertical: Spacing.stackMd,
-    paddingHorizontal: Spacing.containerMargin,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Palette.outlineVariant,
-  },
-  wordmark: {
-    ...Typography.labelSm,
-    color: Palette.onSurface,
-    letterSpacing: 6,
-    fontSize: 14,
-    lineHeight: 20,
-  },
   scrollView: {
     flex: 1,
   },
@@ -121,7 +104,7 @@ export const styles = StyleSheet.create({
     backgroundColor: Palette.primary,
   },
   statsSection: {
-    marginTop: Spacing.stackLg,
+    marginTop: 0,
   },
   statsTitle: {
     ...Typography.titleLg,
@@ -167,6 +150,95 @@ export const styles = StyleSheet.create({
   },
   logOutfitText: {
     ...Typography.labelSm,
+    color: Palette.onPrimary,
+  },
+  dayWearSection: {
+    marginTop: 0,
+  },
+  dayWearTitle: {
+    ...Typography.titleLg,
+    color: Palette.onBackground,
+  },
+  dayWearSubtitle: {
+    ...Typography.labelSm,
+    color: Palette.onSurfaceVariant,
+    marginTop: 4,
+    marginBottom: Spacing.stackMd,
+  },
+  dayWearCarousel: {
+    marginHorizontal: -Spacing.containerMargin,
+  },
+  dayWearCarouselContent: {
+    paddingHorizontal: Spacing.containerMargin,
+  },
+  dayWearSeparator: {
+    width: Spacing.gutter,
+  },
+  dayWearCard: {
+    width: 132,
+    borderRadius: Radius.lg,
+    overflow: "hidden",
+    backgroundColor: Palette.surfaceContainerLowest,
+  },
+  dayWearImageWrap: {
+    aspectRatio: 3 / 4,
+    backgroundColor: Palette.surfaceContainerLow,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: Spacing.stackSm,
+  },
+  dayWearImage: {
+    width: "100%",
+    height: "100%",
+  },
+  dayWearPlaceholder: {
+    width: "60%",
+    height: "60%",
+    borderRadius: Radius.md,
+    backgroundColor: Palette.surfaceVariant,
+  },
+  dayWearCardTitle: {
+    ...Typography.bodyMd,
+    fontSize: 14,
+    lineHeight: 20,
+    color: Palette.onSurface,
+    padding: 12,
+  },
+  dayWearLoading: {
+    minHeight: 180,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  bottomSection: {
+    marginTop: 20,
+    paddingTop: 20,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: Palette.outlineVariant,
+  },
+  bottomToggle: {
+    flexDirection: "row",
+    backgroundColor: Palette.surfaceContainerLow,
+    borderRadius: Radius.lg,
+    padding: 4,
+    marginBottom: Spacing.stackMd,
+  },
+  toggleBtn: {
+    flex: 1,
+    height: 40,
+    borderRadius: Radius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  toggleBtnActive: {
+    backgroundColor: Palette.primary,
+  },
+  toggleText: {
+    ...Typography.labelSm,
+    color: Palette.onSurfaceVariant,
+    textTransform: "none",
+    letterSpacing: 0.5,
+  },
+  toggleTextActive: {
     color: Palette.onPrimary,
   },
 });

@@ -21,6 +21,10 @@ export function formatMonthYear(date: Date): string {
   return `${MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`;
 }
 
+export function formatDayLabel(year: number, month: number, day: number): string {
+  return `${MONTH_NAMES[month]} ${day}, ${year}`;
+}
+
 export function addMonths(date: Date, amount: number): Date {
   const next = new Date(date);
   next.setDate(1);

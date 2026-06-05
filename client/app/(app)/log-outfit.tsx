@@ -1,3 +1,4 @@
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
 import {
@@ -8,7 +9,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SelectableClosetCard } from "@/components/log-outfit/selectable-closet-card";
 import { Palette, Radius, Spacing, Typography } from "@/constants/design";
@@ -50,6 +51,7 @@ function formatDateLabel(iso: string) {
 }
 
 export default function LogOutfitScreen() {
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ wornOn?: string }>();
   const wornOn = useMemo(() => getWornOnParam(params.wornOn), [params.wornOn]);
 
@@ -87,12 +89,25 @@ export default function LogOutfitScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backText}>← Back</Text>
-        </Pressable>
-        <Text style={styles.heading}>Log outfit</Text>
-        <Text style={styles.dateLabel}>Worn on {formatDateLabel(wornOn)}</Text>
+        <View style={styles.headerSide}>
+          <Pressable
+            onPress={() => router.back()}
+            style={({ pressed }) => [styles.backBtn, pressed && styles.backBtnPressed]}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+          >
+            <MaterialIcons name="arrow-back" size={24} color={Palette.onSurface} />
+          </Pressable>
+        </View>
+
+        <View style={styles.headerTitleWrap}>
+          <Text style={styles.heading}>Log outfit</Text>
+        </View>
+
+        <View style={styles.headerSide} />
       </View>
+
+      <Text style={styles.dateLabel}>Worn on {formatDateLabel(wornOn)}</Text>
 
       <Text style={styles.hint}>Tap items you wore together.</Text>
 
@@ -125,17 +140,20 @@ export default function LogOutfitScreen() {
         />
       )}
 
-      <View style={styles.footer}>
+      <View
+        pointerEvents="box-none"
+        style={[styles.doneWrap, { bottom: insets.bottom + Spacing.stackMd }]}
+      >
         <Pressable
           style={[
-            styles.saveBtn,
-            (selected.size === 0 || saving) && styles.saveBtnDisabled,
+            styles.doneBtn,
+            (selected.size === 0 || saving) && styles.doneBtnDisabled,
           ]}
           disabled={selected.size === 0 || saving}
           onPress={handleSave}
         >
-          <Text style={styles.saveText}>
-            {saving ? "Saving…" : `Save (${selected.size})`}
+          <Text style={styles.doneText}>
+            {saving ? "Saving…" : `Done (${selected.size})`}
           </Text>
         </Pressable>
       </View>
@@ -149,24 +167,43 @@ const styles = StyleSheet.create({
     backgroundColor: Palette.background,
   },
   header: {
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: Spacing.containerMargin,
     paddingTop: Spacing.stackMd,
     paddingBottom: Spacing.stackSm,
   },
-  backBtn: {
-    marginBottom: Spacing.stackSm,
+  headerSide: {
+    width: 40,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  backText: {
-    ...Typography.bodyMd,
-    color: Palette.onSurface,
+  headerTitleWrap: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: Radius.full,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  backBtnPressed: {
+    backgroundColor: Palette.surfaceContainerLow,
   },
   heading: {
     ...Typography.headlineMd,
+    fontSize: 22,
+    lineHeight: 28,
     color: Palette.onSurface,
+    textAlign: "center",
   },
   dateLabel: {
     ...Typography.bodyMd,
     color: Palette.onSurfaceVariant,
+    paddingHorizontal: Spacing.containerMargin,
     marginTop: Spacing.stackSm,
   },
   hint: {
@@ -186,26 +223,23 @@ const styles = StyleSheet.create({
   gridItem: {
     flex: 1,
   },
-  footer: {
+  doneWrap: {
     position: "absolute",
     left: 0,
     right: 0,
-    bottom: 0,
-    padding: Spacing.containerMargin,
-    paddingBottom: Spacing.stackXl,
-    backgroundColor: Palette.background,
+    paddingHorizontal: Spacing.containerMargin,
   },
-  saveBtn: {
+  doneBtn: {
     height: 52,
     borderRadius: Radius.lg,
     backgroundColor: Palette.primary,
     alignItems: "center",
     justifyContent: "center",
   },
-  saveBtnDisabled: {
+  doneBtnDisabled: {
     opacity: 0.4,
   },
-  saveText: {
+  doneText: {
     ...Typography.labelSm,
     color: Palette.onPrimary,
   },
