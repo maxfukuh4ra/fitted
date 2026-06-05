@@ -32,9 +32,6 @@ router.post('/prepare-image', upload.single('image'), async (req: Request, res: 
   const { data: { user } } = await supabase.auth.getUser(token);
   if (!user) return res.status(401).json({ error: 'unauthorized' });
 
-  const testurl = "https://esmkcpqpmqcufxnqxicx.supabase.co/storage/v1/object/public/clothing-images/93ef1e92-ad79-45ce-8505-53851e1f3036/1780641400740.png"
-  return res.status(200).json({ success: true, imageUrl: testurl });
-/*
   console.log("User authenticated:", user.id);
   const buffer = req.file!.buffer;
   const base64 = `data:${req.file!.mimetype};base64,${buffer.toString('base64')}`;
@@ -50,7 +47,7 @@ router.post('/prepare-image', upload.single('image'), async (req: Request, res: 
   const url = await uploadToStorage(cleanedBuffer, user.id);
   console.log("Image processed and uploaded, URL:", url);
 
-  return res.status(200).json({ success: true, imageUrl: url });*/
+  return res.status(200).json({ success: true, imageUrl: url });
 });
 
 // POST /api/confirm-image
