@@ -14,6 +14,7 @@ export type FriendOutfit = {
   userId: string;
   userName: string;
   createdAt: string;
+  visibility: string;
   items: { slot: string; itemId: string; imageUrl: string | null }[];
 };
 
@@ -157,19 +158,27 @@ export async function getFriendsOutfits(): Promise<FriendOutfit[]> {
   const friendIds = (friendships ?? []).map((f) =>
     f.requester_id === uid ? f.addressee_id : f.requester_id,
   );
-  if (friendIds.length === 0) return [];
 
-  const { data: outfits, error: outfitError } = await supabase
+  let outfitsQuery = supabase
     .from("outfits")
-    .select("id, name, user_id, created_at")
-    .in("user_id", friendIds)
-    .in("visibility", ["Public", "Friends"])
+    .select("id, name, user_id, created_at, visibility")
+    .neq("user_id", uid)
     .order("created_at", { ascending: false });
 
+  if (friendIds.length > 0) {
+    outfitsQuery = outfitsQuery.or(
+      `visibility.eq.Public,and(visibility.eq.Friends,user_id.in.(${friendIds.join(",")}))`,
+    );
+  } else {
+    outfitsQuery = outfitsQuery.eq("visibility", "Public");
+  }
+
+  const { data: outfits, error: outfitError } = await outfitsQuery;
   if (outfitError) throw new Error(outfitError.message);
   if (!outfits || outfits.length === 0) return [];
 
-  const infoMap = await fetchUsersInfo(friendIds);
+  const authorIds = [...new Set(outfits.map((o) => o.user_id))];
+  const infoMap = await fetchUsersInfo(authorIds);
 
   const outfitIds = outfits.map((o) => o.id);
   const { data: outfitItems } = await supabase
@@ -205,6 +214,7 @@ export async function getFriendsOutfits(): Promise<FriendOutfit[]> {
     userId: o.user_id,
     userName: infoMap[o.user_id]?.name ?? "Unknown",
     createdAt: o.created_at,
+    visibility: o.visibility,
     items: itemsByOutfit[o.id] ?? [],
   }));
 }

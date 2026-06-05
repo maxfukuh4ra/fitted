@@ -91,6 +91,7 @@ export default function FriendsScreen() {
   const [addLoading, setAddLoading] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
   const [addSuccess, setAddSuccess] = useState(false);
+  const [feedFilter, setFeedFilter] = useState<"Public" | "Friends">("Public");
 
   async function loadAll() {
     try {
@@ -279,20 +280,33 @@ export default function FriendsScreen() {
             )}
           </View>
           {/* Feed */}
-          {friends.length > 0 && (
-            <View style={styles.section}>
-              <SectionHeader title="Their Outfits" />
-              {feed.length === 0 ? (
-                <Text style={styles.emptyText}>No shared outfits yet.</Text>
-              ) : (
-                <View style={styles.outfitGrid}>
-                  {feed.map((outfit) => (
+          <View style={styles.section}>
+            <SectionHeader title="Outfits" />
+            <View style={styles.toggle}>
+              {(["Public", "Friends"] as const).map((tab) => (
+                <Pressable
+                  key={tab}
+                  style={[styles.toggleBtn, feedFilter === tab && styles.toggleBtnActive]}
+                  onPress={() => setFeedFilter(tab)}
+                >
+                  <Text style={[styles.toggleBtnText, feedFilter === tab && styles.toggleBtnTextActive]}>
+                    {tab}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            {feed.filter((o) => o.visibility === feedFilter).length === 0 ? (
+              <Text style={styles.emptyText}>No {feedFilter.toLowerCase()} outfits yet.</Text>
+            ) : (
+              <View style={styles.outfitGrid}>
+                {feed
+                  .filter((o) => o.visibility === feedFilter)
+                  .map((outfit) => (
                     <OutfitCard key={outfit.id} outfit={outfit} />
                   ))}
-                </View>
-              )}
-            </View>
-          )}
+              </View>
+            )}
+          </View>
         </ScrollView>
       )}
     </SafeAreaView>
@@ -450,6 +464,28 @@ const styles = StyleSheet.create({
     ...Typography.bodyMd,
     color: Palette.onSurfaceVariant,
     paddingVertical: Spacing.stackSm,
+  },
+  toggle: {
+    flexDirection: "row",
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Palette.outlineVariant,
+    overflow: "hidden",
+    alignSelf: "flex-start",
+  },
+  toggleBtn: {
+    paddingHorizontal: Spacing.stackMd,
+    paddingVertical: 6,
+  },
+  toggleBtnActive: {
+    backgroundColor: Palette.primary,
+  },
+  toggleBtnText: {
+    ...Typography.labelSm,
+    color: Palette.onSurfaceVariant,
+  },
+  toggleBtnTextActive: {
+    color: Palette.onPrimary,
   },
   outfitGrid: {
     flexDirection: "row",
