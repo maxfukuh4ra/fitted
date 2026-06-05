@@ -1,5 +1,14 @@
 // Filter bar used in closet and avatar screens
-import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  LayoutChangeEvent,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import { Palette, Radius, Spacing, Typography } from '@/constants/design';
 import type { CategoryFilter } from '@/lib/types/closet';
@@ -11,41 +20,180 @@ type CategoryFilterBarProps = {
   onSelect: (value: string | null) => void;
 };
 
+type ChipLayout = {
+  x: number;
+  width: number;
+};
+
+const CHIP_ANIMATION_DURATION = 160;
+const PILL_SPRING_CONFIG = {
+  friction: 12,
+  tension: 90,
+  useNativeDriver: true,
+} as const;
+
+function getFilterKey(value: string | null) {
+  return value ?? 'all';
+}
+
+type FilterChipProps = {
+  filter: CategoryFilter;
+  isSelected: boolean;
+  onPress: (value: string | null) => void;
+  onLayout: (event: LayoutChangeEvent) => void;
+};
+
+function FilterChip({ filter, isSelected, onPress, onLayout }: FilterChipProps) {
+  const animation = useRef(new Animated.Value(isSelected ? 1 : 0)).current;
+
+  useEffect(() => {
+    Animated.timing(animation, {
+      toValue: isSelected ? 1 : 0,
+      duration: CHIP_ANIMATION_DURATION,
+      useNativeDriver: true,
+    }).start();
+  }, [animation, isSelected]);
+
+  const scale = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.08],
+  });
+
+  const opacity = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.72, 1],
+  });
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected: isSelected }}
+      onLayout={onLayout}
+      onPress={() => onPress(filter.value)}
+      style={({ pressed }) => [styles.pressable, pressed && styles.chipPressed]}>
+      <Animated.View
+        style={[
+          styles.chip,
+          {
+            opacity,
+            transform: [{ scale }],
+          },
+        ]}>
+        <Text
+          style={[
+            styles.chipLabel,
+            isSelected ? styles.chipLabelSelected : styles.chipLabelUnselected,
+          ]}>
+          {filter.label}
+        </Text>
+      </Animated.View>
+    </Pressable>
+  );
+}
+
 export function CategoryFilterBar({
   filters,
   selectedValue,
   onSelect,
 }: CategoryFilterBarProps) {
+  const [chipLayouts, setChipLayouts] = useState<Record<string, ChipLayout>>({});
+  const pillTranslateX = useRef(new Animated.Value(0)).current;
+  const hasMounted = useRef(false);
+
+  const selectedKey = getFilterKey(selectedValue);
+  const selectedLayout = chipLayouts[selectedKey];
+
+  useEffect(() => {
+    setChipLayouts((current) => {
+      const nextLayouts: Record<string, ChipLayout> = {};
+
+      for (const filter of filters) {
+        const key = getFilterKey(filter.value);
+        if (current[key]) {
+          nextLayouts[key] = current[key];
+        }
+      }
+
+      const currentKeys = Object.keys(current);
+      const nextKeys = Object.keys(nextLayouts);
+      const isSame =
+        currentKeys.length === nextKeys.length &&
+        currentKeys.every((key) => current[key] === nextLayouts[key]);
+
+      if (isSame) {
+        return current;
+      }
+
+      return nextLayouts;
+    });
+  }, [filters]);
+
+  useEffect(() => {
+    if (!selectedLayout) {
+      return;
+    }
+
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      pillTranslateX.setValue(selectedLayout.x);
+      return;
+    }
+
+    Animated.spring(pillTranslateX, {
+      ...PILL_SPRING_CONFIG,
+      toValue: selectedLayout.x,
+    }).start();
+  }, [pillTranslateX, selectedLayout, selectedValue]);
+
+  const handleChipLayout = (key: string, event: LayoutChangeEvent) => {
+    const { x, width } = event.nativeEvent.layout;
+
+    setChipLayouts((current) => {
+      const existingLayout = current[key];
+      if (existingLayout && existingLayout.x === x && existingLayout.width === width) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [key]: { x, width },
+      };
+    });
+  };
+
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.scrollContent}
       style={styles.scroll}>
-      {filters.map((filter) => {
-        const isSelected = selectedValue === filter.value;
+      <View style={styles.rail}>
+        {selectedLayout ? (
+          <Animated.View
+            style={[
+              styles.pill,
+              {
+                width: selectedLayout.width,
+                transform: [{ translateX: pillTranslateX }],
+              },
+            ]}
+          />
+        ) : null}
 
-        return (
-          <Pressable
-            key={filter.value ?? 'all'}
-            accessibilityRole="button"
-            accessibilityState={{ selected: isSelected }}
-            onPress={() => onSelect(filter.value)}
-            style={({ pressed }) => [
-              styles.chip,
-              isSelected ? styles.chipSelected : styles.chipUnselected,
-              pressed && styles.chipPressed,
-            ]}>
-            <Text
-              style={[
-                styles.chipLabel,
-                isSelected ? styles.chipLabelSelected : styles.chipLabelUnselected,
-              ]}>
-              {filter.label}
-            </Text>
-          </Pressable>
-        );
-      })}
+        {filters.map((filter) => {
+          const key = getFilterKey(filter.value);
+
+          return (
+            <FilterChip
+              key={key}
+              filter={filter}
+              isSelected={selectedValue === filter.value}
+              onPress={onSelect}
+              onLayout={(event) => handleChipLayout(key, event)}
+            />
+          );
+        })}
+      </View>
     </ScrollView>
   );
 }
@@ -57,15 +205,23 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.containerMargin,
-    gap: Spacing.stackSm + 4,
     paddingVertical: Spacing.stackSm,
   },
-  chip: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+  rail: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.stackSm + 4,
+    position: 'relative',
     borderRadius: Radius.full,
+    backgroundColor: Palette.surfaceContainerHigh,
+    padding: 4,
   },
-  chipSelected: {
+  pill: {
+    position: 'absolute',
+    top: 4,
+    bottom: 4,
+    left: 0,
+    borderRadius: Radius.full,
     backgroundColor: Palette.primary,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
@@ -73,12 +229,17 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 3,
   },
-  chipUnselected: {
-    backgroundColor: Palette.surfaceContainerHigh,
+  pressable: {
+    zIndex: 1,
+  },
+  chip: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: Radius.full,
+    backgroundColor: 'transparent',
   },
   chipPressed: {
     opacity: 0.85,
-    transform: [{ scale: 0.98 }],
   },
   chipLabel: {
     ...Typography.labelSm,
