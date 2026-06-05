@@ -1,9 +1,9 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { SLOTS } from '@/components/avatar/slots';
+import { SLOT_SUBCATEGORIES, SLOTS } from '@/components/avatar/slots';
 import type { SlotCategory } from '@/components/avatar/slots';
-import { SUBCATEGORIES } from '@/constants/categories';
 import { Palette, Radius, Spacing, Typography } from '@/constants/design';
 
 export type SubcategoryFilters = Record<SlotCategory, string[]>;
@@ -16,19 +16,30 @@ interface FilterModalProps {
 }
 
 export function FilterModal({ visible, filters, onChangeFilters, onClose }: FilterModalProps) {
+  const [draft, setDraft] = useState(filters);
+
+  useEffect(() => {
+    if (visible) setDraft(filters);
+  }, [visible, filters]);
+
   const toggleSub = (category: SlotCategory, sub: string) => {
-    const current = filters[category];
+    const current = draft[category];
     const next = current.includes(sub) ? current.filter((s) => s !== sub) : [...current, sub];
-    onChangeFilters({ ...filters, [category]: next });
+    setDraft({ ...draft, [category]: next });
   };
 
   const clearAll = () => {
     const cleared = {} as SubcategoryFilters;
     for (const { category } of SLOTS) cleared[category] = [];
-    onChangeFilters(cleared);
+    setDraft(cleared);
   };
 
-  const hasAnyFilter = SLOTS.some(({ category }) => filters[category].length > 0);
+  const applyAndClose = () => {
+    onChangeFilters(draft);
+    onClose();
+  };
+
+  const hasAnyFilter = SLOTS.some(({ category }) => draft[category].length > 0);
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
@@ -42,8 +53,8 @@ export function FilterModal({ visible, filters, onChangeFilters, onClose }: Filt
 
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {SLOTS.map(({ label, category }) => {
-            const subs = SUBCATEGORIES[category];
-            const active = filters[category];
+            const subs = SLOT_SUBCATEGORIES[category];
+            const active = draft[category];
             return (
               <View key={category} style={styles.section}>
                 <Text style={styles.sectionLabel}>{label}</Text>
@@ -69,13 +80,15 @@ export function FilterModal({ visible, filters, onChangeFilters, onClose }: Filt
         </ScrollView>
 
         <View style={styles.footer}>
-          {hasAnyFilter && (
-            <Pressable style={styles.clearBtn} onPress={clearAll}>
-              <Text style={styles.clearBtnText}>Clear All</Text>
-            </Pressable>
-          )}
-          <Pressable style={styles.doneBtn} onPress={onClose}>
-            <Text style={styles.doneBtnText}>Done</Text>
+          <Pressable
+            style={[styles.cancelBtn, !hasAnyFilter && styles.cancelBtnDisabled]}
+            onPress={clearAll}
+            disabled={!hasAnyFilter}
+          >
+            <Text style={styles.cancelBtnText}>Clear All</Text>
+          </Pressable>
+          <Pressable style={styles.saveBtn} onPress={applyAndClose}>
+            <Text style={styles.saveBtnText}>Done</Text>
           </Pressable>
         </View>
       </View>
@@ -120,53 +133,61 @@ const styles = StyleSheet.create({
     gap: Spacing.stackSm,
   },
   chip: {
-    paddingHorizontal: Spacing.stackMd,
-    paddingVertical: Spacing.stackSm,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     borderRadius: Radius.md,
     borderWidth: 1,
     borderColor: Palette.outlineVariant,
-    backgroundColor: Palette.surfaceContainerLow,
+    backgroundColor: Palette.surfaceContainerLowest,
   },
   chipSelected: {
     backgroundColor: Palette.primary,
     borderColor: Palette.primary,
   },
   chipText: {
-    ...Typography.bodyMd,
-    color: Palette.onSurfaceVariant,
+    ...Typography.labelSm,
+    color: Palette.onSurface,
+    textTransform: 'none',
+    letterSpacing: 0,
+    transform: [{ translateY: 1 }],
   },
   chipTextSelected: {
     color: Palette.onPrimary,
   },
   footer: {
     flexDirection: 'row',
-    gap: Spacing.stackSm,
+    gap: Spacing.stackMd,
     paddingHorizontal: Spacing.containerMargin,
     paddingVertical: Spacing.stackMd,
     borderTopWidth: 1,
     borderTopColor: Palette.outlineVariant,
   },
-  clearBtn: {
+  cancelBtn: {
     flex: 1,
-    paddingVertical: Spacing.stackMd,
-    borderRadius: Radius.md,
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderRadius: Radius.lg,
     borderWidth: 1,
     borderColor: Palette.outline,
-    alignItems: 'center',
   },
-  clearBtnText: {
-    ...Typography.titleLg,
+  cancelBtnDisabled: {
+    opacity: 0.4,
+  },
+  cancelBtnText: {
+    ...Typography.labelSm,
     color: Palette.onSurface,
+    transform: [{ translateY: 1 }],
   },
-  doneBtn: {
-    flex: 2,
-    paddingVertical: Spacing.stackMd,
-    borderRadius: Radius.md,
-    backgroundColor: Palette.primary,
+  saveBtn: {
+    flex: 1,
     alignItems: 'center',
+    paddingVertical: 12,
+    borderRadius: Radius.lg,
+    backgroundColor: Palette.primary,
   },
-  doneBtnText: {
-    ...Typography.titleLg,
+  saveBtnText: {
+    ...Typography.labelSm,
     color: Palette.onPrimary,
+    transform: [{ translateY: 1 }],
   },
 });

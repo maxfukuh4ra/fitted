@@ -1,16 +1,18 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { Palette, Radius, Spacing, Typography } from '@/constants/design';
+import { FontFamilies, Palette, Radius, Spacing, Typography } from '@/constants/design';
 
 type Props = {
   visible: boolean;
   outfitName: string;
   addToFavorites: boolean;
+  saveToCollection: boolean;
   saving: boolean;
   saveError: string | null;
   onChangeName: (name: string) => void;
   onToggleFavorites: () => void;
+  onToggleSaveToCollection: () => void;
   onSave: () => void;
   onClose: () => void;
 };
@@ -19,10 +21,12 @@ export function SaveOutfitModal({
   visible,
   outfitName,
   addToFavorites,
+  saveToCollection,
   saving,
   saveError,
   onChangeName,
   onToggleFavorites,
+  onToggleSaveToCollection,
   onSave,
   onClose,
 }: Props) {
@@ -31,44 +35,59 @@ export function SaveOutfitModal({
       <Pressable style={styles.overlay} onPress={onClose}>
         <Pressable style={styles.sheet} onPress={() => {}}>
           <View style={styles.handle} />
-          <Text style={styles.title}>Save Outfit</Text>
 
-          <TextInput
-            style={styles.nameInput}
-            placeholder="Outfit name (optional)"
-            placeholderTextColor={Palette.onSurfaceVariant}
-            value={outfitName}
-            onChangeText={onChangeName}
-            maxLength={80}
-            returnKeyType="done"
-          />
-
-          <Pressable style={styles.favRow} onPress={onToggleFavorites}>
-            <MaterialIcons
-              name={addToFavorites ? 'favorite' : 'favorite-border'}
-              size={24}
-              color={addToFavorites ? Palette.error : Palette.onSurface}
-            />
-            <Text style={styles.favLabel}>Add to Favorites</Text>
-          </Pressable>
-
-          <View style={styles.collectionsRow}>
-            <Text style={styles.collectionsLabel}>Save to Collection</Text>
-            <Text style={styles.comingSoon}>Coming soon</Text>
+          <View style={styles.headerRow}>
+            <Text style={styles.title}>Save Outfit</Text>
+            <Pressable
+              style={[styles.toggleBtn, styles.favBtn, addToFavorites && styles.toggleSelected]}
+              onPress={onToggleFavorites}
+            >
+              <MaterialIcons
+                name={addToFavorites ? 'favorite' : 'favorite-border'}
+                size={18}
+                color={addToFavorites ? Palette.error : Palette.onSurfaceVariant}
+              />
+              <Text style={styles.favText}>{addToFavorites ? 'Favorited' : 'Favorite'}</Text>
+            </Pressable>
           </View>
 
-          {saveError && <Text style={styles.errorText}>{saveError}</Text>}
+          <View style={styles.nameInputWrap}>
+            <Text
+              pointerEvents="none"
+              style={[styles.nameValueText, outfitName.length === 0 && styles.namePlaceholder]}
+              numberOfLines={1}
+            >
+              {outfitName.length > 0 ? outfitName : 'Enter name (optional)'}
+            </Text>
+            <TextInput
+              style={styles.nameInput}
+              value={outfitName}
+              onChangeText={onChangeName}
+              maxLength={80}
+              selectionColor={Palette.primary}
+            />
+          </View>
+
+          <Pressable
+            style={[styles.toggleBtn, saveToCollection && styles.toggleSelected]}
+            onPress={onToggleSaveToCollection}
+          >
+            <MaterialIcons
+              name={saveToCollection ? 'bookmark' : 'bookmark-border'}
+              size={20}
+              color={saveToCollection ? Palette.primary : Palette.onSurfaceVariant}
+            />
+            <Text style={styles.btnText}>Save to Collection</Text>
+          </Pressable>
+
+          {saveError ? <Text style={styles.errorText}>{saveError}</Text> : null}
 
           <View style={styles.actions}>
             <Pressable style={styles.cancelBtn} onPress={onClose}>
               <Text style={styles.cancelBtnText}>Cancel</Text>
             </Pressable>
-            <Pressable
-              style={[styles.confirmBtn, saving && styles.confirmBtnDisabled]}
-              onPress={onSave}
-              disabled={saving}
-            >
-              <Text style={styles.confirmBtnText}>{saving ? 'Saving…' : 'Save'}</Text>
+            <Pressable style={[styles.saveBtn, saving && styles.saveBtnDisabled]} onPress={onSave} disabled={saving}>
+              <Text style={styles.saveBtnText}>{saving ? 'Saving…' : 'Save'}</Text>
             </Pressable>
           </View>
         </Pressable>
@@ -98,44 +117,72 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginBottom: Spacing.stackSm,
   },
-  title: {
-    ...Typography.headlineMd,
-    color: Palette.onSurface,
-  },
-  nameInput: {
-    ...Typography.bodyMd,
-    color: Palette.onSurface,
-    borderWidth: 1,
-    borderColor: Palette.outlineVariant,
-    borderRadius: Radius.md,
-    paddingHorizontal: Spacing.stackMd,
-    paddingVertical: Spacing.stackSm,
-  },
-  favRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.stackMd,
-    paddingVertical: Spacing.stackSm,
-  },
-  favLabel: {
-    ...Typography.bodyMd,
-    color: Palette.onSurface,
-  },
-  collectionsRow: {
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: Spacing.stackSm,
-    borderTopWidth: 1,
-    borderTopColor: Palette.outlineVariant,
   },
-  collectionsLabel: {
-    ...Typography.bodyMd,
+  title: {
+    ...Typography.headlineMd,
+    color: Palette.onSurface,
+    flex: 1,
+  },
+  toggleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.stackSm,
+    height: 48,
+    paddingHorizontal: Spacing.stackMd,
+    borderWidth: 1,
+    borderColor: Palette.outlineVariant,
+    borderRadius: Radius.md,
+  },
+  favBtn: {
+    height: 32,
+    gap: 6,
+    paddingHorizontal: Spacing.stackSm,
+    borderRadius: Radius.sm,
+  },
+  toggleSelected: {
+    borderColor: Palette.primary,
+    backgroundColor: Palette.surfaceContainerLow,
+  },
+  btnText: {
+    ...Typography.labelSm,
     color: Palette.onSurface,
   },
-  comingSoon: {
+  favText: {
     ...Typography.labelSm,
+    color: Palette.onSurface,
+    transform: [{ translateY: 1 }],
+  },
+  nameInputWrap: {
+    height: 48,
+    borderWidth: 1,
+    borderColor: Palette.outlineVariant,
+    borderRadius: Radius.md,
+    overflow: 'hidden',
+  },
+  nameValueText: {
+    fontFamily: FontFamilies.body,
+    fontSize: 16,
+    position: 'absolute',
+    left: Spacing.stackMd,
+    right: Spacing.stackMd,
+    top: 13,
+    color: Palette.onSurface,
+  },
+  namePlaceholder: {
     color: Palette.onSurfaceVariant,
+  },
+  nameInput: {
+    fontFamily: FontFamilies.body,
+    fontSize: 16,
+    height: 48,
+    color: 'transparent',
+    paddingHorizontal: Spacing.stackMd,
+    paddingVertical: 0,
+    textAlignVertical: 'center',
   },
   errorText: {
     ...Typography.bodyMd,
@@ -144,34 +191,33 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     gap: Spacing.stackMd,
-    paddingTop: Spacing.stackSm,
   },
   cancelBtn: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.stackMd,
-    borderRadius: Radius.md,
+    paddingVertical: 12,
+    borderRadius: Radius.lg,
     borderWidth: 1,
     borderColor: Palette.outline,
   },
   cancelBtnText: {
-    ...Typography.titleLg,
+    ...Typography.labelSm,
     color: Palette.onSurface,
+    transform: [{ translateY: 1 }],
   },
-  confirmBtn: {
+  saveBtn: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.stackMd,
-    borderRadius: Radius.md,
+    paddingVertical: 12,
+    borderRadius: Radius.lg,
     backgroundColor: Palette.primary,
   },
-  confirmBtnDisabled: {
+  saveBtnDisabled: {
     opacity: 0.4,
   },
-  confirmBtnText: {
-    ...Typography.titleLg,
+  saveBtnText: {
+    ...Typography.labelSm,
     color: Palette.onPrimary,
+    transform: [{ translateY: 1 }],
   },
 });
