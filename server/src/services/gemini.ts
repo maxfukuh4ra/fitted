@@ -22,7 +22,7 @@ Ensure the clothing item is fully visible and uncropped.
 Standardize orientation:
 Tops should face upright.
 Pants should be vertically aligned.
-Shoes should face consistently.
+The shoes must be standing upright and oriented so that the front is directly toward the camera. Do NOT angle the shoes.
 Use soft, even studio lighting.
 Generate a clean, minimal, premium shopping-listing appearance.
 Keep image photorealistic.
