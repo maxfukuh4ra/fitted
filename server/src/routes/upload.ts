@@ -32,17 +32,25 @@ router.post('/prepare-image', upload.single('image'), async (req: Request, res: 
   const { data: { user } } = await supabase.auth.getUser(token);
   if (!user) return res.status(401).json({ error: 'unauthorized' });
 
+  const testurl = "https://esmkcpqpmqcufxnqxicx.supabase.co/storage/v1/object/public/clothing-images/93ef1e92-ad79-45ce-8505-53851e1f3036/1780641400740.png"
+  return res.status(200).json({ success: true, imageUrl: testurl });
+/*
   console.log("User authenticated:", user.id);
   const buffer = req.file!.buffer;
   const base64 = `data:${req.file!.mimetype};base64,${buffer.toString('base64')}`;
   console.log("Calling Gemini API for image standardization...");
   const standardized = await standardizeImage(base64);
-  const cleanedBuffer = Buffer.from(standardized, 'base64');
-  //TODO: RemoveBG
+  //NOTE: Uncomment lines below to activate base64
+  // console.log("Image standardized, calling remove.bg for background removal...");
+  // const backgroundRemoved = await removeBackground(standardized);
+  // const base64Data = backgroundRemoved.replace(/^data:image\/\w+;base64,/, '');
+  // const cleanedBuffer = Buffer.from(base64Data, 'base64');
+  //NOTE: Comment line below out when using removebg
+  const cleanedBuffer = Buffer.from(standardized, 'base64'); // remove when removebg active
   const url = await uploadToStorage(cleanedBuffer, user.id);
   console.log("Image processed and uploaded, URL:", url);
 
-  return res.status(200).json({ success: true, imageUrl: url });
+  return res.status(200).json({ success: true, imageUrl: url });*/
 });
 
 // POST /api/confirm-image
@@ -56,9 +64,11 @@ router.post('/confirm-image', async (req: Request, res: Response) => {
   if (!user) return res.status(401).json({ error: 'unauthorized' });
 
   const { imageUrl, category, subcategory, name } = req.body;
+
   if (!imageUrl || !category) {
     return res.status(400).json({ error: 'imageUrl and category are required' });
   }
+  console.log("Inserting item into database for user:", user.id);
   const { error: insertError } = await supabase.from('items').insert({
     user_id: user.id,
     image_url: imageUrl,
@@ -66,6 +76,7 @@ router.post('/confirm-image', async (req: Request, res: Response) => {
     subcategory: subcategory || null,
     item_name: name || null,
   });
+  console.log("Database insert attempted, reuslt:", insertError ? insertError.message : "success");
 
   if (insertError) {
     return res.status(500).json({ success: false, error: insertError.message });
