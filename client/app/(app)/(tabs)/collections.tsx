@@ -11,65 +11,62 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Palette, Radius, Spacing, Typography } from '@/constants/design';
-import { type Collection } from '@/lib/collections';
-
-const DUMMY_USER_ID = 'demo-user';
-const DUMMY_COLLECTIONS: Collection[] = [
-  {
-    id: 'demo-collection-1',
-    user_id: DUMMY_USER_ID,
-    name: 'Gym',
-    is_favorite: false,
-  },
-  {
-    id: 'demo-collection-2',
-    user_id: DUMMY_USER_ID,
-    name: 'School',
-    is_favorite: false,
-  },
-];
-const DUMMY_ITEM_COUNTS: Record<string, number> = {
-  'demo-collection-1': 12,
-  'demo-collection-2': 8,
-};
-
-function getCollectionItemCount(collection: Collection) {
-  return DUMMY_ITEM_COUNTS[collection.id] ?? 0;
-}
+import { getCurrentUser } from '@/lib/auth';
+import { createCollection, fetchCollections, type Collection } from '@/lib/collections';
 
 export default function CollectionsScreen() {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function loadCollections() {
+  async function loadCollections() {
     setIsLoading(true);
-    setCollections(DUMMY_COLLECTIONS);
-    setIsLoading(false);
+    setError(null);
+    try {
+      const user = await getCurrentUser();
+      if (!user) {
+        setCollections([]);
+        setError('Sign in to view your collections.');
+        return;
+      }
+      const data = await fetchCollections(user.id);
+      setCollections(data);
+    } catch (e) {
+      setCollections([]);
+      setError(e instanceof Error ? e.message : 'Failed to load collections.');
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   useEffect(() => {
     loadCollections();
   }, []);
 
-  function handleCreateCollection() {
-    if (isSubmitting) {
-      return;
-    }
+  async function handleCreateCollection() {
+    if (isSubmitting) return;
 
     setIsSubmitting(true);
-    setCollections((prev) =>
-      [
-        ...prev,
-        {
-          id: `demo-collection-${prev.length + 1}`,
-          user_id: DUMMY_USER_ID,
-          name: `New collection ${prev.length + 1}`,
-          is_favorite: false,
-        },
-      ].sort((a, b) => a.name.localeCompare(b.name))
-    );
-    setIsSubmitting(false);
+    try {
+      const user = await getCurrentUser();
+      if (!user) {
+        setError('Sign in to create a collection.');
+        return;
+      }
+
+      const created = await createCollection(
+        user.id,
+        `New collection ${collections.length + 1}`,
+      );
+      setCollections((prev) =>
+        [...prev, created].sort((a, b) => a.name.localeCompare(b.name)),
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to create collection.');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -97,6 +94,10 @@ export default function CollectionsScreen() {
           )}
         </Pressable>
 
+        {error && !isLoading && (
+          <Text style={styles.errorText}>{error}</Text>
+        )}
+
         {isLoading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="small" color={Palette.primary} />
@@ -115,7 +116,9 @@ export default function CollectionsScreen() {
             ]}
             columnWrapperStyle={collections.length > 1 ? styles.listRow : undefined}
             ListEmptyComponent={
-              <Text style={styles.infoText}>No collections yet. Create your first one.</Text>
+              !error ? (
+                <Text style={styles.infoText}>No collections yet. Create your first one.</Text>
+              ) : null
             }
             renderItem={({ item }) => (
               <View style={styles.collectionItem}>
@@ -128,12 +131,12 @@ export default function CollectionsScreen() {
                     {item.name}
                   </Text>
                   <Text style={styles.collectionMeta}>
-                    {getCollectionItemCount(item)} items
+                    {item.outfit_count} outfits
                   </Text>
                 </View>
               </View>
             )}
-            onRefresh={loadCollections}
+            onRefresh={() => void loadCollections()}
             refreshing={isLoading}
           />
         )}
@@ -233,6 +236,12 @@ const styles = StyleSheet.create({
   infoText: {
     ...Typography.bodyMd,
     color: Palette.onSurfaceVariant,
+    textAlign: 'center',
+    marginTop: Spacing.stackMd,
+  },
+  errorText: {
+    ...Typography.bodyMd,
+    color: Palette.error,
     textAlign: 'center',
     marginTop: Spacing.stackMd,
   },

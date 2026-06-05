@@ -5,18 +5,25 @@ export type Collection = {
   user_id: string;
   name: string;
   is_favorite: boolean;
+  outfit_count: number;
 };
 
 export async function fetchCollections(userId: string) {
   const { data, error } = await supabase
     .from('collections')
-    .select('id, user_id, name, is_favorite')
+    .select('id, user_id, name, is_favorite, collection_outfits(count)')
     .eq('user_id', userId)
     .order('name', { ascending: true });
 
   if (error) throw error;
 
-  return (data || []) as Collection[];
+  return (data || []).map((row: any) => ({
+    id: row.id,
+    user_id: row.user_id,
+    name: row.name,
+    is_favorite: row.is_favorite,
+    outfit_count: row.collection_outfits?.[0]?.count ?? 0,
+  })) as Collection[];
 }
 
 export async function createCollection(userId: string, name: string) {
@@ -36,5 +43,5 @@ export async function createCollection(userId: string, name: string) {
 
   if (error) throw error;
 
-  return data as Collection;
+  return { ...data, outfit_count: 0 } as Collection;
 }
