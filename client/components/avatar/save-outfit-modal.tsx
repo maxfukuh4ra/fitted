@@ -3,15 +3,25 @@ import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-nativ
 
 import { FontFamilies, Palette, Radius, Spacing, Typography } from '@/constants/design';
 
+export type OutfitVisibility = 'private' | 'friends' | 'public';
+
+const VISIBILITY_OPTIONS: { value: OutfitVisibility; icon: string; label: string }[] = [
+  { value: 'private', icon: 'lock', label: 'Private' },
+  { value: 'friends', icon: 'people', label: 'Friends' },
+  { value: 'public', icon: 'public', label: 'Public' },
+];
+
 type Props = {
   visible: boolean;
   outfitName: string;
   addToFavorites: boolean;
+  visibility: OutfitVisibility;
   saveToCollection: boolean;
   saving: boolean;
   saveError: string | null;
   onChangeName: (name: string) => void;
   onToggleFavorites: () => void;
+  onChangeVisibility: (v: OutfitVisibility) => void;
   onToggleSaveToCollection: () => void;
   onSave: () => void;
   onClose: () => void;
@@ -21,11 +31,13 @@ export function SaveOutfitModal({
   visible,
   outfitName,
   addToFavorites,
+  visibility,
   saveToCollection,
   saving,
   saveError,
   onChangeName,
   onToggleFavorites,
+  onChangeVisibility,
   onToggleSaveToCollection,
   onSave,
   onClose,
@@ -66,6 +78,30 @@ export function SaveOutfitModal({
               maxLength={80}
               selectionColor={Palette.primary}
             />
+          </View>
+
+          <View style={styles.visibilityRow}>
+            <Text style={styles.visibilityLabel}>Visibility</Text>
+            <View style={styles.visibilityPicker}>
+              {VISIBILITY_OPTIONS.map((opt) => {
+                const active = visibility === opt.value;
+                return (
+                  <Pressable
+                    key={opt.value}
+                    style={[styles.visibilityBtn, active && styles.visibilityBtnActive]}
+                    onPress={() => onChangeVisibility(opt.value)}
+                    accessibilityLabel={opt.label}
+                    hitSlop={4}
+                  >
+                    <MaterialIcons
+                      name={opt.icon as 'lock' | 'people' | 'public'}
+                      size={16}
+                      color={active ? Palette.onPrimary : Palette.onSurfaceVariant}
+                    />
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
 
           <Pressable
@@ -183,6 +219,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.stackMd,
     paddingVertical: 0,
     textAlignVertical: 'center',
+  },
+  visibilityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  visibilityLabel: {
+    ...Typography.labelSm,
+    color: Palette.onSurfaceVariant,
+    textTransform: 'none',
+    letterSpacing: 0,
+  },
+  visibilityPicker: {
+    flexDirection: 'row',
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Palette.outlineVariant,
+    overflow: 'hidden',
+  },
+  visibilityBtn: {
+    paddingHorizontal: Spacing.stackSm,
+    paddingVertical: 8,
+    backgroundColor: Palette.surfaceContainerLow,
+  },
+  visibilityBtnActive: {
+    backgroundColor: Palette.primary,
   },
   errorText: {
     ...Typography.bodyMd,
