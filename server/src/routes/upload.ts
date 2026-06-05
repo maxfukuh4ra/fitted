@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { standardizeImage } from '../services/gemini';
 import { removeBackground } from '../services/removebg';
@@ -9,41 +9,92 @@ const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_KEY!
 );
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: (_req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only JPEG, PNG, and WebP images are allowed'));
+    }
+  },
+});
 const router = Router();
 
-// POST /api/process-image, upload pipeline for photos
-router.post('/process-image', upload.single('image'), async (req: Request, res: Response) => {
+// POST /api/prepare-image
+// uploads + AI processes image, returns url for user preview — does NOT insert to DB
+router.post('/prepare-image', upload.single('image'), async (req: Request, res: Response) => {
+  console.log("prepare-image called");
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ error: 'no token' });
-  
-  const { data: { user }, error } = await supabase.auth.getUser(token);
+
+  const { data: { user } } = await supabase.auth.getUser(token);
   if (!user) return res.status(401).json({ error: 'unauthorized' });
-  
-  const userId = user.id;
-  const category = req.body.category;
+
+  console.log("User authenticated:", user.id);
   const buffer = req.file!.buffer;
+  const base64 = `data:${req.file!.mimetype};base64,${buffer.toString('base64')}`;
+  console.log("Calling Gemini API for image standardization...");
+  const standardized = await standardizeImage(base64);
+  const cleanedBuffer = Buffer.from(standardized, 'base64');
+  //TODO: RemoveBG
+  const url = await uploadToStorage(cleanedBuffer, user.id);
+  console.log("Image processed and uploaded, URL:", url);
 
-  /*
-  const standardized = await standardizeImage(imageBase64);
-  const cleaned = await removeBackground(standardized);
-  */
-  //TODO: replace imageBase64 with cleaned once done
-  const url = await uploadToStorage(buffer, userId); //upload image to s3 bucket
+  return res.status(200).json({ success: true, imageUrl: url });
+});
 
-  //insert into user items table
+// POST /api/confirm-image
+// user acks preview — inserts into items table, no file upload
+// use subcategory for category
+router.post('/confirm-image', async (req: Request, res: Response) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'no token' });
+
+  const { data: { user } } = await supabase.auth.getUser(token);
+  if (!user) return res.status(401).json({ error: 'unauthorized' });
+
+  const { imageUrl, category, subcategory, name } = req.body;
+  if (!imageUrl || !category) {
+    return res.status(400).json({ error: 'imageUrl and category are required' });
+  }
   const { error: insertError } = await supabase.from('items').insert({
-    user_id: userId,
-    image_url: url,
-    category,
+    user_id: user.id,
+    image_url: imageUrl,
+    category: category,
+    subcategory: subcategory || null,
+    item_name: name || null,
   });
 
   if (insertError) {
-    return res.status(500).json({ success: false, error: insertError.message,});
+    return res.status(500).json({ success: false, error: insertError.message });
   }
+  console.log("sucess")
 
-  return res.status(200).json({ success: true, imageUrl: url,});
- 
+  return res.status(200).json({ success: true });
+});
+
+// POST /api/upload-image, raw upload to supabase storage only
+router.post('/upload-image', upload.single('image'), async (req: Request, res: Response) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'no token' });
+
+  const { data: { user } } = await supabase.auth.getUser(token);
+  if (!user) return res.status(401).json({ error: 'unauthorized' });
+
+  const buffer = req.file!.buffer;
+  const url = await uploadToStorage(buffer, user.id);
+
+  return res.status(200).json({ success: true, imageUrl: url });
+});
+
+router.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  if (err instanceof multer.MulterError || err.message.includes('Only')) {
+    return res.status(400).json({ error: err.message });
+  }
+  console.log('Unexpected error:', err);
+  return res.status(500).json({ error: 'Internal server error' });
 });
 
 export default router;

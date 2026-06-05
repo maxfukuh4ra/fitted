@@ -1,0 +1,268 @@
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+
+import { FilterModal } from '@/components/avatar/filter-modal';
+import type { SubcategoryFilters } from '@/components/avatar/filter-modal';
+import { SaveOutfitModal } from '@/components/avatar/save-outfit-modal';
+import { SlotRow } from '@/components/avatar/slot-row';
+import { SLOTS, SUB_TO_CAT } from '@/components/avatar/slots';
+import type { SlotCategory, SlotIndices } from '@/components/avatar/slots';
+import { MainHeader } from '@/components/ui/main-header';
+import { Category } from '@/constants/categories';
+import { Palette, Radius, Spacing, Typography } from '@/constants/design';
+import { fetchClosetItems } from '@/lib/items';
+import { supabase } from '@/lib/supabase';
+import type { ClosetItem } from '@/lib/types/closet';
+
+export default function AvatarScreen() {
+  const tabBarHeight = useBottomTabBarHeight();
+  const [items, setItems] = useState<ClosetItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [indices, setIndices] = useState<SlotIndices>({
+    [Category.TOPS]: 0,
+    [Category.BOTTOMS]: 0,
+    [Category.SHOES]: 0,
+  });
+  const [filters, setFilters] = useState<SubcategoryFilters>({
+    [Category.TOPS]: [],
+    [Category.BOTTOMS]: [],
+    [Category.SHOES]: [],
+  });
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [addToFavorites, setAddToFavorites] = useState(false);
+  const [outfitName, setOutfitName] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const uid = session?.user?.id;
+        if (!uid) { setError('Sign in to create outfits.'); setLoading(false); return; }
+        const fetched = await fetchClosetItems(uid);
+        setItems(fetched);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Failed to load items.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  const grouped = useMemo(() => {
+    const result: Record<SlotCategory, ClosetItem[]> = {
+      [Category.TOPS]: [],
+      [Category.BOTTOMS]: [],
+      [Category.SHOES]: [],
+    };
+    for (const item of items) {
+      const catFromSub = item.subcategory ? SUB_TO_CAT[item.subcategory.toLowerCase()] : undefined;
+      const catFromField = item.category?.toLowerCase() as SlotCategory | undefined;
+
+      const cat = catFromSub ?? catFromField;
+      if (!cat || !(cat in result)) continue;
+
+      const activeFilters = filters[cat];
+      if (activeFilters.length > 0 && item.subcategory && !activeFilters.some((f) => f.toLowerCase() === item.subcategory!.toLowerCase())) continue;
+
+      result[cat].push(item);
+    }
+    return result;
+  }, [items, filters]);
+
+  const canSave = SLOTS.every(({ category }) => grouped[category].length > 0);
+
+  const activeFilterCount = SLOTS.reduce((sum, { category }) => sum + filters[category].length, 0);
+  const hasActiveFilters = activeFilterCount > 0;
+
+  const navigate = (category: SlotCategory, dir: 1 | -1) => {
+    const len = grouped[category].length;
+    if (len === 0) return;
+    setIndices((prev) => ({ ...prev, [category]: (prev[category] + dir + len) % len }));
+  };
+
+  const openModal = () => {
+    setAddToFavorites(false);
+    setOutfitName('');
+    setSaveError(null);
+    setModalVisible(true);
+  };
+
+  const saveOutfit = async () => {
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const uid = session?.user?.id;
+      if (!uid) throw new Error('Not signed in.');
+
+      const { data: outfitData, error: outfitError } = await supabase
+        .from('outfits')
+        .insert([{ user_id: uid, name: outfitName.trim() || null }])
+        .select();
+      if (outfitError) throw outfitError;
+
+      const outfitId = outfitData?.[0]?.id;
+      if (!outfitId) throw new Error('Failed to create outfit.');
+
+      const outfitItems = SLOTS.map(({ category, slot }) => ({
+        outfit_id: outfitId,
+        item_id: grouped[category][indices[category]]?.id,
+        slot,
+      })).filter((r) => r.item_id);
+
+      const { error: itemsError } = await supabase.from('outfit_items').insert(outfitItems);
+      if (itemsError) throw itemsError;
+
+      setModalVisible(false);
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : 'Failed to save outfit.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator color={Palette.primary} size="large" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.screen}>
+      <StatusBar style="dark" />
+      <MainHeader />
+
+      <View style={[styles.body, { paddingBottom: tabBarHeight }]}>
+        <Pressable
+          style={[styles.filterBtn, hasActiveFilters && styles.filterBtnActive]}
+          onPress={() => setFilterModalVisible(true)}
+          hitSlop={8}
+        >
+          <MaterialIcons
+            name="tune"
+            size={20}
+            color={hasActiveFilters ? Palette.onPrimary : Palette.onSurface}
+          />
+        </Pressable>
+        {SLOTS.map(({ label, category, slotFlex }) => (
+          <SlotRow
+            key={category}
+            label={label}
+            category={category}
+            slotFlex={slotFlex}
+            slotItems={grouped[category]}
+            idx={indices[category]}
+            onNavigate={(dir) => navigate(category, dir)}
+          />
+        ))}
+
+        <View style={styles.actions}>
+          <Pressable
+            style={[styles.saveBtn, !canSave && styles.saveBtnDisabled]}
+            onPress={openModal}
+            disabled={!canSave}
+          >
+            <MaterialIcons name="bookmark-border" size={20} color={Palette.onPrimary} />
+            <Text style={styles.saveBtnText}>Save Outfit</Text>
+          </Pressable>
+        </View>
+      </View>
+
+      <FilterModal
+        visible={filterModalVisible}
+        filters={filters}
+        onChangeFilters={setFilters}
+        onClose={() => setFilterModalVisible(false)}
+      />
+
+      <SaveOutfitModal
+        visible={modalVisible}
+        outfitName={outfitName}
+        addToFavorites={addToFavorites}
+        saving={saving}
+        saveError={saveError}
+        onChangeName={setOutfitName}
+        onToggleFavorites={() => setAddToFavorites((v) => !v)}
+        onSave={saveOutfit}
+        onClose={() => setModalVisible(false)}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: Palette.background,
+  },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Palette.background,
+  },
+  filterBtn: {
+    position: 'absolute',
+    top: Spacing.stackMd,
+    right: Spacing.containerMargin,
+    zIndex: 1,
+    padding: Spacing.stackSm,
+    borderRadius: Radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Palette.surfaceContainerLow,
+    borderWidth: 1,
+    borderColor: Palette.outlineVariant,
+  },
+  filterBtnActive: {
+    backgroundColor: Palette.primary,
+    borderColor: Palette.primary,
+  },
+  body: {
+    flex: 1,
+    paddingHorizontal: Spacing.containerMargin,
+    paddingTop: Spacing.stackMd,
+    gap: Spacing.stackSm,
+  },
+  actions: {
+    paddingVertical: Spacing.stackMd,
+  },
+  saveBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.stackSm,
+    backgroundColor: Palette.primary,
+    borderRadius: Radius.md,
+    paddingVertical: Spacing.stackMd,
+  },
+  saveBtnDisabled: {
+    opacity: 0.4,
+  },
+  saveBtnText: {
+    ...Typography.titleLg,
+    color: Palette.onPrimary,
+  },
+  errorText: {
+    ...Typography.bodyMd,
+    color: Palette.error,
+  },
+});
