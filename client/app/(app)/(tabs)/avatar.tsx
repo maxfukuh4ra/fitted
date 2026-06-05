@@ -36,7 +36,7 @@ export default function AvatarScreen() {
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [addToFavorites, setAddToFavorites] = useState(false);
-  const [visibility, setVisibility] = useState<OutfitVisibility>('private');
+  const [visibility, setVisibility] = useState<OutfitVisibility>('Private');
   const [saveToCollection, setSaveToCollection] = useState(false);
   const [outfitName, setOutfitName] = useState('');
   const [saving, setSaving] = useState(false);
@@ -93,7 +93,7 @@ export default function AvatarScreen() {
 
   const openModal = () => {
     setAddToFavorites(false);
-    setVisibility('private');
+    setVisibility('Private');
     setSaveToCollection(false);
     setOutfitName('');
     setSaveError(null);
@@ -112,7 +112,7 @@ export default function AvatarScreen() {
         .from('outfits')
         .insert([{ user_id: uid, name: outfitName.trim() || null, visibility }])
         .select();
-      if (outfitError) throw outfitError;
+      if (outfitError) throw new Error(outfitError.message);
 
       const outfitId = outfitData?.[0]?.id;
       if (!outfitId) throw new Error('Failed to create outfit.');
@@ -124,7 +124,7 @@ export default function AvatarScreen() {
       })).filter((r) => r.item_id);
 
       const { error: itemsError } = await supabase.from('outfit_items').insert(outfitItems);
-      if (itemsError) throw itemsError;
+      if (itemsError) throw new Error(itemsError.message);
 
       setModalVisible(false);
     } catch (e) {

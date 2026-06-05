@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { SLOTS } from "@/components/avatar/slots";
 import { Palette, Radius, Spacing, Typography } from "@/constants/design";
 import type { Friend, FriendOutfit } from "@/lib/friends";
 import {
@@ -24,6 +25,10 @@ import {
   removeFriend,
   sendFriendRequest,
 } from "@/lib/friends";
+
+const SLOT_IMAGE_HEIGHT: Record<string, number> = Object.fromEntries(
+  SLOTS.map(({ slot, slotFlex }) => [slot, slotFlex * 13])
+);
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -61,21 +66,22 @@ function OutfitCard({ outfit }: { outfit: FriendOutfit }) {
       </View>
       {outfit.name && <Text style={styles.outfitName}>{outfit.name}</Text>}
       <View style={styles.outfitImages}>
-        {sorted.map((item, i) =>
-          item.imageUrl ? (
+        {sorted.map((item, i) => {
+          const h = SLOT_IMAGE_HEIGHT[item.slot] ?? 72;
+          return item.imageUrl ? (
             <Image
               key={i}
               source={{ uri: item.imageUrl }}
-              style={styles.outfitItemImage}
-              contentFit="cover"
+              style={[styles.outfitItemImage, { height: h }]}
+              contentFit="contain"
             />
           ) : (
             <View
               key={i}
-              style={[styles.outfitItemImage, styles.outfitItemPlaceholder]}
+              style={[styles.outfitItemImage, styles.outfitItemPlaceholder, { height: h }]}
             />
-          ),
-        )}
+          );
+        })}
       </View>
     </View>
   );
@@ -525,11 +531,10 @@ const styles = StyleSheet.create({
   outfitImages: {
     flexDirection: "column",
     gap: Spacing.stackSm,
-    alignSelf: "flex-start",
+    alignSelf: "center",
   },
   outfitItemImage: {
     width: 72,
-    aspectRatio: 3 / 4,
     borderRadius: Radius.md,
     backgroundColor: Palette.surfaceContainerLow,
   },
