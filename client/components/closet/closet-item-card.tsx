@@ -1,4 +1,3 @@
-// Card for each item in the closet
 import { Image } from 'expo-image';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -10,7 +9,6 @@ type ClosetItemCardProps = {
   item: ClosetItem;
 };
 
-// Display item name if it exists, otherwise use subcategory
 function getItemDisplayName(item: ClosetItem): string {
   const name = item.item_name?.trim();
   if (name) {
