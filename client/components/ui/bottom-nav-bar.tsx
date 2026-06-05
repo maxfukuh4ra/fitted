@@ -1,12 +1,12 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { ComponentProps } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { ComponentProps, useEffect, useRef } from 'react';
+import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Palette, Spacing } from '@/constants/design';
 
 // Bottom navigation bar items
-export type BottomNavTab = 'closet' | 'collections' | 'upload' | 'calendar' | 'profile';
+export type BottomNavTab = 'closet' | 'collections' | 'avatar' | 'upload' | 'calendar' | 'profile';
 // Bottom navigation bar as a whole knows which one is active and what to do when a tab is pressed
 export type BottomNavBarProps = {
   activeTab: BottomNavTab;
@@ -22,13 +22,18 @@ type NavItemConfig = {
 const NAV_ITEMS: NavItemConfig[] = [
   { id: 'closet', label: 'My Closet', icon: 'checkroom' },
   { id: 'collections', label: 'Collections', icon: 'accessibility' },
+  { id: 'avatar', label: 'Avatar', icon: 'style' },
   { id: 'upload', label: 'Upload', icon: 'add-circle' },
   { id: 'calendar', label: 'Calendar', icon: 'calendar-month' },
   { id: 'profile', label: 'Profile', icon: 'person' },
 ];
 
 const ICON_SIZE = 24;
-const ACTIVE_SCALE = 1.1;
+const TAB_ANIMATION_CONFIG = {
+  friction: 6,
+  tension: 90,
+  useNativeDriver: true,
+} as const;
 
 // Each navigation item has an id, label, and icon
 type NavItemProps = {
@@ -39,22 +44,42 @@ type NavItemProps = {
 
 // Handle press event and navigation
 function NavItem({ item, isActive, onPress }: NavItemProps) {
+  const animation = useRef(new Animated.Value(isActive ? 1 : 0)).current;
+
+  useEffect(() => {
+    Animated.spring(animation, {
+      ...TAB_ANIMATION_CONFIG,
+      toValue: isActive ? 1 : 0,
+    }).start();
+  }, [animation, isActive]);
+
+  const scale = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.08],
+  });
+
+  const translateY = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -2],
+  });
+
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={item.label}
       accessibilityState={{ selected: isActive }}
       onPress={() => onPress(item.id)}
-      style={({ pressed }) => [
-        styles.navItem,
-        isActive && styles.navItemActive,
-        pressed && styles.navItemPressed,
-      ]}>
-      <MaterialIcons
-        name={item.icon}
-        size={isActive ? ICON_SIZE + 2 : ICON_SIZE}
-        color={isActive ? Palette.onSurface : Palette.outline}
-      />
+      style={({ pressed }) => [styles.navItem, pressed && styles.navItemPressed]}>
+      <Animated.View
+        style={{
+          transform: [{ translateY }, { scale }],
+        }}>
+        <MaterialIcons
+          name={item.icon}
+          size={isActive ? ICON_SIZE + 2 : ICON_SIZE}
+          color={isActive ? Palette.onSurface : Palette.outline}
+        />
+      </Animated.View>
     </Pressable>
   );
 }
@@ -97,13 +122,8 @@ const styles = StyleSheet.create({
   navItem: {
     alignItems: 'center',
     justifyContent: 'center',
-    transform: [{ scale: 1 }],
-  },
-  navItemActive: {
-    transform: [{ scale: ACTIVE_SCALE }],
   },
   navItemPressed: {
     opacity: 0.7,
-    transform: [{ scale: 0.95 }],
   },
 });

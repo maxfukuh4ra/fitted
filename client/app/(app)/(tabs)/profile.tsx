@@ -1,28 +1,87 @@
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Animated,
   Pressable,
   ScrollView,
   Text,
   TextInput,
+  type TextInputProps,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { GenderPicker } from "@/components/profile/gender-picker";
 import { styles } from "@/components/profile/profile-styles";
-import { capitalize, getInitials } from "@/components/profile/profile-utils";
+import {
+  capitalize,
+  getInitials,
+  inchesToFeetAndInches,
+} from "@/components/profile/profile-utils";
+import { MainHeader } from "@/components/ui/main-header";
 import { Palette, Typography } from "@/constants/design";
 import { useProfileEdit } from "@/hooks/use-profile-edit";
 import { signOut } from "@/lib/auth";
 import { getProfile, type UserProfile } from "@/lib/profile";
+
+type HeightEditorProps = {
+  feet: string;
+  inches: string;
+  setFeet: (value: string) => void;
+  setInches: (value: string) => void;
+  fieldProps: TextInputProps;
+};
+
+function HeightEditor({
+  feet,
+  inches,
+  setFeet,
+  setInches,
+  fieldProps,
+}: HeightEditorProps) {
+  return (
+    <View style={styles.heightRow}>
+      <View style={[styles.inputWrap, styles.feetWrap]}>
+        <TextInput
+          {...fieldProps}
+          style={[Typography.titleLg, styles.fieldInput]}
+          value={feet}
+          onChangeText={setFeet}
+          keyboardType="number-pad"
+          placeholder="ft"
+          placeholderTextColor={Palette.onSurfaceVariant}
+          maxLength={1}
+          returnKeyType="next"
+        />
+        <View style={styles.inputUnderline} />
+      </View>
+      <Text style={[Typography.titleLg, styles.heightSep]}>&apos;</Text>
+      <View style={[styles.inputWrap, styles.inchesWrap]}>
+        <TextInput
+          {...fieldProps}
+          style={[Typography.titleLg, styles.fieldInput]}
+          value={inches}
+          onChangeText={setInches}
+          keyboardType="number-pad"
+          placeholder="in"
+          placeholderTextColor={Palette.onSurfaceVariant}
+          maxLength={2}
+          returnKeyType="done"
+        />
+        <View style={styles.inputUnderline} />
+      </View>
+      <Text style={[Typography.titleLg, styles.heightSep]}>&quot;</Text>
+    </View>
+  );
+}
 
 export default function ProfileScreen() {
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const editTransition = useRef(new Animated.Value(0)).current;
 
   const edit = useProfileEdit(profile, (updated) => setProfile(updated));
 
@@ -33,6 +92,14 @@ export default function ProfileScreen() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    Animated.timing(editTransition, {
+      toValue: edit.editing ? 1 : 0,
+      duration: 220,
+      useNativeDriver: true,
+    }).start();
+  }, [edit.editing, editTransition]);
+
   const handleSignOut = async () => {
     await signOut();
     router.replace("/");
@@ -40,7 +107,8 @@ export default function ProfileScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+      <SafeAreaView style={styles.safeArea} edges={["left", "right"]}>
+        <MainHeader />
         <View style={styles.centered}>
           <ActivityIndicator color={Palette.primary} size="large" />
         </View>
@@ -50,7 +118,8 @@ export default function ProfileScreen() {
 
   if (error || !profile) {
     return (
-      <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+      <SafeAreaView style={styles.safeArea} edges={["left", "right"]}>
+        <MainHeader />
         <View style={styles.centered}>
           <Text style={styles.errorText}>
             {error ?? "Could not load profile."}
@@ -60,21 +129,37 @@ export default function ProfileScreen() {
     );
   }
 
-  const heightFeet = Math.floor((profile.height ?? 0) / 12);
-  const heightInches = (profile.height ?? 0) % 12;
-  const fieldProps = {
+  const fieldProps: TextInputProps = {
     editable: edit.editing,
     showSoftInputOnFocus: edit.editing,
     caretHidden: !edit.editing,
     pointerEvents: edit.editing ? ("auto" as const) : ("none" as const),
     underlineColorAndroid: "transparent" as const,
   };
+  const viewActionsOpacity = editTransition.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0],
+  });
+  const editActionsOpacity = editTransition.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],
+  });
+  const viewActionsTranslateY = editTransition.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 8],
+  });
+  const editActionsTranslateY = editTransition.interpolate({
+    inputRange: [0, 1],
+    outputRange: [8, 0],
+  });
+  const underlineOpacity = editTransition.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],
+  });
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
-      <View style={styles.topBar}>
-        <Text style={styles.wordmark}>FITTED</Text>
-      </View>
+    <SafeAreaView style={styles.safeArea} edges={["left", "right"]}>
+      <MainHeader />
 
       <ScrollView
         style={styles.scrollView}
@@ -101,14 +186,11 @@ export default function ProfileScreen() {
                 autoCapitalize="words"
                 returnKeyType="done"
               />
-              <View
-                style={[
-                  styles.nameUnderlineWrap,
-                  !edit.editing && styles.underlineHidden,
-                ]}
+              <Animated.View
+                style={[styles.nameUnderlineWrap, { opacity: underlineOpacity }]}
               >
                 <View style={styles.nameUnderline} />
-              </View>
+              </Animated.View>
             </View>
           </View>
           <Text style={styles.email}>{profile.email}</Text>
@@ -131,11 +213,8 @@ export default function ProfileScreen() {
                     maxLength={3}
                     returnKeyType="done"
                   />
-                  <View
-                    style={[
-                      styles.inputUnderline,
-                      !edit.editing && styles.underlineHidden,
-                    ]}
+                  <Animated.View
+                    style={[styles.inputUnderline, { opacity: underlineOpacity }]}
                   />
                 </View>
               </View>
@@ -144,50 +223,19 @@ export default function ProfileScreen() {
             <View style={[styles.card, styles.cardHalf]}>
               <Text style={styles.cardLabel}>HEIGHT</Text>
               <View style={styles.cardField}>
-                <View style={styles.heightRow}>
-                  <View style={[styles.inputWrap, styles.feetWrap]}>
-                    <TextInput
-                      {...fieldProps}
-                      style={[Typography.titleLg, styles.fieldInput]}
-                      value={edit.editing ? edit.draftFeet : String(heightFeet)}
-                      onChangeText={edit.setDraftFeet}
-                      keyboardType="number-pad"
-                      placeholder="ft"
-                      placeholderTextColor={Palette.onSurfaceVariant}
-                      maxLength={1}
-                      returnKeyType="next"
-                    />
-                    <View
-                      style={[
-                        styles.inputUnderline,
-                        !edit.editing && styles.underlineHidden,
-                      ]}
-                    />
-                  </View>
-                  <Text style={[Typography.titleLg, styles.heightSep]}>&apos;</Text>
-                  <View style={[styles.inputWrap, styles.inchesWrap]}>
-                    <TextInput
-                      {...fieldProps}
-                      style={[Typography.titleLg, styles.fieldInput]}
-                      value={
-                        edit.editing ? edit.draftInches : String(heightInches)
-                      }
-                      onChangeText={edit.setDraftInches}
-                      keyboardType="number-pad"
-                      placeholder="in"
-                      placeholderTextColor={Palette.onSurfaceVariant}
-                      maxLength={2}
-                      returnKeyType="done"
-                    />
-                    <View
-                      style={[
-                        styles.inputUnderline,
-                        !edit.editing && styles.underlineHidden,
-                      ]}
-                    />
-                  </View>
-                  <Text style={[Typography.titleLg, styles.heightSep]}>&quot;</Text>
-                </View>
+                {edit.editing ? (
+                  <HeightEditor
+                    feet={edit.draftFeet}
+                    inches={edit.draftInches}
+                    setFeet={edit.setDraftFeet}
+                    setInches={edit.setDraftInches}
+                    fieldProps={fieldProps}
+                  />
+                ) : (
+                  <Text style={[Typography.titleLg, styles.cardValue]}>
+                    {inchesToFeetAndInches(profile.height)}
+                  </Text>
+                )}
               </View>
             </View>
           </View>
@@ -195,10 +243,7 @@ export default function ProfileScreen() {
           <View style={styles.card}>
             <Text style={styles.cardLabel}>GENDER</Text>
             <View
-              style={[
-                styles.cardField,
-                edit.editing && styles.genderField,
-              ]}
+              style={[styles.cardField, edit.editing && styles.genderField]}
             >
               {edit.editing ? (
                 <GenderPicker
@@ -215,7 +260,47 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.profileActions}>
-          {edit.editing ? (
+          <Animated.View
+            pointerEvents={edit.editing ? "none" : "auto"}
+            style={[
+              styles.actionGroup,
+              {
+                opacity: viewActionsOpacity,
+                transform: [{ translateY: viewActionsTranslateY }],
+              },
+            ]}
+          >
+            <>
+              <Pressable
+                onPress={edit.startEditing}
+                style={({ pressed }) => [
+                  styles.editProfileButton,
+                  pressed && styles.buttonPressed,
+                ]}
+              >
+                <Text style={styles.editProfileButtonText}>Edit profile</Text>
+              </Pressable>
+              <Pressable
+                onPress={handleSignOut}
+                style={({ pressed }) => [
+                  styles.signOutButton,
+                  pressed && styles.buttonPressed,
+                ]}
+              >
+                <Text style={styles.signOutText}>Sign Out</Text>
+              </Pressable>
+            </>
+          </Animated.View>
+          <Animated.View
+            pointerEvents={edit.editing ? "auto" : "none"}
+            style={[
+              styles.actionGroup,
+              {
+                opacity: editActionsOpacity,
+                transform: [{ translateY: editActionsTranslateY }],
+              },
+            ]}
+          >
             <>
               <Pressable
                 onPress={edit.cancelEditing}
@@ -244,28 +329,7 @@ export default function ProfileScreen() {
                 </View>
               </Pressable>
             </>
-          ) : (
-            <>
-              <Pressable
-                onPress={edit.startEditing}
-                style={({ pressed }) => [
-                  styles.editProfileButton,
-                  pressed && styles.buttonPressed,
-                ]}
-              >
-                <Text style={styles.editProfileButtonText}>Edit profile</Text>
-              </Pressable>
-              <Pressable
-                onPress={handleSignOut}
-                style={({ pressed }) => [
-                  styles.signOutButton,
-                  pressed && styles.buttonPressed,
-                ]}
-              >
-                <Text style={styles.signOutText}>Sign Out</Text>
-              </Pressable>
-            </>
-          )}
+          </Animated.View>
         </View>
       </ScrollView>
     </SafeAreaView>
