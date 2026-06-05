@@ -17,6 +17,10 @@ import { Palette, Radius, Spacing, Typography } from '@/constants/design';
 
 type Props = {
   visible: boolean;
+  title?: string;
+  confirmLabel?: string;
+  showNameInput?: boolean;
+  emptyText?: string;
   collectionName: string;
   items: ClosetItem[];
   itemsLoading: boolean;
@@ -37,6 +41,10 @@ function getItemDisplayName(item: ClosetItem): string {
 
 export function CreateCollectionModal({
   visible,
+  title = 'Create Collection',
+  confirmLabel = 'Save',
+  showNameInput = true,
+  emptyText = 'No items in your closet yet.',
   collectionName,
   items,
   itemsLoading,
@@ -48,43 +56,51 @@ export function CreateCollectionModal({
   onSave,
   onClose,
 }: Props) {
+  const canSave = showNameInput
+    ? collectionName.trim().length > 0
+    : selectedItemIds.size > 0;
+
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.overlay} onPress={onClose}>
         <Pressable style={styles.sheet} onPress={() => {}}>
           <View style={styles.handle} />
-          <Text style={styles.title}>Create Collection</Text>
+          <Text style={styles.title}>{title}</Text>
 
-          <View style={styles.nameInputWrap}>
-            <Text
-              pointerEvents="none"
-              style={[
-                styles.nameValueText,
-                collectionName.length === 0 && styles.namePlaceholder,
-              ]}
-              numberOfLines={1}
-            >
-              {collectionName.length > 0 ? collectionName : 'Enter name'}
-            </Text>
-            <TextInput
-              style={styles.nameInput}
-              value={collectionName}
-              onChangeText={onChangeName}
-              maxLength={80}
-              returnKeyType="done"
-              accessibilityLabel="Collection name"
-              selectionColor={Palette.primary}
-            />
-          </View>
+          {showNameInput && (
+            <View style={styles.nameInputWrap}>
+              <Text
+                pointerEvents="none"
+                style={[
+                  styles.nameValueText,
+                  collectionName.length === 0 && styles.namePlaceholder,
+                ]}
+                numberOfLines={1}
+              >
+                {collectionName.length > 0 ? collectionName : 'Enter name'}
+              </Text>
+              <TextInput
+                style={styles.nameInput}
+                value={collectionName}
+                onChangeText={onChangeName}
+                maxLength={80}
+                returnKeyType="done"
+                accessibilityLabel="Collection name"
+                selectionColor={Palette.primary}
+              />
+            </View>
+          )}
 
-          <Text style={styles.sectionLabel}>Add items (optional)</Text>
+          <Text style={styles.sectionLabel}>
+            {showNameInput ? 'Add items (optional)' : 'Select items'}
+          </Text>
 
           {itemsLoading ? (
             <View style={styles.itemsLoading}>
               <ActivityIndicator size="small" color={Palette.primary} />
             </View>
           ) : items.length === 0 ? (
-            <Text style={styles.emptyText}>No items in your closet yet.</Text>
+            <Text style={styles.emptyText}>{emptyText}</Text>
           ) : (
             <FlatList
               data={items}
@@ -139,9 +155,11 @@ export function CreateCollectionModal({
             <Pressable
               style={[styles.confirmBtn, saving && styles.confirmBtnDisabled]}
               onPress={onSave}
-              disabled={saving || collectionName.trim().length === 0}
+              disabled={saving || !canSave}
             >
-              <Text style={styles.confirmBtnText}>{saving ? 'Saving…' : 'Save'}</Text>
+              <Text style={styles.confirmBtnText}>
+                {saving ? 'Saving…' : confirmLabel}
+              </Text>
             </Pressable>
           </View>
         </Pressable>

@@ -1,6 +1,8 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Image } from 'expo-image';
-import { useEffect, useState } from 'react';
+import { router } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -51,9 +53,11 @@ export default function CollectionsScreen() {
     }
   }
 
-  useEffect(() => {
-    loadCollections();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      void loadCollections();
+    }, []),
+  );
 
   async function openCreateModal() {
     setCollectionName('');
@@ -163,7 +167,12 @@ export default function CollectionsScreen() {
               ) : null
             }
             renderItem={({ item }) => (
-              <View style={styles.collectionItem}>
+              <Pressable
+                style={styles.collectionItem}
+                accessibilityRole="button"
+                accessibilityLabel={`Open ${item.name} collection`}
+                onPress={() => router.push(`/collection/${item.id}`)}
+              >
                 <View
                   style={styles.collectionImage}
                   accessibilityLabel={`${item.name} collection image`}
@@ -191,7 +200,7 @@ export default function CollectionsScreen() {
                     {item.item_count} items
                   </Text>
                 </View>
-              </View>
+              </Pressable>
             )}
             onRefresh={() => void loadCollections()}
             refreshing={isLoading}
