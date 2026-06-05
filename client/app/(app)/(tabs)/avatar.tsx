@@ -8,7 +8,7 @@ import { FilterModal } from '@/components/avatar/filter-modal';
 import type { SubcategoryFilters } from '@/components/avatar/filter-modal';
 import { SaveOutfitModal } from '@/components/avatar/save-outfit-modal';
 import { SlotRow } from '@/components/avatar/slot-row';
-import { SLOTS, SUB_TO_CAT } from '@/components/avatar/slots';
+import { CAT_TO_SLOT, SLOTS, SUB_TO_CAT } from '@/components/avatar/slots';
 import type { SlotCategory, SlotIndices } from '@/components/avatar/slots';
 import { MainHeader } from '@/components/ui/main-header';
 import { Category } from '@/constants/categories';
@@ -64,7 +64,7 @@ export default function AvatarScreen() {
     };
     for (const item of items) {
       const catFromSub = item.subcategory ? SUB_TO_CAT[item.subcategory.toLowerCase()] : undefined;
-      const catFromField = item.category?.toLowerCase() as SlotCategory | undefined;
+      const catFromField = item.category ? CAT_TO_SLOT[item.category.toLowerCase()] : undefined;
 
       const cat = catFromSub ?? catFromField;
       if (!cat || !(cat in result)) continue;

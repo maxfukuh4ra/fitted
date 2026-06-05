@@ -1,9 +1,8 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { SLOTS } from '@/components/avatar/slots';
+import { SLOT_SUBCATEGORIES, SLOTS } from '@/components/avatar/slots';
 import type { SlotCategory } from '@/components/avatar/slots';
-import { SUBCATEGORIES } from '@/constants/categories';
 import { Palette, Radius, Spacing, Typography } from '@/constants/design';
 
 export type SubcategoryFilters = Record<SlotCategory, string[]>;
@@ -42,7 +41,7 @@ export function FilterModal({ visible, filters, onChangeFilters, onClose }: Filt
 
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {SLOTS.map(({ label, category }) => {
-            const subs = SUBCATEGORIES[category];
+            const subs = SLOT_SUBCATEGORIES[category];
             const active = filters[category];
             return (
               <View key={category} style={styles.section}>

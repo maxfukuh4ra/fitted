@@ -108,6 +108,7 @@ describe('SLOTS', () => {
 });
 
 
+
 describe('SUB_TO_CAT', () => {
   it('maps known tops subcategories', () => {
     for (const sub of SUBCATEGORIES[Category.TOPS]) {
