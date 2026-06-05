@@ -1,8 +1,8 @@
 import { Redirect, Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 
-import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+import type { Session } from '@supabase/supabase-js';
 
 export default function AppLayout() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
