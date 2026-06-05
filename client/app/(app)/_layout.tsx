@@ -1,8 +1,8 @@
 import { Redirect, Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 
-import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+import type { Session } from '@supabase/supabase-js';
 
 export default function AppLayout() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
@@ -29,10 +29,7 @@ export default function AppLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="upload" />
-      <Stack.Screen
-        name="log-outfit"
-        options={{ presentation: 'card' }}
-      />
+      <Stack.Screen name="collection/[collectionId]" />
     </Stack>
   );
 }
