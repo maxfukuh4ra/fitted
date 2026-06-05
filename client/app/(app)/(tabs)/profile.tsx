@@ -7,18 +7,74 @@ import {
   ScrollView,
   Text,
   TextInput,
+  type TextInputProps,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { GenderPicker } from "@/components/profile/gender-picker";
 import { styles } from "@/components/profile/profile-styles";
-import { capitalize, getInitials } from "@/components/profile/profile-utils";
+import {
+  capitalize,
+  getInitials,
+  inchesToFeetAndInches,
+} from "@/components/profile/profile-utils";
 import { MainHeader } from "@/components/ui/main-header";
 import { Palette, Typography } from "@/constants/design";
 import { useProfileEdit } from "@/hooks/use-profile-edit";
 import { signOut } from "@/lib/auth";
 import { getProfile, type UserProfile } from "@/lib/profile";
+
+type HeightEditorProps = {
+  feet: string;
+  inches: string;
+  setFeet: (value: string) => void;
+  setInches: (value: string) => void;
+  fieldProps: TextInputProps;
+};
+
+function HeightEditor({
+  feet,
+  inches,
+  setFeet,
+  setInches,
+  fieldProps,
+}: HeightEditorProps) {
+  return (
+    <View style={styles.heightRow}>
+      <View style={[styles.inputWrap, styles.feetWrap]}>
+        <TextInput
+          {...fieldProps}
+          style={[Typography.titleLg, styles.fieldInput]}
+          value={feet}
+          onChangeText={setFeet}
+          keyboardType="number-pad"
+          placeholder="ft"
+          placeholderTextColor={Palette.onSurfaceVariant}
+          maxLength={1}
+          returnKeyType="next"
+        />
+        <View style={styles.inputUnderline} />
+      </View>
+      <Text style={[Typography.titleLg, styles.heightSep]}>&apos;</Text>
+      <View style={[styles.inputWrap, styles.inchesWrap]}>
+        <TextInput
+          {...fieldProps}
+          style={[Typography.titleLg, styles.fieldInput]}
+          value={inches}
+          onChangeText={setInches}
+          keyboardType="number-pad"
+          placeholder="in"
+          placeholderTextColor={Palette.onSurfaceVariant}
+          maxLength={2}
+          returnKeyType="done"
+        />
+        <View style={styles.inputUnderline} />
+      </View>
+      <Text style={[Typography.titleLg, styles.heightSep]}>&quot;</Text>
+    </View>
+  );
+}
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -73,9 +129,7 @@ export default function ProfileScreen() {
     );
   }
 
-  const heightFeet = Math.floor((profile.height ?? 0) / 12);
-  const heightInches = (profile.height ?? 0) % 12;
-  const fieldProps = {
+  const fieldProps: TextInputProps = {
     editable: edit.editing,
     showSoftInputOnFocus: edit.editing,
     caretHidden: !edit.editing,
@@ -169,44 +223,19 @@ export default function ProfileScreen() {
             <View style={[styles.card, styles.cardHalf]}>
               <Text style={styles.cardLabel}>HEIGHT</Text>
               <View style={styles.cardField}>
-                <View style={styles.heightRow}>
-                  <View style={[styles.inputWrap, styles.feetWrap]}>
-                    <TextInput
-                      {...fieldProps}
-                      style={[Typography.titleLg, styles.fieldInput]}
-                      value={edit.editing ? edit.draftFeet : String(heightFeet)}
-                      onChangeText={edit.setDraftFeet}
-                      keyboardType="number-pad"
-                      placeholder="ft"
-                      placeholderTextColor={Palette.onSurfaceVariant}
-                      maxLength={1}
-                      returnKeyType="next"
-                    />
-                    <Animated.View
-                      style={[styles.inputUnderline, { opacity: underlineOpacity }]}
-                    />
-                  </View>
-                  <Text style={[Typography.titleLg, styles.heightSep]}>&apos;</Text>
-                  <View style={[styles.inputWrap, styles.inchesWrap]}>
-                    <TextInput
-                      {...fieldProps}
-                      style={[Typography.titleLg, styles.fieldInput]}
-                      value={
-                        edit.editing ? edit.draftInches : String(heightInches)
-                      }
-                      onChangeText={edit.setDraftInches}
-                      keyboardType="number-pad"
-                      placeholder="in"
-                      placeholderTextColor={Palette.onSurfaceVariant}
-                      maxLength={2}
-                      returnKeyType="done"
-                    />
-                    <Animated.View
-                      style={[styles.inputUnderline, { opacity: underlineOpacity }]}
-                    />
-                  </View>
-                  <Text style={[Typography.titleLg, styles.heightSep]}>&quot;</Text>
-                </View>
+                {edit.editing ? (
+                  <HeightEditor
+                    feet={edit.draftFeet}
+                    inches={edit.draftInches}
+                    setFeet={edit.setDraftFeet}
+                    setInches={edit.setDraftInches}
+                    fieldProps={fieldProps}
+                  />
+                ) : (
+                  <Text style={[Typography.titleLg, styles.cardValue]}>
+                    {inchesToFeetAndInches(profile.height)}
+                  </Text>
+                )}
               </View>
             </View>
           </View>
@@ -214,10 +243,7 @@ export default function ProfileScreen() {
           <View style={styles.card}>
             <Text style={styles.cardLabel}>GENDER</Text>
             <View
-              style={[
-                styles.cardField,
-                edit.editing && styles.genderField,
-              ]}
+              style={[styles.cardField, edit.editing && styles.genderField]}
             >
               {edit.editing ? (
                 <GenderPicker
