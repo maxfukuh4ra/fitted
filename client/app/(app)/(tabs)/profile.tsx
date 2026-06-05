@@ -77,6 +77,21 @@ function HeightEditor({
   );
 }
 
+function FriendsButton({ onPress }: { onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.friendsBtn,
+        pressed && styles.buttonPressed,
+      ]}
+    >
+      <MaterialIcons name="people" size={18} color={Palette.onSurface} />
+      <Text style={styles.friendsBtnText}>Friends</Text>
+    </Pressable>
+  );
+}
+
 export default function ProfileScreen() {
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -161,8 +176,11 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={["left", "right"]}>
       <MainHeader />
-
-      <ScrollView
+      <View style={styles.body}>
+        {!edit.editing ? (
+          <FriendsButton onPress={() => router.push("/(app)/friends")} />
+        ) : null}
+        <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -282,16 +300,6 @@ export default function ProfileScreen() {
                 <Text style={styles.editProfileButtonText}>Edit profile</Text>
               </Pressable>
               <Pressable
-                onPress={() => router.push("/(app)/friends")}
-                style={({ pressed }) => [
-                  styles.friendsButton,
-                  pressed && styles.buttonPressed,
-                ]}
-              >
-                <MaterialIcons name="people" size={18} color={Palette.onSurface} />
-                <Text style={styles.friendsButtonText}>Friends</Text>
-              </Pressable>
-              <Pressable
                 onPress={handleSignOut}
                 style={({ pressed }) => [
                   styles.signOutButton,
@@ -343,6 +351,7 @@ export default function ProfileScreen() {
           </Animated.View>
         </View>
       </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }

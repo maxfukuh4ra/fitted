@@ -482,7 +482,11 @@ const styles = StyleSheet.create({
   },
   toggleBtnText: {
     ...Typography.labelSm,
+    fontSize: 11,
+    lineHeight: 11,
+    letterSpacing: 0.6,
     color: Palette.onSurfaceVariant,
+    transform: [{ translateY: 1 }],
   },
   toggleBtnTextActive: {
     color: Palette.onPrimary,
