@@ -1,8 +1,11 @@
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
+import { useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Animated,
   FlatList,
+  LayoutChangeEvent,
   RefreshControl,
   StyleSheet,
   Text,
@@ -16,8 +19,12 @@ import { Palette, Spacing, Typography } from '@/constants/design';
 import { useCloset } from '@/hooks/use-closet';
 import type { ClosetItem } from '@/lib/types/closet';
 
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<ClosetItem>);
+
 export default function ClosetScreen() {
   const tabBarHeight = useBottomTabBarHeight();
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const [headerHeight, setHeaderHeight] = useState(0);
   const {
     subcategoryFilters,
     selectedSubcategory,
@@ -28,6 +35,23 @@ export default function ClosetScreen() {
     error,
     refresh,
   } = useCloset();
+
+  const headerTranslateY = scrollY.interpolate({
+    inputRange: [0, 48],
+    outputRange: [0, -18],
+    extrapolate: 'clamp',
+  });
+
+  const dividerOpacity = scrollY.interpolate({
+    inputRange: [0, 32],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
+
+  const handleHeaderLayout = (event: LayoutChangeEvent) => {
+    const nextHeight = Math.round(event.nativeEvent.layout.height);
+    setHeaderHeight((current) => (current === nextHeight ? current : nextHeight));
+  };
 
   const listHeader = (
     <CategoryFilterBar
@@ -69,8 +93,19 @@ export default function ClosetScreen() {
   return (
     <View style={styles.screen}>
       <StatusBar style="dark" />
-      <MainHeader />
-      <FlatList
+      <Animated.View
+        onLayout={handleHeaderLayout}
+        pointerEvents="none"
+        style={[
+          styles.headerOverlay,
+          {
+            transform: [{ translateY: headerTranslateY }],
+          },
+        ]}>
+        <MainHeader />
+        <Animated.View style={[styles.headerDividerOverlay, { opacity: dividerOpacity }]} />
+      </Animated.View>
+      <AnimatedFlatList
         data={filteredItems}
         keyExtractor={(item) => item.id}
         numColumns={2}
@@ -83,11 +118,19 @@ export default function ClosetScreen() {
         ListEmptyComponent={listEmpty}
         contentContainerStyle={[
           styles.listContent,
-          { paddingBottom: tabBarHeight + Spacing.stackMd },
+          {
+            paddingTop: headerHeight + Spacing.stackSm,
+            paddingBottom: tabBarHeight + Spacing.stackMd,
+          },
           filteredItems.length === 0 && styles.listContentEmpty,
         ]}
         columnWrapperStyle={filteredItems.length > 0 ? styles.row : undefined}
         showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true },
+        )}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -106,9 +149,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Palette.background,
   },
+  headerOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 2,
+  },
+  headerDividerOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: Palette.outline,
+  },
   listContent: {
     paddingHorizontal: Spacing.containerMargin,
-    paddingTop: Spacing.stackSm,
   },
   listContentEmpty: {
     flexGrow: 1,

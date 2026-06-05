@@ -5,9 +5,14 @@ import { Palette, Radius, Spacing, Typography } from "@/constants/design";
 const actionButton = {
   borderWidth: 1,
   borderRadius: Radius.lg,
+  height: 44,
   paddingVertical: 12,
   alignItems: "center" as const,
+  justifyContent: "center" as const,
 };
+
+const ACTION_GROUP_GAP = Spacing.stackMd;
+const ACTION_BUTTON_HEIGHT = 44;
 
 export const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Palette.background },
@@ -29,7 +34,17 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
-  profileActions: { gap: Spacing.stackMd },
+  profileActions: {
+    position: "relative",
+    height: ACTION_BUTTON_HEIGHT * 2 + ACTION_GROUP_GAP,
+  },
+  actionGroup: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    gap: ACTION_GROUP_GAP,
+  },
   editProfileButton: {
     ...actionButton,
     borderColor: Palette.primary,
@@ -173,7 +188,6 @@ export const styles = StyleSheet.create({
     height: 1,
     backgroundColor: Palette.primary,
   },
-  underlineHidden: { opacity: 0 },
   heightSep: { color: Palette.onSurface },
   friendsButton: {
     ...actionButton,

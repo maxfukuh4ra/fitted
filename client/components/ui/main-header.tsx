@@ -14,6 +14,7 @@ export function MainHeader() {
         { paddingTop: top + Spacing.stackMd },
       ]}>
       <Text style={styles.title}>FITTED</Text>
+      <View style={styles.divider} />
     </View>
   );
 }
@@ -36,5 +37,14 @@ const styles = StyleSheet.create({
     color: Palette.onSurface,
     letterSpacing: 3.2,
     textTransform: 'uppercase',
+  },
+  divider: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: Palette.outlineVariant,
+    opacity: 0.35,
   },
 });

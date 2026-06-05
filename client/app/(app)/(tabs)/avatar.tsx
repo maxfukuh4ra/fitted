@@ -9,7 +9,7 @@ import type { SubcategoryFilters } from '@/components/avatar/filter-modal';
 import { SaveOutfitModal } from '@/components/avatar/save-outfit-modal';
 import type { OutfitVisibility } from '@/components/avatar/save-outfit-modal';
 import { SlotRow } from '@/components/avatar/slot-row';
-import { SLOTS, SUB_TO_CAT } from '@/components/avatar/slots';
+import { CAT_TO_SLOT, SLOTS, SUB_TO_CAT } from '@/components/avatar/slots';
 import type { SlotCategory, SlotIndices } from '@/components/avatar/slots';
 import { MainHeader } from '@/components/ui/main-header';
 import { Category } from '@/constants/categories';
@@ -37,6 +37,7 @@ export default function AvatarScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [addToFavorites, setAddToFavorites] = useState(false);
   const [visibility, setVisibility] = useState<OutfitVisibility>('private');
+  const [saveToCollection, setSaveToCollection] = useState(false);
   const [outfitName, setOutfitName] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -66,7 +67,7 @@ export default function AvatarScreen() {
     };
     for (const item of items) {
       const catFromSub = item.subcategory ? SUB_TO_CAT[item.subcategory.toLowerCase()] : undefined;
-      const catFromField = item.category?.toLowerCase() as SlotCategory | undefined;
+      const catFromField = item.category ? CAT_TO_SLOT[item.category.toLowerCase()] : undefined;
 
       const cat = catFromSub ?? catFromField;
       if (!cat || !(cat in result)) continue;
@@ -93,6 +94,7 @@ export default function AvatarScreen() {
   const openModal = () => {
     setAddToFavorites(false);
     setVisibility('private');
+    setSaveToCollection(false);
     setOutfitName('');
     setSaveError(null);
     setModalVisible(true);
@@ -201,11 +203,13 @@ export default function AvatarScreen() {
         outfitName={outfitName}
         addToFavorites={addToFavorites}
         visibility={visibility}
+        saveToCollection={saveToCollection}
         saving={saving}
         saveError={saveError}
         onChangeName={setOutfitName}
         onToggleFavorites={() => setAddToFavorites((v) => !v)}
         onChangeVisibility={setVisibility}
+        onToggleSaveToCollection={() => setSaveToCollection((v) => !v)}
         onSave={saveOutfit}
         onClose={() => setModalVisible(false)}
       />
@@ -255,16 +259,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.stackSm,
+    paddingVertical: 12,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Palette.primary,
     backgroundColor: Palette.primary,
-    borderRadius: Radius.md,
-    paddingVertical: Spacing.stackMd,
   },
   saveBtnDisabled: {
     opacity: 0.4,
   },
   saveBtnText: {
-    ...Typography.titleLg,
+    ...Typography.labelSm,
     color: Palette.onPrimary,
+    transform: [{ translateY: 1 }],
   },
   errorText: {
     ...Typography.bodyMd,

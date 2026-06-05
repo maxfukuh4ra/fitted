@@ -108,6 +108,7 @@ describe('SLOTS', () => {
 });
 
 
+
 describe('SUB_TO_CAT', () => {
   it('maps known tops subcategories', () => {
     for (const sub of SUBCATEGORIES[Category.TOPS]) {
@@ -127,10 +128,13 @@ describe('SUB_TO_CAT', () => {
     }
   });
 
-  it('does NOT include outerwear or accessories', () => {
+  it('maps outerwear subcategories to tops', () => {
     for (const sub of SUBCATEGORIES[Category.OUTERWEAR]) {
-      expect(SUB_TO_CAT[sub.toLowerCase()]).toBeUndefined();
+      expect(SUB_TO_CAT[sub.toLowerCase()]).toBe(Category.TOPS);
     }
+  });
+
+  it('does NOT include accessories', () => {
     for (const sub of SUBCATEGORIES[Category.ACCESSORIES]) {
       expect(SUB_TO_CAT[sub.toLowerCase()]).toBeUndefined();
     }
