@@ -35,6 +35,7 @@ export default function AvatarScreen() {
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [addToFavorites, setAddToFavorites] = useState(false);
+  const [saveToCollection, setSaveToCollection] = useState(false);
   const [outfitName, setOutfitName] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -90,6 +91,7 @@ export default function AvatarScreen() {
 
   const openModal = () => {
     setAddToFavorites(false);
+    setSaveToCollection(false);
     setOutfitName('');
     setSaveError(null);
     setModalVisible(true);
@@ -197,10 +199,12 @@ export default function AvatarScreen() {
         visible={modalVisible}
         outfitName={outfitName}
         addToFavorites={addToFavorites}
+        saveToCollection={saveToCollection}
         saving={saving}
         saveError={saveError}
         onChangeName={setOutfitName}
         onToggleFavorites={() => setAddToFavorites((v) => !v)}
+        onToggleSaveToCollection={() => setSaveToCollection((v) => !v)}
         onSave={saveOutfit}
         onClose={() => setModalVisible(false)}
       />
@@ -250,16 +254,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.stackSm,
+    paddingVertical: 12,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Palette.primary,
     backgroundColor: Palette.primary,
-    borderRadius: Radius.md,
-    paddingVertical: Spacing.stackMd,
   },
   saveBtnDisabled: {
     opacity: 0.4,
   },
   saveBtnText: {
-    ...Typography.titleLg,
+    ...Typography.labelSm,
     color: Palette.onPrimary,
+    transform: [{ translateY: 1 }],
   },
   errorText: {
     ...Typography.bodyMd,
