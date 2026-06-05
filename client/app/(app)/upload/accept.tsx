@@ -14,6 +14,7 @@ import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { API } from '@/constants/api';
+import { Category, CATEGORY_LABELS, SUBCATEGORIES } from '@/constants/categories';
 
 export default function AcceptScreen() {
   const { imageUrl, category, subcategory } = useUpload();
@@ -40,7 +41,7 @@ export default function AcceptScreen() {
           Authorization: `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ imageUrl, category, subcategory, name: itemName.trim() }),
+        body: JSON.stringify({ imageUrl, category: category ? CATEGORY_LABELS[category] : null, subcategory, name: itemName.trim() }),
       });
 
       const data = await response.json();

@@ -117,7 +117,7 @@ export default function UploadCategoryScreen() {
       </ScrollView>
       <CategoryPicker
         visible={!!picker}
-        title={picker ?? ''}
+        title={picker ? CATEGORY_LABELS[picker] : ''}
         subcategories={picker ? SUBCATEGORIES[picker] : []}
         onNext={(sub) => {
           setPicker(null);
