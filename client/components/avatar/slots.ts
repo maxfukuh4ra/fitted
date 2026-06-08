@@ -1,8 +1,8 @@
 import { Category, SUBCATEGORIES } from '@/constants/categories';
 
 export const SLOTS = [
-  { label: 'Top', category: Category.TOPS, slot: 'top', slotFlex: 6 },
-  { label: 'Bottom', category: Category.BOTTOMS, slot: 'bottom', slotFlex: 7 },
+  { label: 'Top', category: Category.TOPS, slot: 'top', slotFlex: 9 },
+  { label: 'Bottom', category: Category.BOTTOMS, slot: 'bottom', slotFlex: 9 },
   { label: 'Shoes', category: Category.SHOES, slot: 'footwear', slotFlex: 5 },
 ] as const;
 
