@@ -13,6 +13,9 @@ export function useCloset() {
   const [items, setItems] = useState<ClosetItem[]>([]);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  // [GenAI Use] Prompt:
+  // "Add pull-to-refresh so users can reload their closet items without the full-screen loading spinner."
+  // [GenAI Use] LLM Response Start
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,11 +50,18 @@ export function useCloset() {
   }, []);
 
   const refresh = useCallback(() => load(true), [load]);
+  // [GenAI Use] LLM Response End (Note: not all of above is AI generated, only the functionality related to pull-to-refresh)
+  // [GenAI Use] Reflection:
+  // I wanted refresh to feel different from the initial load by keeping the grid visible
+  // while pulling down, instead of swapping to the full-screen spinner again.
 
   useEffect(() => {
     load();
   }, [load]);
 
+  // [GenAI Use] Prompt:
+  // "Only rebuild the filter chips and filtered item list when items or the selected subcategory change."
+  // [GenAI Use] LLM Response Start
   const subcategoryFilters: CategoryFilter[] = useMemo(
     () => getSubcategoryFilters(items),
     [items],
@@ -61,6 +71,10 @@ export function useCloset() {
     () => filterItemsBySubcategory(items, selectedSubcategory),
     [items, selectedSubcategory],
   );
+  // [GenAI Use] LLM Response End
+  // [GenAI Use] Reflection:
+  // Without this, the filters and grid could recalculate on every render. useMemo keeps
+  // that work tied to when items or the active chip actually changes.
 
   return {
     subcategoryFilters,
