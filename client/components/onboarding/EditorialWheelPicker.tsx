@@ -33,9 +33,18 @@ export function EditorialWheelPicker({
     const index = values.indexOf(selected);
     if (index < 0) return;
 
+    // [GenAI Use] Prompt:
+    // "Scroll to the selected value when the component mounts or when selected changes.
+    // Right now it glitches and shows the first row instead of the selected value. 
+    // Perhaps we need to wait for the layout to finish before scrolling?"
+    // [GenAI Use] LLM Response Start
     requestAnimationFrame(() => {
       scrollRef.current?.scrollTo({ y: index * ITEM_HEIGHT, animated: false });
     });
+    // [GenAI Use] LLM Response End
+    // [GenAI Use] Reflection:
+    // I understand that useEffect + scrollTo fixed syncing in general, but calling scrollTo immediately 
+    // still flashed the wrong row on open. Deferring with requestAnimationFrame let layout finish first.
   }, [selected, values]);
 
   const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
