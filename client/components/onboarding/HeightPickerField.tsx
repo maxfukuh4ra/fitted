@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+// Height picker field component for the onboarding process
 import { StyleSheet, Text, View } from 'react-native';
 
 import { EditorialWheelPicker } from '@/components/onboarding/EditorialWheelPicker';
@@ -8,6 +8,15 @@ const FEET_MIN = 3;
 const FEET_MAX = 8;
 const INCHES_MIN = 0;
 const INCHES_MAX = 11;
+
+const FEET_VALUES = Array.from(
+  { length: FEET_MAX - FEET_MIN + 1 },
+  (_, i) => FEET_MIN + i,
+);
+const INCH_VALUES = Array.from(
+  { length: INCHES_MAX - INCHES_MIN + 1 },
+  (_, i) => INCHES_MIN + i,
+);
 
 type HeightPickerFieldProps = {
   feet: number;
@@ -22,28 +31,22 @@ export function HeightPickerField({
   onFeetChange,
   onInchesChange,
 }: HeightPickerFieldProps) {
-  const feetValues = useMemo(
-    () => Array.from({ length: FEET_MAX - FEET_MIN + 1 }, (_, i) => FEET_MIN + i),
-    [],
-  );
-  const inchValues = useMemo(
-    () => Array.from({ length: INCHES_MAX - INCHES_MIN + 1 }, (_, i) => INCHES_MIN + i),
-    [],
-  );
-
   return (
     <View style={styles.fieldGroup}>
       <Text style={styles.label}>Height</Text>
       <View style={styles.pickerRow}>
-        <EditorialWheelPicker selected={feet} values={feetValues} onSelect={onFeetChange} />
+        <EditorialWheelPicker selected={feet} values={FEET_VALUES} onSelect={onFeetChange} />
         <Text style={styles.unitLabel}>ft</Text>
-        <EditorialWheelPicker selected={inches} values={inchValues} onSelect={onInchesChange} />
+        <EditorialWheelPicker selected={inches} values={INCH_VALUES} onSelect={onInchesChange} />
         <Text style={styles.unitLabel}>in</Text>
       </View>
     </View>
   );
 }
 
+// [GenAI Use] Prompt: "Create styles for the height picker field according to the given HTML code. 
+// Do not hard-code everything, pull from the constants/design.ts file for colors, fonts, etc."
+// [GenAI Use] LLM Response Start
 const styles = StyleSheet.create({
   fieldGroup: {
     gap: Spacing.stackSm,
@@ -67,3 +70,8 @@ const styles = StyleSheet.create({
     marginRight: Spacing.stackMd,
   },
 });
+// [GenAI Use] LLM Response End
+// [GenAI Use] Reflection:
+// The styles were created according to the given HTML code. After, seeing the initial output 
+// and testing it on my phone,I manually edited and removed styles that were not actively visible 
+// or meaningful to the user. 
