@@ -33,9 +33,18 @@ export function EditorialWheelPicker({
     const index = values.indexOf(selected);
     if (index < 0) return;
 
+    // [GenAI Use] Prompt:
+    // "Scroll to the selected value when the component mounts or when selected changes.
+    // Right now it glitches and shows the first row instead of the selected value. 
+    // Perhaps we need to wait for the layout to finish before scrolling?"
+    // [GenAI Use] LLM Response Start
     requestAnimationFrame(() => {
       scrollRef.current?.scrollTo({ y: index * ITEM_HEIGHT, animated: false });
     });
+    // [GenAI Use] LLM Response End
+    // [GenAI Use] Reflection:
+    // I understand that useEffect + scrollTo fixed syncing in general, but calling scrollTo immediately 
+    // still flashed the wrong row on open. Deferring with requestAnimationFrame let layout finish first.
   }, [selected, values]);
 
   const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -76,6 +85,9 @@ export function EditorialWheelPicker({
   );
 }
 
+// [GenAI Use] Prompt: "Create styles for the editorial wheel picker according to the given HTML code. 
+// Do not hard-code everything, pull from the constants/design.ts file for colors, fonts, etc."
+// [GenAI Use] LLM Response Start
 const styles = StyleSheet.create({
   container: {
     width: 56,
@@ -108,3 +120,8 @@ const styles = StyleSheet.create({
     color: Palette.primary,
   },
 });
+// [GenAI Use] LLM Response End
+// [GenAI Use] Reflection:
+// The styles were created according to the given HTML code. After, seeing the initial output 
+// and testing it on my phone, I manually edited and removed styles that were not actively visible 
+// or meaningful to the user. 

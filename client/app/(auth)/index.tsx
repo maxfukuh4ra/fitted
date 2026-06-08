@@ -1,3 +1,7 @@
+// Landing screen
+// [GenAI Use] Prompt: 
+// "Import necessary libraries and components for a landing screen with a background image, logo, and sign in/sign up buttons."
+// [GenAI Use] LLM Response Start
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -28,6 +32,11 @@ import {
   normalizeEmail,
   validateAuthCredentials,
 } from "@/lib/validation";
+// [GenAI Use] LLM Response End
+// [GenAI Use] Reflection: 
+// The imported libraries and components were necessary to create the landing screen. 
+// I manually edited and removed imports that were not used or excessive to our functionality. I also followed
+// up and imported necessary components that I created for this screen which was not from outside libraries. 
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -227,6 +236,8 @@ export default function HomeScreen() {
   );
 }
 
+// [GenAI Use] Prompt: "Create styles for the landing screen according to the given HTML code. Do not hard-code everything, pull from the constants/design.ts file for colors, fonts, etc."
+// [GenAI Use] LLM Response Start
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
@@ -410,3 +421,8 @@ const styles = StyleSheet.create({
     fontFamily: FontFamilies.bodySemiBold,
   },
 });
+// [GenAI Use] LLM Response End
+// [GenAI Use] Reflection:
+// The styles were created according to the given HTML code. After, seeing the initial output 
+// and testing it on my phone,I manually edited and removed styles that were not actively visible 
+// or meaningful to the user. 

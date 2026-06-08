@@ -1,3 +1,7 @@
+// [GenAI Use] Prompt: 
+// "Import necessary libraries and components for a personal info screen with a form 
+// for full name, age, height, and gender."
+// [GenAI Use] LLM Response Start
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -8,17 +12,22 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { EditorialTextField } from "@/components/onboarding/EditorialTextField";
-import { HeightPickerField } from "@/components/onboarding/HeightPickerField";
+import { EditorialWheelPicker } from "@/components/onboarding/EditorialWheelPicker";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Palette, Radius, Spacing, Typography } from "@/constants/design";
 import { signUpWithProfile } from "@/lib/sign-up";
 import { clearSignUpDraft, getSignUpDraft } from "@/lib/sign-up-draft";
 import { validateProfileForm } from "@/lib/validation";
+// [GenAI Use] LLM Response End
+// [GenAI Use] Reflection:
+// The imported libraries and components were necessary to create the personal info screen. 
+// I manually edited and removed imports that were not used or excessive to our functionality. I also followed
+// up and imported necessary components that I created for this screen which was not from outside libraries. 
 
 type Gender = "female" | "male" | "other";
 
@@ -27,6 +36,9 @@ const GENDER_OPTIONS: { value: Gender; label: string }[] = [
   { value: "male", label: "Male" },
   { value: "other", label: "Other" },
 ];
+
+const FEET_VALUES = [3, 4, 5, 6, 7, 8];
+const INCH_VALUES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
 export default function PersonalInfoScreen() {
   const router = useRouter();
@@ -45,6 +57,7 @@ export default function PersonalInfoScreen() {
   }, [router]);
 
   const handleContinue = async () => {
+    // Get the sign up draft and save
     const draft = getSignUpDraft();
     if (!draft) {
       setError(
@@ -52,7 +65,7 @@ export default function PersonalInfoScreen() {
       );
       return;
     }
-
+    // Check if the full name and age are valid
     const validationError = validateProfileForm({ fullName, age });
     if (validationError) {
       setError(validationError);
@@ -84,6 +97,7 @@ export default function PersonalInfoScreen() {
     }
 
     clearSignUpDraft();
+    // Redirect to the closet screen
     router.replace("/closet");
   };
 
@@ -131,29 +145,48 @@ export default function PersonalInfoScreen() {
               </View>
 
               <View style={styles.formSection}>
-                <EditorialTextField
-                  autoComplete="name"
-                  label="Full Name"
-                  onChangeText={setFullName}
-                  placeholder="e.g. Jane Doe"
-                  value={fullName}
-                />
+                <View style={styles.fieldGroup}>
+                  <Text style={styles.fieldLabel}>Full Name</Text>
+                  <TextInput
+                    autoComplete="name"
+                    onChangeText={setFullName}
+                    placeholder="e.g. Jane Doe"
+                    placeholderTextColor={Palette.outline}
+                    style={styles.fieldInput}
+                    value={fullName}
+                  />
+                </View>
 
-                <EditorialTextField
-                  label="Age"
-                  maxLength={3}
-                  numericOnly
-                  onChangeText={setAge}
-                  placeholder="Enter your age"
-                  value={age}
-                />
+                <View style={styles.fieldGroup}>
+                  <Text style={styles.fieldLabel}>Age</Text>
+                  <TextInput
+                    keyboardType="number-pad"
+                    maxLength={3}
+                    onChangeText={setAge}
+                    placeholder="Enter your age"
+                    placeholderTextColor={Palette.outline}
+                    style={styles.fieldInput}
+                    value={age}
+                  />
+                </View>
 
-                <HeightPickerField
-                  feet={heightFeet}
-                  inches={heightInches}
-                  onFeetChange={setHeightFeet}
-                  onInchesChange={setHeightInches}
-                />
+                <View style={styles.fieldGroup}>
+                  <Text style={styles.fieldLabel}>Height</Text>
+                  <View style={styles.pickerRow}>
+                    <EditorialWheelPicker
+                      selected={heightFeet}
+                      values={FEET_VALUES}
+                      onSelect={setHeightFeet}
+                    />
+                    <Text style={styles.unitLabel}>ft</Text>
+                    <EditorialWheelPicker
+                      selected={heightInches}
+                      values={INCH_VALUES}
+                      onSelect={setHeightInches}
+                    />
+                    <Text style={styles.unitLabel}>in</Text>
+                  </View>
+                </View>
 
                 <View style={styles.genderSection}>
                   <Text style={styles.genderLabel}>I identify as</Text>
@@ -222,6 +255,9 @@ export default function PersonalInfoScreen() {
   );
 }
 
+// [GenAI Use] Prompt: "Create styles for the personal info screen according to the given HTML code. 
+// Do not hard-code everything, pull from the constants/design.ts file for colors, fonts, etc."
+// [GenAI Use] LLM Response Start
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
@@ -304,6 +340,35 @@ const styles = StyleSheet.create({
   formSection: {
     gap: Spacing.stackLg,
   },
+  fieldGroup: {
+    gap: Spacing.stackSm,
+  },
+  fieldLabel: {
+    ...Typography.labelSm,
+    color: Palette.onSurfaceVariant,
+    letterSpacing: 1.2,
+  },
+  fieldInput: {
+    ...Typography.titleLg,
+    color: Palette.primary,
+    borderBottomWidth: 1,
+    borderBottomColor: Palette.outlineVariant,
+    paddingVertical: Spacing.stackSm,
+    paddingHorizontal: 0,
+  },
+  pickerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: Palette.outlineVariant,
+    paddingBottom: Spacing.stackSm,
+    gap: Spacing.stackSm,
+  },
+  unitLabel: {
+    ...Typography.titleLg,
+    color: Palette.onSurfaceVariant,
+    marginRight: Spacing.stackMd,
+  },
   genderSection: {
     gap: Spacing.stackSm,
     paddingTop: Spacing.stackSm,
@@ -385,3 +450,8 @@ const styles = StyleSheet.create({
     color: Palette.onPrimary,
   },
 });
+// [GenAI Use] LLM Response End
+// [GenAI Use] Reflection:
+// The styles were created according to the given HTML code. After, seeing the initial output 
+// and testing it on my phone,I manually edited and removed styles that were not actively visible 
+// or meaningful to the user. 

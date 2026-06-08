@@ -1,6 +1,13 @@
 // Validation functions for basic error handling of form inputs 
+// [GenAI Use] Prompt: "Create a regex for email validation please".
+// [GenAI Use] LLM Response Start
 const EMAIL_REGEX =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+// [GenAI Use] LLM Response End
+// [GenAI Use] Reflection:
+// The regex was created according to the given prompt. I also ensured that the regex
+// was not too restrictive and allowed for a variety of email addresses.
+
 
 const MIN_PASSWORD_LENGTH = 6;
 const MIN_AGE = 10;
@@ -69,6 +76,7 @@ export function validateProfileForm(input: ProfileFormInput): string | null {
   return null;
 }
 
+// Error formatting function for authentication errors
 export function formatAuthError(message: string): string {
   const lower = message.toLowerCase();
 
