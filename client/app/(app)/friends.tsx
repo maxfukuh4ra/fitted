@@ -27,9 +27,10 @@ import {
 } from "@/lib/friends";
 
 const SLOT_IMAGE_HEIGHT: Record<string, number> = Object.fromEntries(
-  SLOTS.map(({ slot, slotFlex }) => [slot, slotFlex * 13])
+  SLOTS.map(({ slot, slotFlex }) => [slot, slotFlex * 13]),
 );
 
+// AI Usage: what's a good function to calculate "time ago" (5m ago, 1h ago, etc) from a timestamp
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
@@ -52,6 +53,7 @@ function SectionHeader({ title, count }: { title: string; count?: number }) {
   );
 }
 
+// referenced avatar.tsx to match formatting
 function OutfitCard({ outfit }: { outfit: FriendOutfit }) {
   const slotOrder = ["top", "bottom", "footwear"];
   const sorted = slotOrder
@@ -78,7 +80,11 @@ function OutfitCard({ outfit }: { outfit: FriendOutfit }) {
           ) : (
             <View
               key={i}
-              style={[styles.outfitItemImage, styles.outfitItemPlaceholder, { height: h }]}
+              style={[
+                styles.outfitItemImage,
+                styles.outfitItemPlaceholder,
+                { height: h },
+              ]}
             />
           );
         })}
@@ -87,6 +93,8 @@ function OutfitCard({ outfit }: { outfit: FriendOutfit }) {
   );
 }
 
+// AI Usage:
+// - create a skeleton for friends screen. I want to handle pending requests and current friends via email.
 export default function FriendsScreen() {
   const router = useRouter();
   const [pending, setPending] = useState<Friend[]>([]);
@@ -99,6 +107,8 @@ export default function FriendsScreen() {
   const [addSuccess, setAddSuccess] = useState(false);
   const [feedFilter, setFeedFilter] = useState<"Public" | "Friends">("Public");
 
+  // - Create two db fetches: one for any outfit with visibility=Public, and one for any outfit where visiblity=Public and (user_id, friend_id) is in public.friendships.
+  // ^later refactored this prompt output into lib/friends.ts (helper/"backend" functions)
   async function loadAll() {
     try {
       const [p, f, outfits] = await Promise.all([
@@ -149,8 +159,6 @@ export default function FriendsScreen() {
     setFriends((prev) => prev.filter((f) => f.friendshipId !== friendshipId));
   }
 
-  console.log(friends);
-  console.log(pending);
   return (
     <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
       <View style={styles.header}>
@@ -292,17 +300,27 @@ export default function FriendsScreen() {
               {(["Public", "Friends"] as const).map((tab) => (
                 <Pressable
                   key={tab}
-                  style={[styles.toggleBtn, feedFilter === tab && styles.toggleBtnActive]}
+                  style={[
+                    styles.toggleBtn,
+                    feedFilter === tab && styles.toggleBtnActive,
+                  ]}
                   onPress={() => setFeedFilter(tab)}
                 >
-                  <Text style={[styles.toggleBtnText, feedFilter === tab && styles.toggleBtnTextActive]}>
+                  <Text
+                    style={[
+                      styles.toggleBtnText,
+                      feedFilter === tab && styles.toggleBtnTextActive,
+                    ]}
+                  >
                     {tab}
                   </Text>
                 </Pressable>
               ))}
             </View>
             {feed.filter((o) => o.visibility === feedFilter).length === 0 ? (
-              <Text style={styles.emptyText}>No {feedFilter.toLowerCase()} outfits yet.</Text>
+              <Text style={styles.emptyText}>
+                No {feedFilter.toLowerCase()} outfits yet.
+              </Text>
             ) : (
               <View style={styles.outfitGrid}>
                 {feed
@@ -319,6 +337,8 @@ export default function FriendsScreen() {
   );
 }
 
+// AI Usage: try to match styling of avatar.tsx and the general codebase
+// ^manual refactor to match styles (ie flex centering, sizing, display, etc)
 const styles = StyleSheet.create({
   safe: {
     flex: 1,

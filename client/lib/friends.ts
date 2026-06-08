@@ -18,6 +18,8 @@ export type FriendOutfit = {
   items: { slot: string; itemId: string; imageUrl: string | null }[];
 };
 
+// AI Usage: VSCode auto-complete with manual adjustments for correct logic
+// ^as I typed the function, it would suggest code (sometimes incorrect). I would press tab to accept, or keep typing to reject
 async function getCurrentUserId(): Promise<string> {
   const { data } = await supabase.auth.getSession();
   const uid = data.session?.user?.id;
@@ -60,6 +62,7 @@ export async function sendFriendRequest(email: string): Promise<void> {
   const uid = await getCurrentUserId();
   const targetId = data[0].id;
 
+  // bi-directional friendship/pending check (dedup)
   const { data: existing } = await supabase
     .from("friendships")
     .select("status")
@@ -92,6 +95,7 @@ export async function acceptFriendRequest(friendshipId: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+// refactored decline and remove to use same underlying logic
 export const declineFriendRequest = deleteFriendship;
 export const removeFriend = deleteFriendship;
 
@@ -145,6 +149,7 @@ export async function getPendingRequests(): Promise<Friend[]> {
   }));
 }
 
+// Supabase RLS handles security so we can have functions like these exposed on the frontend
 export async function getFriendsOutfits(): Promise<FriendOutfit[]> {
   const uid = await getCurrentUserId();
 
@@ -177,6 +182,7 @@ export async function getFriendsOutfits(): Promise<FriendOutfit[]> {
   if (outfitError) throw new Error(outfitError.message);
   if (!outfits || outfits.length === 0) return [];
 
+  // need to display additional data (via supabase rpc)
   const authorIds = [...new Set(outfits.map((o) => o.user_id))];
   const infoMap = await fetchUsersInfo(authorIds);
 
@@ -198,6 +204,7 @@ export async function getFriendsOutfits(): Promise<FriendOutfit[]> {
     );
   }
 
+  // group items as together as 'outfit' (single modular unit)
   const itemsByOutfit: Record<string, FriendOutfit["items"]> = {};
   for (const oi of outfitItems ?? []) {
     if (!itemsByOutfit[oi.outfit_id]) itemsByOutfit[oi.outfit_id] = [];
