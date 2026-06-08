@@ -46,6 +46,9 @@ type FilterChipProps = {
 function FilterChip({ filter, isSelected, onPress, onLayout }: FilterChipProps) {
   const animation = useRef(new Animated.Value(isSelected ? 1 : 0)).current;
 
+  // [GenAI Use] Prompt:
+  // "Add a subtle animation when a filter chip is selected so the tap feels responsive."
+  // [GenAI Use] LLM Response Start
   useEffect(() => {
     Animated.timing(animation, {
       toValue: isSelected ? 1 : 0,
@@ -63,6 +66,10 @@ function FilterChip({ filter, isSelected, onPress, onLayout }: FilterChipProps) 
     inputRange: [0, 1],
     outputRange: [0.72, 1],
   });
+  // [GenAI Use] LLM Response End
+  // [GenAI Use] Reflection:
+  // I toned down the scale after testing on my phone, since a small bump was enough
+  // without making the chips feel jumpy.
 
   return (
     <Pressable
@@ -128,6 +135,9 @@ export function CategoryFilterBar({
     });
   }, [filters]);
 
+  // [GenAI Use] Prompt:
+  // "Add a sliding highlight pill that moves to whichever filter chip is selected."
+  // [GenAI Use] LLM Response Start
   useEffect(() => {
     if (!selectedLayout) {
       return;
@@ -160,6 +170,10 @@ export function CategoryFilterBar({
       };
     });
   };
+  // [GenAI Use] LLM Response End
+  // [GenAI Use] Reflection:
+  // Each chip reports its position via onLayout so the pill knows where to slide.
+  // On first render the pill snaps into place; after that it springs when you switch chips.
 
   return (
     <ScrollView
@@ -198,6 +212,10 @@ export function CategoryFilterBar({
   );
 }
 
+// [GenAI Use] Prompt:
+// "Create styles for the category filter bar according to the given HTML code. 
+// Do not hard-code everything, pull from the constants/design.ts file for colors, fonts, etc."
+// [GenAI Use] LLM Response Start
 const styles = StyleSheet.create({
   scroll: {
     marginBottom: Spacing.stackLg,
@@ -251,3 +269,8 @@ const styles = StyleSheet.create({
     color: Palette.onSurfaceVariant,
   },
 });
+// [GenAI Use] LLM Response End
+// [GenAI Use] Reflection:
+// The styles were created according to the given HTML code. After, seeing the initial output 
+// and testing it on my phone, I manually edited and removed styles that were not actively visible 
+// or meaningful to the user. 
