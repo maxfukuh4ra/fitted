@@ -7,6 +7,9 @@ import {
 } from '../lib/closet-filters';
 import type { ClosetItem } from '../lib/types/closet';
 
+// [GenAI Use] Prompt:
+// "Write unit tests for the closet filter helpers in lib/closet-filters.ts."
+// [GenAI Use] LLM Response Start
 const makeItem = (overrides: Partial<ClosetItem> = {}): ClosetItem => ({
   id: '1',
   user_id: 'user-1',
@@ -77,3 +80,8 @@ describe('lib/closet-filters', () => {
     });
   });
 });
+// [GenAI Use] LLM Response End
+// [GenAI Use] Reflection:
+// I ran each test and checked the outputs against how the closet screen should behave.
+// I added edge cases the first draft missed, e.g. "excludes null-subcategory items when
+// a chip is selected" so uncategorized items do not show under a specific filter chip.

@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getProfile, updateProfile } from "../lib/profile";
 
+// [GenAI Use] Prompt:
+// "Write unit tests for getProfile and updateProfile in lib/profile.ts using Vitest.
+// Mock Supabase and cover success and error cases."
+// [GenAI Use] LLM Response Start
 const mocks = vi.hoisted(() => ({
   getSession: vi.fn(),
   from: vi.fn(),
@@ -109,3 +113,9 @@ describe("updateProfile", () => {
     ).rejects.toThrow("update failed");
   });
 });
+// [GenAI Use] LLM Response End
+// [GenAI Use] Reflection:
+// I ran each test locally and checked that the mocks matched how profile.ts calls Supabase.
+// The first draft did not cover every failure path so I added cases when a test failed or
+// left a gap, e.g. "throws when there is no active session" after getProfile did not handle
+// a signed-out user the way I expected.
