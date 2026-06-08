@@ -1,3 +1,7 @@
+// [GenAI Use] Prompt: 
+// "Import necessary libraries and components for a personal info screen with a form 
+// for full name, age, height, and gender."
+// [GenAI Use] LLM Response Start
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -19,6 +23,11 @@ import { Palette, Radius, Spacing, Typography } from "@/constants/design";
 import { signUpWithProfile } from "@/lib/sign-up";
 import { clearSignUpDraft, getSignUpDraft } from "@/lib/sign-up-draft";
 import { validateProfileForm } from "@/lib/validation";
+// [GenAI Use] LLM Response End
+// [GenAI Use] Reflection:
+// The imported libraries and components were necessary to create the personal info screen. 
+// I manually edited and removed imports that were not used or excessive to our functionality. I also followed
+// up and imported necessary components that I created for this screen which was not from outside libraries. 
 
 type Gender = "female" | "male" | "other";
 
@@ -45,6 +54,7 @@ export default function PersonalInfoScreen() {
   }, [router]);
 
   const handleContinue = async () => {
+    // Get the sign up draft and save
     const draft = getSignUpDraft();
     if (!draft) {
       setError(
@@ -52,7 +62,7 @@ export default function PersonalInfoScreen() {
       );
       return;
     }
-
+    // Check if the full name and age are valid
     const validationError = validateProfileForm({ fullName, age });
     if (validationError) {
       setError(validationError);
@@ -84,6 +94,7 @@ export default function PersonalInfoScreen() {
     }
 
     clearSignUpDraft();
+    // Redirect to the closet screen
     router.replace("/closet");
   };
 
@@ -222,6 +233,9 @@ export default function PersonalInfoScreen() {
   );
 }
 
+// [GenAI Use] Prompt: "Create styles for the personal info screen according to the given HTML code. 
+// Do not hard-code everything, pull from the constants/design.ts file for colors, fonts, etc."
+// [GenAI Use] LLM Response Start
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
@@ -385,3 +399,8 @@ const styles = StyleSheet.create({
     color: Palette.onPrimary,
   },
 });
+// [GenAI Use] LLM Response End
+// [GenAI Use] Reflection:
+// The styles were created according to the given HTML code. After, seeing the initial output 
+// and testing it on my phone,I manually edited and removed styles that were not actively visible 
+// or meaningful to the user. 
