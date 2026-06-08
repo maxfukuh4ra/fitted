@@ -76,6 +76,9 @@ export function EditorialWheelPicker({
   );
 }
 
+// [GenAI Use] Prompt: "Create styles for the editorial wheel picker according to the given HTML code. 
+// Do not hard-code everything, pull from the constants/design.ts file for colors, fonts, etc."
+// [GenAI Use] LLM Response Start
 const styles = StyleSheet.create({
   container: {
     width: 56,
@@ -108,3 +111,8 @@ const styles = StyleSheet.create({
     color: Palette.primary,
   },
 });
+// [GenAI Use] LLM Response End
+// [GenAI Use] Reflection:
+// The styles were created according to the given HTML code. After, seeing the initial output 
+// and testing it on my phone, I manually edited and removed styles that were not actively visible 
+// or meaningful to the user. 

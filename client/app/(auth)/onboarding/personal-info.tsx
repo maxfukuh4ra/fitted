@@ -17,7 +17,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { HeightPickerField } from "@/components/onboarding/HeightPickerField";
+import { EditorialWheelPicker } from "@/components/onboarding/EditorialWheelPicker";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Palette, Radius, Spacing, Typography } from "@/constants/design";
 import { signUpWithProfile } from "@/lib/sign-up";
@@ -36,6 +36,9 @@ const GENDER_OPTIONS: { value: Gender; label: string }[] = [
   { value: "male", label: "Male" },
   { value: "other", label: "Other" },
 ];
+
+const FEET_VALUES = [3, 4, 5, 6, 7, 8];
+const INCH_VALUES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
 export default function PersonalInfoScreen() {
   const router = useRouter();
@@ -167,12 +170,23 @@ export default function PersonalInfoScreen() {
                   />
                 </View>
 
-                <HeightPickerField
-                  feet={heightFeet}
-                  inches={heightInches}
-                  onFeetChange={setHeightFeet}
-                  onInchesChange={setHeightInches}
-                />
+                <View style={styles.fieldGroup}>
+                  <Text style={styles.fieldLabel}>Height</Text>
+                  <View style={styles.pickerRow}>
+                    <EditorialWheelPicker
+                      selected={heightFeet}
+                      values={FEET_VALUES}
+                      onSelect={setHeightFeet}
+                    />
+                    <Text style={styles.unitLabel}>ft</Text>
+                    <EditorialWheelPicker
+                      selected={heightInches}
+                      values={INCH_VALUES}
+                      onSelect={setHeightInches}
+                    />
+                    <Text style={styles.unitLabel}>in</Text>
+                  </View>
+                </View>
 
                 <View style={styles.genderSection}>
                   <Text style={styles.genderLabel}>I identify as</Text>
@@ -341,6 +355,19 @@ const styles = StyleSheet.create({
     borderBottomColor: Palette.outlineVariant,
     paddingVertical: Spacing.stackSm,
     paddingHorizontal: 0,
+  },
+  pickerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: Palette.outlineVariant,
+    paddingBottom: Spacing.stackSm,
+    gap: Spacing.stackSm,
+  },
+  unitLabel: {
+    ...Typography.titleLg,
+    color: Palette.onSurfaceVariant,
+    marginRight: Spacing.stackMd,
   },
   genderSection: {
     gap: Spacing.stackSm,
