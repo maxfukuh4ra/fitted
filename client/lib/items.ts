@@ -1,3 +1,4 @@
+// Fetches closet items from database for closet and avatar screens
 import { supabase } from '@/lib/supabase';
 import type { AvatarItem, ClosetItem } from '@/lib/types/closet';
 
