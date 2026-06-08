@@ -8,6 +8,7 @@ import { FilterModal } from '@/components/avatar/filter-modal';
 import type { SubcategoryFilters } from '@/components/avatar/filter-modal';
 import { SaveOutfitModal } from '@/components/avatar/save-outfit-modal';
 import type { OutfitVisibility } from '@/components/avatar/save-outfit-modal';
+import { SaveToCollectionModal } from '@/components/avatar/save-to-collection-modal';
 import { SlotRow } from '@/components/avatar/slot-row';
 import { CAT_TO_SLOT, SLOTS, SUB_TO_CAT } from '@/components/avatar/slots';
 import type { SlotCategory, SlotIndices } from '@/components/avatar/slots';
@@ -16,7 +17,14 @@ import { Category } from '@/constants/categories';
 import { Palette, Radius, Spacing, Typography } from '@/constants/design';
 import { fetchClosetItems } from '@/lib/items';
 import { supabase } from '@/lib/supabase';
+import type { Collection } from '@/lib/collections';
 import type { ClosetItem } from '@/lib/types/closet';
+
+function formatCollectionLabel(collections: Collection[]): string | null {
+  if (collections.length === 0) return null;
+  if (collections.length === 1) return collections[0].name;
+  return `${collections.length} collections`;
+}
 
 export default function AvatarScreen() {
   const tabBarHeight = useBottomTabBarHeight();
@@ -35,9 +43,10 @@ export default function AvatarScreen() {
   });
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [collectionPickerVisible, setCollectionPickerVisible] = useState(false);
+  const [selectedCollections, setSelectedCollections] = useState<Collection[]>([]);
   const [addToFavorites, setAddToFavorites] = useState(false);
   const [visibility, setVisibility] = useState<OutfitVisibility>('Private');
-  const [saveToCollection, setSaveToCollection] = useState(false);
   const [outfitName, setOutfitName] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -94,7 +103,7 @@ export default function AvatarScreen() {
   const openModal = () => {
     setAddToFavorites(false);
     setVisibility('Private');
-    setSaveToCollection(false);
+    setSelectedCollections([]);
     setOutfitName('');
     setSaveError(null);
     setModalVisible(true);
@@ -126,7 +135,17 @@ export default function AvatarScreen() {
       const { error: itemsError } = await supabase.from('outfit_items').insert(outfitItems);
       if (itemsError) throw new Error(itemsError.message);
 
+      if (selectedCollections.length > 0) {
+        const links = selectedCollections.map((collection) => ({
+          collection_id: collection.id,
+          outfit_id: outfitId,
+        }));
+        const { error: linkError } = await supabase.from('collection_outfits').insert(links);
+        if (linkError) throw new Error(linkError.message);
+      }
+
       setModalVisible(false);
+      setCollectionPickerVisible(false);
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : 'Failed to save outfit.');
     } finally {
@@ -199,19 +218,26 @@ export default function AvatarScreen() {
       />
 
       <SaveOutfitModal
-        visible={modalVisible}
+        visible={modalVisible && !collectionPickerVisible}
         outfitName={outfitName}
         addToFavorites={addToFavorites}
         visibility={visibility}
-        saveToCollection={saveToCollection}
+        selectedCollectionName={formatCollectionLabel(selectedCollections)}
         saving={saving}
         saveError={saveError}
         onChangeName={setOutfitName}
         onToggleFavorites={() => setAddToFavorites((v) => !v)}
         onChangeVisibility={setVisibility}
-        onToggleSaveToCollection={() => setSaveToCollection((v) => !v)}
+        onOpenCollectionPicker={() => setCollectionPickerVisible(true)}
         onSave={saveOutfit}
         onClose={() => setModalVisible(false)}
+      />
+
+      <SaveToCollectionModal
+        visible={modalVisible && collectionPickerVisible}
+        selectedCollections={selectedCollections}
+        onChangeSelectedCollections={setSelectedCollections}
+        onClose={() => setCollectionPickerVisible(false)}
       />
     </View>
   );
