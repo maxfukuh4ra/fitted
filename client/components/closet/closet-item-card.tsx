@@ -47,6 +47,10 @@ export function ClosetItemCard({ item }: ClosetItemCardProps) {
   );
 }
 
+// [GenAI Use] Prompt:
+// "Create styles for the closet item card according to the given HTML code. 
+// Do not hard-code everything, pull from the constants/design.ts file for colors, fonts, etc."
+// [GenAI Use] LLM Response Start
 const styles = StyleSheet.create({
   card: {
     flex: 1,
@@ -91,3 +95,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
 });
+// [GenAI Use] LLM Response End
+// [GenAI Use] Reflection:
+// The styles were created according to the given HTML code. After, seeing the initial output 
+// and testing it on my phone, I manually edited and removed styles that were not actively visible 
+// or meaningful to the user. 
