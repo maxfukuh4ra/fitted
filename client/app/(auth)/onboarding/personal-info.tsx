@@ -12,11 +12,11 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { EditorialTextField } from "@/components/onboarding/EditorialTextField";
 import { HeightPickerField } from "@/components/onboarding/HeightPickerField";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Palette, Radius, Spacing, Typography } from "@/constants/design";
@@ -142,22 +142,30 @@ export default function PersonalInfoScreen() {
               </View>
 
               <View style={styles.formSection}>
-                <EditorialTextField
-                  autoComplete="name"
-                  label="Full Name"
-                  onChangeText={setFullName}
-                  placeholder="e.g. Jane Doe"
-                  value={fullName}
-                />
+                <View style={styles.fieldGroup}>
+                  <Text style={styles.fieldLabel}>Full Name</Text>
+                  <TextInput
+                    autoComplete="name"
+                    onChangeText={setFullName}
+                    placeholder="e.g. Jane Doe"
+                    placeholderTextColor={Palette.outline}
+                    style={styles.fieldInput}
+                    value={fullName}
+                  />
+                </View>
 
-                <EditorialTextField
-                  label="Age"
-                  maxLength={3}
-                  numericOnly
-                  onChangeText={setAge}
-                  placeholder="Enter your age"
-                  value={age}
-                />
+                <View style={styles.fieldGroup}>
+                  <Text style={styles.fieldLabel}>Age</Text>
+                  <TextInput
+                    keyboardType="number-pad"
+                    maxLength={3}
+                    onChangeText={setAge}
+                    placeholder="Enter your age"
+                    placeholderTextColor={Palette.outline}
+                    style={styles.fieldInput}
+                    value={age}
+                  />
+                </View>
 
                 <HeightPickerField
                   feet={heightFeet}
@@ -317,6 +325,22 @@ const styles = StyleSheet.create({
   },
   formSection: {
     gap: Spacing.stackLg,
+  },
+  fieldGroup: {
+    gap: Spacing.stackSm,
+  },
+  fieldLabel: {
+    ...Typography.labelSm,
+    color: Palette.onSurfaceVariant,
+    letterSpacing: 1.2,
+  },
+  fieldInput: {
+    ...Typography.titleLg,
+    color: Palette.primary,
+    borderBottomWidth: 1,
+    borderBottomColor: Palette.outlineVariant,
+    paddingVertical: Spacing.stackSm,
+    paddingHorizontal: 0,
   },
   genderSection: {
     gap: Spacing.stackSm,
