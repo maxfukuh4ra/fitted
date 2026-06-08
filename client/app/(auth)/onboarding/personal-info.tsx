@@ -108,7 +108,7 @@ export default function PersonalInfoScreen() {
               size={24}
             />
           </Pressable>
-          <Text style={styles.headerLabel}>Getting to Know You</Text>
+          <Text style={styles.headerLabel}>Sign Up</Text>
           <View style={styles.headerSpacer} />
         </View>
 
@@ -246,8 +246,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: Spacing.containerMargin,
-    paddingTop: Spacing.stackMd,
-    paddingBottom: Spacing.stackMd,
+    paddingTop: Spacing.stackSm,
+    paddingBottom: Spacing.stackSm,
   },
   backButton: {
     width: 40,
@@ -261,9 +261,12 @@ const styles = StyleSheet.create({
     backgroundColor: Palette.surfaceContainer,
   },
   headerLabel: {
-    ...Typography.labelSm,
-    color: Palette.outline,
-    letterSpacing: 2,
+    fontFamily: Typography.headlineMd.fontFamily,
+    fontSize: 20,
+    lineHeight: 26,
+    fontWeight: '500',
+    color: Palette.onSurface,
+    letterSpacing: 0,
     textAlign: "center",
     flex: 1,
   },
@@ -276,7 +279,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: Spacing.containerMargin,
-    paddingTop: Spacing.stackXl,
+    paddingTop: Spacing.stackLg,
     paddingBottom: Spacing.stackLg,
   },
   content: {
@@ -288,7 +291,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.stackXl,
   },
   title: {
-    ...Typography.displayLg,
+    ...Typography.headlineMd,
+    fontSize: 32,
+    lineHeight: 38,
     color: Palette.primary,
     marginBottom: Spacing.stackSm,
   },
@@ -315,48 +320,53 @@ const styles = StyleSheet.create({
   },
   segmentButton: {
     flex: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     borderWidth: 1,
     borderColor: Palette.outlineVariant,
-    borderRadius: Radius.sm,
-    paddingVertical: 12,
-    alignItems: "center",
-    justifyContent: "center",
+    borderRadius: Radius.md,
+    backgroundColor: Palette.surfaceContainerLowest,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   segmentButtonActive: {
     backgroundColor: Palette.primary,
     borderColor: Palette.primary,
   },
   segmentButtonPressed: {
-    backgroundColor: Palette.surfaceContainer,
+    backgroundColor: Palette.surfaceContainerLow,
   },
   segmentButtonText: {
-    ...Typography.bodyMd,
-    color: Palette.primary,
+    ...Typography.labelSm,
+    color: Palette.onSurface,
+    textTransform: 'none',
+    letterSpacing: 0,
+    transform: [{ translateY: 1 }],
   },
   segmentButtonTextActive: {
     color: Palette.onPrimary,
   },
   footer: {
     paddingHorizontal: Spacing.containerMargin,
-    paddingTop: Spacing.stackXl,
-    paddingBottom: Spacing.stackMd,
+    paddingTop: Spacing.stackLg,
+    paddingBottom: Spacing.stackSm,
     maxWidth: 448,
     width: "100%",
     alignSelf: "center",
   },
   continueButton: {
     height: 52,
-    borderRadius: Radius.md,
+    borderRadius: Radius.lg,
     backgroundColor: Palette.primary,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: Spacing.stackSm,
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 4,
   },
   continueButtonPressed: {
     opacity: 0.9,
@@ -371,7 +381,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.stackMd,
   },
   continueButtonText: {
-    ...Typography.titleLg,
+    ...Typography.bodyMd,
     color: Palette.onPrimary,
   },
 });

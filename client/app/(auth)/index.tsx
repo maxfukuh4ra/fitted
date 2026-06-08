@@ -139,55 +139,69 @@ export default function HomeScreen() {
                 <View style={styles.authSection}>
                   <View style={styles.fieldGroup}>
                     <Text style={styles.fieldLabel}>Email</Text>
-                    <TextInput
-                      autoCapitalize="none"
-                      autoComplete="email"
-                      keyboardType="email-address"
-                      onChangeText={setEmail}
-                      placeholder="you@example.com"
-                      placeholderTextColor={Palette.onSurfaceVariant}
-                      style={styles.input}
-                      value={email}
-                    />
+                    <View style={styles.inputWrap}>
+                      <Text
+                        pointerEvents="none"
+                        style={[styles.inputValueText, email.length === 0 && styles.inputPlaceholder]}
+                        numberOfLines={1}
+                      >
+                        {email.length > 0 ? email : 'you@example.com'}
+                      </Text>
+                      <TextInput
+                        autoCapitalize="none"
+                        autoComplete="email"
+                        keyboardType="email-address"
+                        onChangeText={setEmail}
+                        style={styles.input}
+                        value={email}
+                        selectionColor={Palette.primary}
+                      />
+                    </View>
                   </View>
 
                   <View style={styles.fieldGroup}>
                     <Text style={styles.fieldLabel}>Password</Text>
-                    <TextInput
-                      autoCapitalize="none"
-                      autoComplete="password"
-                      onChangeText={setPassword}
-                      placeholder="Enter your password"
-                      placeholderTextColor={Palette.onSurfaceVariant}
-                      secureTextEntry
-                      style={styles.input}
-                      value={password}
-                    />
+                    <View style={styles.inputWrap}>
+                      <Text
+                        pointerEvents="none"
+                        style={[styles.inputValueText, password.length === 0 && styles.inputPlaceholder]}
+                        numberOfLines={1}
+                      >
+                        {password.length > 0 ? '•'.repeat(password.length) : 'Enter your password'}
+                      </Text>
+                      <TextInput
+                        autoCapitalize="none"
+                        autoComplete="password"
+                        onChangeText={setPassword}
+                        secureTextEntry
+                        style={styles.input}
+                        value={password}
+                        selectionColor={Palette.primary}
+                      />
+                    </View>
                   </View>
 
                   <View style={styles.actionStack}>
                     <Pressable
                       accessibilityRole="button"
-                      onPress={handleSignUp}
+                      onPress={handleSignIn}
                       style={({ pressed }) => [
                         styles.primaryButton,
                         pressed && styles.buttonPressed,
                       ]}
                     >
-                      <Text style={styles.primaryButtonText}>
-                        Create Account
-                      </Text>
+                      <Text style={styles.primaryButtonText}>Sign In</Text>
                     </Pressable>
 
                     <Pressable
                       accessibilityRole="button"
-                      onPress={handleSignIn}
+                      onPress={handleSignUp}
                       style={({ pressed }) => [
                         styles.secondaryButton,
                         pressed && styles.secondaryButtonPressed,
                       ]}
                     >
-                      <Text style={styles.secondaryButtonText}>Sign In</Text>
+                      <Text style={styles.secondaryButtonText}>Create Account</Text>
                     </Pressable>
                   </View>
 
@@ -276,15 +290,34 @@ const styles = StyleSheet.create({
     color: Palette.onSurfaceVariant,
     letterSpacing: 1.2,
   },
-  input: {
-    ...Typography.bodyMd,
+  inputWrap: {
     height: 52,
     borderWidth: 1,
     borderColor: Palette.outlineVariant,
     borderRadius: Radius.md,
     backgroundColor: Palette.surfaceContainerLowest,
+    overflow: 'hidden',
+  },
+  inputValueText: {
+    fontFamily: FontFamilies.body,
+    fontSize: 16,
+    position: 'absolute',
+    left: Spacing.stackMd,
+    right: Spacing.stackMd,
+    top: 15,
     color: Palette.onSurface,
+  },
+  inputPlaceholder: {
+    color: Palette.onSurfaceVariant,
+  },
+  input: {
+    fontFamily: FontFamilies.body,
+    fontSize: 16,
+    height: 52,
+    color: 'transparent',
     paddingHorizontal: Spacing.stackMd,
+    paddingVertical: 0,
+    textAlignVertical: 'center',
   },
   actionStack: {
     gap: Spacing.stackMd,
@@ -292,7 +325,7 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     height: 52,
-    borderRadius: Radius.md,
+    borderRadius: Radius.lg,
     backgroundColor: Palette.primary,
     alignItems: "center",
     justifyContent: "center",
@@ -308,7 +341,7 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     height: 52,
-    borderRadius: Radius.md,
+    borderRadius: Radius.lg,
     borderWidth: 1,
     borderColor: Palette.outlineVariant,
     backgroundColor: Palette.surfaceContainerLowest,
@@ -365,9 +398,9 @@ const styles = StyleSheet.create({
   footerText: {
     ...Typography.labelSm,
     color: Palette.onSurfaceVariant,
-    textAlign: "center",
-    marginTop: Spacing.stackXl,
-    textTransform: "none",
+    textAlign: 'center',
+    marginTop: Spacing.stackLg,
+    textTransform: 'none',
     letterSpacing: 0.4,
     lineHeight: 18,
   },
