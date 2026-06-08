@@ -5,6 +5,9 @@ import {
   inchesToFeetAndInches,
 } from "../components/profile/profile-utils";
 
+// [GenAI Use] Prompt:
+// "Write unit tests for the profile helper functions in profile-utils.ts."
+// [GenAI Use] LLM Response Start
 describe("inchesToFeetAndInches", () => {
   it("converts whole feet", () => {
     expect(inchesToFeetAndInches(60)).toBe("5'0\"");
@@ -62,3 +65,7 @@ describe("getInitials", () => {
     expect(getInitials("   ")).toBe("?");
   });
 });
+// [GenAI Use] LLM Response End
+// [GenAI Use] Reflection:
+// I ran the tests and checked each output by hand. I added a couple edge cases the
+// first draft missed, e.g. "returns ? for whitespace-only string" for getInitials.

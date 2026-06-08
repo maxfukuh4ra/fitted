@@ -6,11 +6,18 @@ export function formatSubcategoryLabel(subcategory: string | null): string {
     return 'Uncategorized';
   }
 
+  // [GenAI Use] Prompt:
+  // "Format raw subcategory strings from the database into readable labels for the filter chips."
+  // [GenAI Use] LLM Response Start
   return subcategory
     .trim()
     .split(/\s+/)
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
+  // [GenAI Use] LLM Response End
+  // [GenAI Use] Reflection:
+  // Subcategories come in inconsistent casing (e.g. "Zip jacket"). This turns them into
+  // display labels like "Zip Jacket" for the chip bar.
 }
 
 export function getSubcategoryFilters(items: ClosetItem[]): CategoryFilter[] {
