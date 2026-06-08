@@ -1,4 +1,5 @@
 // Initial AI Prompt: Please generate some unit tests (vitest) to test friends functionality.
+// Reflection: basic skeleton code is always helpful to get started. Actual logic is filled in by me.
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   acceptFriendRequest,
@@ -28,6 +29,7 @@ vi.mock("../lib/supabase", () => ({
 const UID = "current-user-id";
 
 // AI Usage: please refactor my code to reduce/abstract the repeated supabase calls
+// Reflection: The AI output had good tests, but was very long. Refactoring is a good way to reduce code bloat
 // Builds a supabase-style thenable chain: every builder method returns the
 // same object so any call sequence eventually resolves to `result`.
 function chain(result: unknown) {
@@ -54,6 +56,7 @@ function chain(result: unknown) {
 }
 
 // AI Usage: there is stale data between each test, please fix by keeping each test modular and independent.
+// Reflection: failing unit test due to stale data (determined by me). Asked AI for the syntax to reset mock
 beforeEach(() => {
   vi.resetAllMocks();
   mocks.getSession.mockResolvedValue({
@@ -62,6 +65,7 @@ beforeEach(() => {
 });
 
 // AI Usage: please add additional tests for rpc error, no user found, already friends, pending req, and success for sendFriendRequest
+// Reflection: list of edge cases for a comprehensive/true test
 describe("lib/friends", () => {
   describe("sendFriendRequest", () => {
     it("throws when rpc errors", async () => {
@@ -199,6 +203,7 @@ describe("lib/friends", () => {
     });
 
     // AI Usage: even though friendship is bi-directional, the supabase table stores it as requester_id and addressee_id. Please test correct direction
+    // Reflection: AI does not know the project specs. Manual review + clarification and tweaks were required to get a correct test
     it("maps direction 'received' when current user is addressee", async () => {
       mocks.from.mockReturnValue(
         chain({
@@ -285,6 +290,7 @@ describe("lib/friends", () => {
   });
 
   // AI Usage: getFriendsOutfits should fetch friends, then their outfits, then their outfit items (3 stage fetch)
+  // Reflection: AI did not know my db table schemas. I had it list out 3 separate calls, then modified it to match the schema. This was later refactored into chain()
   describe("getFriendsOutfits", () => {
     it("returns empty array when no outfits", async () => {
       mocks.from.mockImplementation((table: string) => {

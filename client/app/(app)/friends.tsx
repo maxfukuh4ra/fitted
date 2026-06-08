@@ -31,6 +31,7 @@ const SLOT_IMAGE_HEIGHT: Record<string, number> = Object.fromEntries(
 );
 
 // AI Usage: what's a good function to calculate "time ago" (5m ago, 1h ago, etc) from a timestamp
+// Reflection: AI is good for common/standard utility functions (basically like importing from a library/service)
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
@@ -93,8 +94,8 @@ function OutfitCard({ outfit }: { outfit: FriendOutfit }) {
   );
 }
 
-// AI Usage:
-// - create a skeleton for friends screen. I want to handle pending requests and current friends via email.
+// AI Usage: create a skeleton for friends screen. I want to handle pending requests and current friends via email.
+// reflection: AI is great at skeleton code and section/tabs. I had to manually adjust the HTML DOM and CSS styling (ie flex col, each is separate; public and friends is grouped together as tabs).
 export default function FriendsScreen() {
   const router = useRouter();
   const [pending, setPending] = useState<Friend[]>([]);
@@ -107,7 +108,7 @@ export default function FriendsScreen() {
   const [addSuccess, setAddSuccess] = useState(false);
   const [feedFilter, setFeedFilter] = useState<"Public" | "Friends">("Public");
 
-  // - Create two db fetches: one for any outfit with visibility=Public, and one for any outfit where visiblity=Public and (user_id, friend_id) is in public.friendships.
+  // AI Usage: Create two db fetches: one for any outfit with visibility=Public, and one for any outfit where visiblity=Public and (user_id, friend_id) is in public.friendships.
   // ^later refactored this prompt output into lib/friends.ts (helper/"backend" functions)
   async function loadAll() {
     try {
