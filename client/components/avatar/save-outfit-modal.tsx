@@ -1,3 +1,5 @@
+// [GenAI Use] Prompt: import necessary libraries and components for rendering the save outfit bottom sheet with name input, visibility picker, and favorites toggle.
+// [GenAI Use] Reflection: i looked at how TextInput and Modal were layered and understood the transparent input trick used for custom text rendering
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
@@ -132,6 +134,8 @@ export function SaveOutfitModal({
   );
 }
 
+// [GenAI Use] AI was used to format and style these components using the theme, spacing, and design tokens from the constants folder.
+// [GenAI Use] Reflection: i traced how the overlay and sheet styles create the bottom sheet effect and reviewed the visibility picker row layout
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,

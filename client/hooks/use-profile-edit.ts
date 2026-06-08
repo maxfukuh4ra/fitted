@@ -1,3 +1,5 @@
+// [GenAI Use] Prompt: import necessary libraries and components for the custom hook that manages profile edit state, validation, and save logic.
+// [GenAI Use] Reflection: i looked at how useState and Alert are combined to manage the edit/save flow and surface errors to the user without a separate error state component
 import { useState } from "react";
 import { Alert } from "react-native";
 import { updateProfile, type UserProfile } from "@/lib/profile";
@@ -33,6 +35,10 @@ export function useProfileEdit(
   async function saveEditing() {
     if (!profile) return;
 
+    // [GenAI Use] Prompt: "write form validation for a profile edit hook that checks the name
+    // is non-empty, age is in a reasonable range, and height feet and inches are valid,
+    // then converts feet and inches into a single total-inches value before saving."
+    // [GenAI Use] LLM Response Start
     const age = parseInt(draftAge, 10);
     const feet = parseInt(draftFeet, 10);
     const inches = parseInt(draftInches, 10);
@@ -52,6 +58,9 @@ export function useProfileEdit(
 
     const totalInches = feet * 12 + inches;
     const updates = { name: draftName.trim(), age, height: totalInches, gender: draftGender };
+    // [GenAI Use] LLM Response End
+    // [GenAI Use] Reflection: the validation guards looked correct. i added isNaN checks on
+    // feet since the text field accepts any string, and confirmed the inches range is 0–11.
 
     setSaving(true);
     try {

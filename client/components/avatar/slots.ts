@@ -1,3 +1,5 @@
+// [GenAI Use] Prompt: import necessary libraries and components for defining avatar slot configuration and building category-to-slot and subcategory-to-slot lookup maps.
+// [GenAI Use] Reflection: i traced how SUBCATEGORIES feeds into SUB_TO_CAT and understood why the mapping is built at module load time rather than at runtime
 import { Category, SUBCATEGORIES } from '@/constants/categories';
 
 export const SLOTS = [
@@ -18,6 +20,9 @@ export const CAT_TO_SLOT: Record<string, SlotCategory> = {
 
 const SLOT_CATEGORIES = new Set<string>([Category.TOPS, Category.BOTTOMS, Category.SHOES]);
 
+// [GenAI Use] Prompt: "Map subcategories back to their main outfit slots. Group combined categories 
+// (like outerwear into tops) automatically, and ignore anything that isn't part of the outfit layout."
+// [GenAI Use] LLM Response Start
 export const SUB_TO_CAT: Record<string, SlotCategory> = {};
 for (const [cat, subs] of Object.entries(SUBCATEGORIES)) {
   const slotCat = CAT_TO_SLOT[cat];
@@ -27,6 +32,9 @@ for (const [cat, subs] of Object.entries(SUBCATEGORIES)) {
     }
   }
 }
+// [GenAI Use] LLM Response End
+// [GenAI Use] Reflection: the loop worked well. i confirmed the fallback handles categories
+// that map directly without going through the remapping step.
 
 export const SLOT_SUBCATEGORIES: Record<SlotCategory, string[]> = {
   [Category.TOPS]: [...SUBCATEGORIES[Category.TOPS], ...SUBCATEGORIES[Category.OUTERWEAR]].sort(),

@@ -1,3 +1,5 @@
+// [GenAI Use] Prompt: import necessary libraries and components for unit testing avatar grouping logic, slot navigation, subcategory filtering, and filter state management.
+// [GenAI Use] Reflection: i reviewed how the describe/it/expect structure maps to the helper functions defined below and confirmed the test logic mirrors the screen behavior
 import { describe, expect, it } from 'vitest';
 
 import { Category, SUBCATEGORIES } from '../constants/categories';
