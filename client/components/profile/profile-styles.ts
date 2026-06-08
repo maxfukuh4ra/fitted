@@ -1,3 +1,5 @@
+// [GenAI Use] Prompt: import necessary libraries and components for defining shared stylesheet tokens used across profile screen components.
+// [GenAI Use] Reflection: i understood why styles are exported from a shared file rather than colocated so profile.tsx and sub-components can stay consistent
 import { StyleSheet } from "react-native";
 
 import { Palette, Radius, Spacing, Typography } from "@/constants/design";
@@ -14,6 +16,8 @@ const actionButton = {
 const ACTION_GROUP_GAP = Spacing.stackMd;
 const ACTION_BUTTON_HEIGHT = 44;
 
+// [GenAI Use] AI was used to format and style these components using the theme, spacing, and design tokens from the constants folder.
+// [GenAI Use] Reflection: i went through each style rule and confirmed the spacing, radius, and color tokens are pulled consistently from the constants folder
 export const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Palette.background },
   body: {

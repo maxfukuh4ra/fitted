@@ -1,3 +1,5 @@
+// [GenAI Use] Prompt: import necessary libraries and components for rendering a single clothing slot row with swipe gesture navigation and item image display.
+// [GenAI Use] Reflection: i looked into how PanResponder and useRef work together to capture swipe gestures without re-creating the responder on each render
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Image } from 'expo-image';
 import { useEffect, useRef } from 'react';
@@ -84,6 +86,8 @@ export function SlotRow({ label, slotItems, idx, onNavigate, slotFlex }: Props) 
   );
 }
 
+// [GenAI Use] AI was used to format and style these components using the theme, spacing, and design tokens from the constants folder.
+// [GenAI Use] Reflection: i checked how flex and minHeight interact in the slot and slotRow styles to make sure items stretch correctly
 const styles = StyleSheet.create({
   slot: {
     minHeight: 0,

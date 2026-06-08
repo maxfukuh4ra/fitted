@@ -1,3 +1,5 @@
+// [GenAI Use] Prompt: import necessary libraries and components for unit testing profile utility functions like height formatting and string capitalization.
+// [GenAI Use] Reflection: i reviewed the utility functions being tested and understood how edge cases like null inputs and zero values are handled
 import { describe, expect, it } from "vitest";
 import {
   capitalize,

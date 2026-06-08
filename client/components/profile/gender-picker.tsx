@@ -1,3 +1,5 @@
+// [GenAI Use] Prompt: import necessary libraries and components for rendering the animated gender selection chip picker on the profile screen.
+// [GenAI Use] Reflection: i looked at how Animated and useRef drive the chip scale spring and understood why the ref is used to avoid re-subscribing on re-renders
 import { useEffect, useRef } from "react";
 import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
 
@@ -79,6 +81,8 @@ export function GenderPicker({
   );
 }
 
+// [GenAI Use] AI was used to format and style these components using the theme, spacing, and design tokens from the constants folder.
+// [GenAI Use] Reflection: i reviewed the chip layout and confirmed the border radius and padding are consistent with the profile card design
 const styles = StyleSheet.create({
   genderRow: {
     flexDirection: "row",

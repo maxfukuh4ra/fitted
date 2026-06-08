@@ -1,3 +1,5 @@
+// [GenAI Use] Prompt: import necessary libraries and components for rendering the avatar outfit builder screen, managing closet item state, and saving outfits to Supabase.
+// [GenAI Use] Reflection: i reviewed how useBottomTabBarHeight and useMemo worked together to handle layout and derived grouping state for the outfit builder
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo, useState } from 'react';
@@ -59,6 +61,9 @@ export default function AvatarScreen() {
     load();
   }, []);
 
+  // [GenAI Use] Prompt: "Filter and sort closet items into three buckets: tops, bottoms, and shoes. Sort them by subcategory first 
+  // (falling back to category if needed), and skip any items that don't match the active filters for that slot."
+  // [GenAI Use] LLM Response Start
   const grouped = useMemo(() => {
     const result: Record<SlotCategory, ClosetItem[]> = {
       [Category.TOPS]: [],
@@ -79,6 +84,9 @@ export default function AvatarScreen() {
     }
     return result;
   }, [items, filters]);
+  // [GenAI Use] LLM Response End
+  // [GenAI Use] Reflection: the double lookup strategy works perfectly. Also verified that the filters ignore text casing, 
+  // so they handle mixed-case database values just fine.
 
   const canSave = SLOTS.every(({ category }) => grouped[category].length > 0);
 
@@ -217,6 +225,8 @@ export default function AvatarScreen() {
   );
 }
 
+// [GenAI Use] AI was used to format and style these components using the theme, spacing, and design tokens from the constants folder.
+// [GenAI Use] Reflection: i reviewed the spacing and palette choices and confirmed they matched the overall app design language
 const styles = StyleSheet.create({
   screen: {
     flex: 1,

@@ -1,3 +1,5 @@
+// [GenAI Use] Prompt: import necessary libraries and components for rendering the subcategory filter modal used on the avatar screen.
+// [GenAI Use] Reflection: i looked at how Modal and ScrollView were used together and understood how to structure the sheet layout with draft filter state
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -96,6 +98,8 @@ export function FilterModal({ visible, filters, onChangeFilters, onClose }: Filt
   );
 }
 
+// [GenAI Use] AI was used to format and style these components using the theme, spacing, and design tokens from the constants folder.
+// [GenAI Use] Reflection: i reviewed how the chip selection styles toggled between active and inactive states using the palette tokens
 const styles = StyleSheet.create({
   container: {
     flex: 1,

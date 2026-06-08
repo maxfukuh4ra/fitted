@@ -1,3 +1,5 @@
+// [GenAI Use] Prompt: import necessary libraries and components for unit testing profile fetch and update functions with mocked Supabase calls.
+// [GenAI Use] Reflection: i looked at how vi.mock and vi.hoisted set up the supabase mock before imports resolve and understood the test isolation approach
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getProfile, updateProfile } from "../lib/profile";
 

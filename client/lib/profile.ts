@@ -1,3 +1,5 @@
+// [GenAI Use] Prompt: import necessary libraries and components for fetching and updating user profile data in Supabase.
+// [GenAI Use] Reflection: i reviewed how the supabase client is used to fetch and patch profile rows and understood the session-based user id lookup pattern
 import { supabase } from './supabase';
 
 export type UserProfile = {
