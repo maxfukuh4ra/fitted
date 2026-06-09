@@ -1,3 +1,9 @@
+/*
+GEN AI Usage Prompt: "Generate code to transition HTML example in React Native, using anything from 
+from design.ts file"
+// I added page logic, API calls, managing context, and other logic ontop of AI generated page styling
+*/
+
 import { View, Text, StyleSheet, Animated, Image } from 'react-native';
 import { useEffect, useRef } from 'react';
 import { Palette, Spacing, Radius, textVariants } from '@/constants/design';

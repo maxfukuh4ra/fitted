@@ -1,3 +1,7 @@
+/*
+GEN AI Use in file: Given design.ts file, implement a component to select category
+My Code: Connecting React Logic + Animation
+*/
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
