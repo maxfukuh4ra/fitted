@@ -1,3 +1,9 @@
+/*
+GEN AI Usage Prompt: "Generate code to transition HTML example in React Native, using anything from 
+from design.ts file"
+ I manually added page logic, category, selection logic, etc. ontop of the generated code.
+*/
+
 import React, { useState } from 'react';
 import {
   View,

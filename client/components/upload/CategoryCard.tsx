@@ -1,3 +1,7 @@
+/*
+GEN AI Use in file: Given design.ts file, implement a component to display categories
+My Code: Connecting React Logic 
+*/
 import { FontFamilies, Palette, Radius, Spacing, textVariants } from '@/constants/design';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';

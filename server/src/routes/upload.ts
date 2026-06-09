@@ -97,6 +97,8 @@ router.post('/upload-image', upload.single('image'), async (req: Request, res: R
   return res.status(200).json({ success: true, imageUrl: url });
 });
 
+
+//GEN AI USE: Prompt: Fix Issue with Error Handling In Given File
 router.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof multer.MulterError || err.message.includes('Only')) {
     return res.status(400).json({ error: err.message });
