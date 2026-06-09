@@ -211,6 +211,16 @@ export async function addOutfitToCollections(outfitId: string, collectionIds: st
   if (error) throw new Error(error.message);
 }
 
+export async function removeOutfitFromCollection(collectionId: string, outfitId: string) {
+  const { error } = await supabase
+    .from('collection_outfits')
+    .delete()
+    .eq('collection_id', collectionId)
+    .eq('outfit_id', outfitId);
+
+  if (error) throw new Error(error.message);
+}
+
 export async function removeItemFromCollection(collectionId: string, itemId: string) {
   const outfitIds = await getCollectionOutfitIds(collectionId);
   if (outfitIds.length === 0) return;
