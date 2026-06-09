@@ -113,7 +113,7 @@ export default function CollectionsScreen() {
         collectionName,
         [...selectedItemIds],
       );
-      setCollections((prev) => [...prev, created]);
+      setCollections((prev) => [created, ...prev]);
       setModalVisible(false);
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : 'Failed to create collection.');
