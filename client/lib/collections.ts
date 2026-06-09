@@ -162,7 +162,7 @@ export async function fetchCollections(userId: string) {
       'id, user_id, name, is_favorite, collection_outfits(outfits(id, outfit_items(slot, item_id, items(image_url))))',
     )
     .eq('user_id', userId)
-    .order('created_at', { ascending: true });
+    .order('created_at', { ascending: false });
 
   if (error) throw new Error(error.message);
 

@@ -18,13 +18,13 @@ type Props = {
   outfitName: string;
   addToFavorites: boolean;
   visibility: OutfitVisibility;
-  saveToCollection: boolean;
+  selectedCollectionName: string | null;
   saving: boolean;
   saveError: string | null;
   onChangeName: (name: string) => void;
   onToggleFavorites: () => void;
   onChangeVisibility: (v: OutfitVisibility) => void;
-  onToggleSaveToCollection: () => void;
+  onOpenCollectionPicker: () => void;
   onSave: () => void;
   onClose: () => void;
 };
@@ -34,16 +34,17 @@ export function SaveOutfitModal({
   outfitName,
   addToFavorites,
   visibility,
-  saveToCollection,
+  selectedCollectionName,
   saving,
   saveError,
   onChangeName,
   onToggleFavorites,
   onChangeVisibility,
-  onToggleSaveToCollection,
+  onOpenCollectionPicker,
   onSave,
   onClose,
 }: Props) {
+  const hasCollection = selectedCollectionName != null;
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.overlay} onPress={onClose}>
@@ -107,15 +108,18 @@ export function SaveOutfitModal({
           </View>
 
           <Pressable
-            style={[styles.toggleBtn, saveToCollection && styles.toggleSelected]}
-            onPress={onToggleSaveToCollection}
+            style={[styles.toggleBtn, hasCollection && styles.toggleSelected]}
+            onPress={onOpenCollectionPicker}
           >
             <MaterialIcons
-              name={saveToCollection ? 'bookmark' : 'bookmark-border'}
+              name={hasCollection ? 'bookmark' : 'bookmark-border'}
               size={20}
-              color={saveToCollection ? Palette.primary : Palette.onSurfaceVariant}
+              color={hasCollection ? Palette.primary : Palette.onSurfaceVariant}
             />
-            <Text style={styles.btnText}>Save to Collection</Text>
+            <Text style={[styles.btnText, styles.collectionBtnText]} numberOfLines={1}>
+              {hasCollection ? selectedCollectionName : 'Save to Collection'}
+            </Text>
+            <MaterialIcons name="chevron-right" size={20} color={Palette.onSurfaceVariant} />
           </Pressable>
 
           {saveError ? <Text style={styles.errorText}>{saveError}</Text> : null}
@@ -190,6 +194,10 @@ const styles = StyleSheet.create({
   btnText: {
     ...Typography.labelSm,
     color: Palette.onSurface,
+  },
+  collectionBtnText: {
+    flex: 1,
+    transform: [{ translateY: 2 }],
   },
   favText: {
     ...Typography.labelSm,

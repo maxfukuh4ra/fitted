@@ -20,6 +20,7 @@ type Props = {
   title?: string;
   confirmLabel?: string;
   showNameInput?: boolean;
+  showItemPicker?: boolean;
   emptyText?: string;
   collectionName: string;
   items: ClosetItem[];
@@ -44,6 +45,7 @@ export function CreateCollectionModal({
   title = 'Create Collection',
   confirmLabel = 'Save',
   showNameInput = true,
+  showItemPicker = true,
   emptyText = 'No items in your closet yet.',
   collectionName,
   items,
@@ -91,59 +93,63 @@ export function CreateCollectionModal({
             </View>
           )}
 
-          <Text style={styles.sectionLabel}>
-            {showNameInput ? 'Add items (optional)' : 'Select items'}
-          </Text>
+          {showItemPicker && (
+            <>
+              <Text style={styles.sectionLabel}>
+                {showNameInput ? 'Add items (optional)' : 'Select items'}
+              </Text>
 
-          {itemsLoading ? (
-            <View style={styles.itemsLoading}>
-              <ActivityIndicator size="small" color={Palette.primary} />
-            </View>
-          ) : items.length === 0 ? (
-            <Text style={styles.emptyText}>{emptyText}</Text>
-          ) : (
-            <FlatList
-              data={items}
-              keyExtractor={(item) => item.id}
-              numColumns={3}
-              style={styles.itemList}
-              contentContainerStyle={styles.itemListContent}
-              columnWrapperStyle={styles.itemRow}
-              showsVerticalScrollIndicator={false}
-              renderItem={({ item }) => {
-                const selected = selectedItemIds.has(item.id);
-                const title = getItemDisplayName(item);
-                return (
-                  <Pressable
-                    style={[styles.itemTile, selected && styles.itemTileSelected]}
-                    onPress={() => onToggleItem(item.id)}
-                    accessibilityRole="checkbox"
-                    accessibilityState={{ checked: selected }}
-                    accessibilityLabel={title}
-                  >
-                    <View style={styles.itemImageWrap}>
-                      {item.image_url ? (
-                        <Image
-                          source={{ uri: item.image_url }}
-                          style={styles.itemImage}
-                          contentFit="contain"
-                        />
-                      ) : (
-                        <View style={styles.itemImagePlaceholder} />
-                      )}
-                      {selected && (
-                        <View style={styles.checkBadge}>
-                          <MaterialIcons name="check" size={14} color={Palette.onPrimary} />
+              {itemsLoading ? (
+                <View style={styles.itemsLoading}>
+                  <ActivityIndicator size="small" color={Palette.primary} />
+                </View>
+              ) : items.length === 0 ? (
+                <Text style={styles.emptyText}>{emptyText}</Text>
+              ) : (
+                <FlatList
+                  data={items}
+                  keyExtractor={(item) => item.id}
+                  numColumns={3}
+                  style={styles.itemList}
+                  contentContainerStyle={styles.itemListContent}
+                  columnWrapperStyle={styles.itemRow}
+                  showsVerticalScrollIndicator={false}
+                  renderItem={({ item }) => {
+                    const selected = selectedItemIds.has(item.id);
+                    const title = getItemDisplayName(item);
+                    return (
+                      <Pressable
+                        style={[styles.itemTile, selected && styles.itemTileSelected]}
+                        onPress={() => onToggleItem(item.id)}
+                        accessibilityRole="checkbox"
+                        accessibilityState={{ checked: selected }}
+                        accessibilityLabel={title}
+                      >
+                        <View style={styles.itemImageWrap}>
+                          {item.image_url ? (
+                            <Image
+                              source={{ uri: item.image_url }}
+                              style={styles.itemImage}
+                              contentFit="contain"
+                            />
+                          ) : (
+                            <View style={styles.itemImagePlaceholder} />
+                          )}
+                          {selected && (
+                            <View style={styles.checkBadge}>
+                              <MaterialIcons name="check" size={14} color={Palette.onPrimary} />
+                            </View>
+                          )}
                         </View>
-                      )}
-                    </View>
-                    <Text style={styles.itemLabel} numberOfLines={1}>
-                      {title}
-                    </Text>
-                  </Pressable>
-                );
-              }}
-            />
+                        <Text style={styles.itemLabel} numberOfLines={1}>
+                          {title}
+                        </Text>
+                      </Pressable>
+                    );
+                  }}
+                />
+              )}
+            </>
           )}
 
           {saveError && <Text style={styles.errorText}>{saveError}</Text>}
