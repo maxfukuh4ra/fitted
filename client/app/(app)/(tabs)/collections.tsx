@@ -199,7 +199,9 @@ export default function CollectionsScreen() {
                     {item.name}
                   </Text>
                   <Text style={styles.collectionMeta}>
-                    {item.item_count} items
+                    {item.outfit_count > 0
+                      ? `${item.outfit_count} outfits · ${item.item_count} items`
+                      : `${item.item_count} items`}
                   </Text>
                 </View>
               </Pressable>
