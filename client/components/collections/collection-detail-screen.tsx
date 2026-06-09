@@ -13,6 +13,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ClosetItemCard } from '@/components/closet/closet-item-card';
+import { CollectionOutfitCard } from '@/components/collections/collection-outfit-card';
 import { CreateCollectionModal } from '@/components/collections/create-collection-modal';
 import { Palette, Radius, Spacing, Typography } from '@/constants/design';
 import { getCurrentUser } from '@/lib/auth';
@@ -21,7 +22,9 @@ import {
   deleteCollection,
   fetchCollectionDetail,
   removeItemFromCollection,
+  removeOutfitFromCollection,
   type CollectionDetail,
+  type CollectionOutfit,
 } from '@/lib/collections';
 import { fetchClosetItems } from '@/lib/items';
 import type { ClosetItem } from '@/lib/types/closet';
@@ -33,11 +36,14 @@ type Props = {
 export function CollectionDetailScreen({ collectionId }: Props) {
   const insets = useSafeAreaInsets();
   const [collection, setCollection] = useState<CollectionDetail | null>(null);
+  const [view, setView] = useState<'outfits' | 'items'>('items');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editItemsSnapshot, setEditItemsSnapshot] = useState<ClosetItem[]>([]);
   const [editedItems, setEditedItems] = useState<ClosetItem[]>([]);
+  const [editOutfitsSnapshot, setEditOutfitsSnapshot] = useState<CollectionOutfit[]>([]);
+  const [editedOutfits, setEditedOutfits] = useState<CollectionOutfit[]>([]);
   const [isSavingEdits, setIsSavingEdits] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
@@ -73,9 +79,15 @@ export function CollectionDetailScreen({ collectionId }: Props) {
   }, [loadCollection]);
 
   function handleStartEdit() {
-    const items = collection?.items ?? [];
-    setEditItemsSnapshot(items);
-    setEditedItems(items);
+    if (view === 'outfits') {
+      const outfits = collection?.outfits ?? [];
+      setEditOutfitsSnapshot(outfits);
+      setEditedOutfits(outfits);
+    } else {
+      const items = collection?.items ?? [];
+      setEditItemsSnapshot(items);
+      setEditedItems(items);
+    }
     setIsEditing(true);
     setMenuVisible(false);
   }
@@ -85,28 +97,41 @@ export function CollectionDetailScreen({ collectionId }: Props) {
 
     setIsSavingEdits(true);
     try {
-      const removedIds = editItemsSnapshot
-        .filter((item) => !editedItems.some((edited) => edited.id === item.id))
-        .map((item) => item.id);
+      if (view === 'outfits') {
+        const removedIds = editOutfitsSnapshot
+          .filter((outfit) => !editedOutfits.some((edited) => edited.id === outfit.id))
+          .map((outfit) => outfit.id);
 
-      for (const itemId of removedIds) {
-        await removeItemFromCollection(collection.id, itemId);
+        for (const outfitId of removedIds) {
+          await removeOutfitFromCollection(collection.id, outfitId);
+        }
+      } else {
+        const removedIds = editItemsSnapshot
+          .filter((item) => !editedItems.some((edited) => edited.id === item.id))
+          .map((item) => item.id);
+
+        for (const itemId of removedIds) {
+          await removeItemFromCollection(collection.id, itemId);
+        }
+
+        setCollection((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            items: editedItems,
+            item_count: editedItems.length,
+            thumbnail_urls: editedItems
+              .map((item) => item.image_url)
+              .filter((url): url is string => Boolean(url))
+              .slice(0, 4),
+          };
+        });
       }
 
-      setCollection((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          items: editedItems,
-          item_count: editedItems.length,
-          thumbnail_urls: editedItems
-            .map((item) => item.image_url)
-            .filter((url): url is string => Boolean(url))
-            .slice(0, 4),
-        };
-      });
-
       setIsEditing(false);
+      if (view === 'outfits') {
+        await loadCollection();
+      }
     } catch (e) {
       Alert.alert('Error', e instanceof Error ? e.message : 'Failed to save changes.');
       setIsEditing(false);
@@ -179,13 +204,20 @@ export function CollectionDetailScreen({ collectionId }: Props) {
     }
   }
 
-  const showBottomBar = !isLoading && !error;
+  const showBottomBar =
+    !isLoading && !error && (view === 'items' || (view === 'outfits' && isEditing));
   const bottomBarPadding = insets.bottom + 88;
 
-  const displayedItems = isEditing ? editedItems : (collection?.items ?? []);
+  const displayedItems = isEditing && view === 'items' ? editedItems : (collection?.items ?? []);
+  const displayedOutfits =
+    isEditing && view === 'outfits' ? editedOutfits : (collection?.outfits ?? []);
 
   function handleRemoveItem(item: ClosetItem) {
     setEditedItems((prev) => prev.filter((i) => i.id !== item.id));
+  }
+
+  function handleRemoveOutfit(outfit: CollectionOutfit) {
+    setEditedOutfits((prev) => prev.filter((o) => o.id !== outfit.id));
   }
 
   function handleDeleteCollection() {
@@ -262,7 +294,7 @@ export function CollectionDetailScreen({ collectionId }: Props) {
 
           {menuVisible && (
             <View style={styles.menuDropdown}>
-              {!isEditing && (
+              {!isEditing && (view === 'items' || view === 'outfits') && (
                 <>
                   <Pressable
                     accessibilityRole="button"
@@ -293,6 +325,33 @@ export function CollectionDetailScreen({ collectionId }: Props) {
         </View>
       </View>
 
+      {!isLoading && !error && (
+        <View style={styles.toggleRow}>
+          <Pressable
+            style={[styles.toggleBtn, view === 'outfits' && styles.toggleBtnActive]}
+            onPress={() => {
+              setIsEditing(false);
+              setView('outfits');
+            }}
+          >
+            <Text style={[styles.toggleLabel, view === 'outfits' && styles.toggleLabelActive]}>
+              Outfits
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[styles.toggleBtn, view === 'items' && styles.toggleBtnActive]}
+            onPress={() => {
+              setIsEditing(false);
+              setView('items');
+            }}
+          >
+            <Text style={[styles.toggleLabel, view === 'items' && styles.toggleLabelActive]}>
+              Items
+            </Text>
+          </Pressable>
+        </View>
+      )}
+
       {isLoading ? (
         <View style={styles.centerContent}>
           <ActivityIndicator size="small" color={Palette.primary} />
@@ -302,6 +361,41 @@ export function CollectionDetailScreen({ collectionId }: Props) {
         <View style={styles.centerContent}>
           <Text style={styles.errorText}>{error}</Text>
         </View>
+      ) : view === 'outfits' ? (
+        <FlatList
+          data={displayedOutfits}
+          keyExtractor={(outfit) => outfit.id}
+          numColumns={2}
+          contentContainerStyle={[
+            styles.listContent,
+            displayedOutfits.length === 0 && styles.listContentEmpty,
+            showBottomBar && { paddingBottom: bottomBarPadding },
+          ]}
+          columnWrapperStyle={displayedOutfits.length > 0 ? styles.listRow : undefined}
+          ListEmptyComponent={
+            <Text style={styles.infoText}>No outfits in this collection yet.</Text>
+          }
+          renderItem={({ item }) => (
+            <View style={styles.gridItem}>
+              <View style={styles.itemContainer}>
+                <CollectionOutfitCard outfit={item} />
+                {isEditing && (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Remove ${item.name?.trim() || 'outfit'}`}
+                    onPress={() => handleRemoveOutfit(item)}
+                    style={({ pressed }) => [
+                      styles.removeBadge,
+                      pressed && styles.removeBadgePressed,
+                    ]}
+                  >
+                    <MaterialIcons name="remove" size={18} color={Palette.onPrimary} />
+                  </Pressable>
+                )}
+              </View>
+            </View>
+          )}
+        />
       ) : (
         <FlatList
           data={displayedItems}
@@ -358,7 +452,7 @@ export function CollectionDetailScreen({ collectionId }: Props) {
                 {isSavingEdits ? 'Saving…' : 'Done'}
               </Text>
             </Pressable>
-          ) : (
+          ) : view === 'items' ? (
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Add items"
@@ -372,7 +466,7 @@ export function CollectionDetailScreen({ collectionId }: Props) {
               <MaterialIcons name="add" size={20} color={Palette.onPrimary} />
               <Text style={styles.bottomButtonLabel}>Add items</Text>
             </Pressable>
-          )}
+          ) : null}
         </View>
       )}
 
@@ -493,6 +587,33 @@ const styles = StyleSheet.create({
   menuDivider: {
     height: 1,
     backgroundColor: Palette.outlineVariant,
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    marginHorizontal: Spacing.containerMargin,
+    marginBottom: Spacing.stackSm,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Palette.outlineVariant,
+    overflow: 'hidden',
+  },
+  toggleBtn: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 10,
+    backgroundColor: Palette.surfaceContainerLow,
+  },
+  toggleBtnActive: {
+    backgroundColor: Palette.primary,
+  },
+  toggleLabel: {
+    ...Typography.labelSm,
+    color: Palette.onSurfaceVariant,
+    textTransform: 'none',
+    letterSpacing: 0,
+  },
+  toggleLabelActive: {
+    color: Palette.onPrimary,
   },
   centerContent: {
     flex: 1,
