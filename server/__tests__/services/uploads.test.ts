@@ -3,21 +3,13 @@
 // multer for file uploads, and calls standardizeImage and uploadToStorage services.
 // Mock all external dependencies using vi.mock. Cover auth failures, input validation,
 // happy paths, service failures, and the separation of concerns between the two upload routes."
-// [GenAI Use] Reflection: Trimmed redundant cases (duplicate file type checks, repeated auth
-// failure patterns across routes, empty-body variant already covered by individual missing-field
-// tests). Kept separation-of-concerns assertions (TC-06, TC-13) as they test non-obvious
-// architectural invariants specific to the prepare/confirm two-step flow. Fixed Supabase mock
-// wiring using vi.hoisted() so the mock instance exists before the route module loads and calls
-// createClient at import time.
+// [GenAI Use] Reflection: I thought thought test cases to add and used AI for code generation
+// and setting the framework/tools to test. I removed redundant test cases and resolved
+// minor testing bugs
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import request from "supertest";
 import express from "express";
-
-// ─── Hoist mock instance so it exists before any imports run ─────────────────
-// createClient is called at the TOP LEVEL of the route module when it loads,
-// so the mock return value must be set up before that import happens.
-// vi.hoisted() guarantees this block runs before all vi.mock() factories.
 
 const { mockGetUser, mockInsert, mockSupabaseInstance } = vi.hoisted(() => {
   const mockGetUser = vi.fn();
