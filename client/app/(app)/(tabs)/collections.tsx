@@ -229,6 +229,8 @@ export default function CollectionsScreen() {
   );
 }
 
+// [GenAI Use] Prompt: style the collections list — 2-column grid, thumbnail mosaic, create button.
+// [GenAI Use] Reflection: adjusted card width and image border to fit the tab layout.
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,

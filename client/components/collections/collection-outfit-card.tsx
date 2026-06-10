@@ -35,6 +35,8 @@ export function CollectionOutfitCard({ outfit }: Props) {
   );
 }
 
+// [GenAI Use] Prompt: style the outfit card thumbnail grid for the collection detail view.
+// [GenAI Use] Reflection: reused the 2x2 mosaic layout from the collections list page.
 const styles = StyleSheet.create({
   card: {
     width: '100%',

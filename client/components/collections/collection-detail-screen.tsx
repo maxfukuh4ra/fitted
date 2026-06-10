@@ -491,6 +491,8 @@ export function CollectionDetailScreen({ collectionId }: Props) {
   );
 }
 
+// [GenAI Use] Prompt: style collection detail — header menu, outfits/items toggle, edit bottom bar.
+// [GenAI Use] Reflection: kept the add-items button aligned with the collections tab CTA.
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
