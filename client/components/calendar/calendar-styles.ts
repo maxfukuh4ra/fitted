@@ -5,6 +5,8 @@ import { Palette, Radius, Spacing, Typography } from "@/constants/design";
 const DAY_CELL_WIDTH = "14.28%";
 const DAY_MARKER_SIZE = 44;
 
+// [GenAI Use] Prompt: style the calendar page — month header, day grid, OOTD/stats toggle.
+// [GenAI Use] Reflection: matched spacing and toggle styling to the collections detail screen.
 export const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -103,6 +105,8 @@ export const styles = StyleSheet.create({
     borderRadius: 1.5,
     backgroundColor: Palette.primary,
   },
+  // [GenAI Use] Prompt: style the OOTD carousel and monthly stats section below the calendar grid.
+  // [GenAI Use] Reflection: aligned section titles and empty states with the collections tab.
   statsSection: {
     marginTop: 0,
   },

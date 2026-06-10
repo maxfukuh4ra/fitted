@@ -174,6 +174,8 @@ export function CreateCollectionModal({
   );
 }
 
+// [GenAI Use] Prompt: style the create/add-to-collection modal — sheet, item picker grid, actions.
+// [GenAI Use] Reflection: matched cancel/confirm buttons to the onboarding modal pattern.
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,

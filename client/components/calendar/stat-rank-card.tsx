@@ -74,6 +74,8 @@ export function StatRankCard({ item, variant, style }: Props) {
   );
 }
 
+// [GenAI Use] Prompt: style the monthly stats rank cards — hero and compact variants.
+// [GenAI Use] Reflection: tuned overlay text and pill badges for readability on item photos.
 const styles = StyleSheet.create({
   card: {
     borderRadius: Radius.lg,
